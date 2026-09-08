@@ -206,7 +206,15 @@
   margin-bottom: 48px;
   max-width: 760px;
 }
-
+.footnote-link {
+  color: var(--purple-deep);
+  text-decoration: underline;
+  text-decoration-color: rgba(78,42,132,0.4);
+  transition: color 0.2s;
+}
+.footnote-link:hover {
+  color: var(--purple);
+}
   .hero-meta {
     display: flex;
     gap: 48px;
@@ -1209,7 +1217,7 @@
     <div class="hero-eyebrow">EMT-B Certification Course</div>
     <h1>Northwestern University's<br><em>EMT-B certification.</em></h1>
     <p class="hero-lede">Northwestern's only for students, by students, EMT-B certification course. Two quarters long, only $200<sup>*</sup>, and a direct line into emergency medicine. </p>
-    <p class="hero-footnote">*Students who do not complete the course are not eligible for the reduced tuition rate. See FAQ for more details.</p>
+    <p class="hero-footnote">*Students who do not complete the course are not eligible for the reduced tuition rate. See <a href="#faq" class="footnote-link">FAQ</a> for more details.</p>
     <div class="hero-meta">
       <span>Format<b>In-Person</b></span>
       <span>Duration<b>Jan – Mid-May</b></span>
@@ -1474,6 +1482,13 @@
   <div class="section-eyebrow">Things you should ask</div>
   <h2 class="section-title">Frequently asked <em>questions.</em></h2>
 
+  <div class="faq-list">
+    <details class="faq-item">
+      <summary><h4>What does it mean to not be eligible for the reduced tuition?</h4><span class="toggle">+</span></summary>
+      <div class="answer">
+        <p>Tuition is $400 upfront. If you successfully complete the course — passing all required tests and evaluations — $200 is refunded, bringing your net cost to $200. If you do not pass, the $200 is not refunded.
+        <p>We structured it this way for two reasons: first, requiring some upfront investment helps ensure students are fully committed before taking a seat that could go to someone else — NEMO has limited capacity and instructor time, both of which are wasted if a student drops early. Second, this lets us keep the effective cost at $200 for everyone who completes the program, rather than raising the sticker price for all students to cover the few who don't finish.</div>
+    </details>
   <div class="faq-list">
     <details class="faq-item">
       <summary><h4>Do I need any medical background to enroll?</h4><span class="toggle">+</span></summary>
