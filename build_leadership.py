@@ -22,10 +22,16 @@ from the name: lowercase, spaces -> hyphens, punctuation dropped.
                                             assets/adam-dipasquale.jpg
 A row may set an explicit "slug" column to override this.
 
-Photos are NOT created by this script. Upload each person's photo to
-assets/<slug>.jpg (e.g. assets/adam-dipasquale.jpg). The generated page
-points at that path automatically; if the file is missing the photo simply
-won't display until it's added.
+Real photos: upload each person's photo to assets/<slug>.jpg (or .jpeg/.png)
+(e.g. assets/adam-dipasquale.jpg). The generated page points at that path
+automatically.
+
+Placeholder photos: if no real photo file exists for a person, this script
+auto-generates a placeholder graphic (their initials + name, in the site's
+own colors) at assets/<slug>-placeholder.svg and points the page at that
+instead — so nobody ever shows a broken image icon. The placeholder is
+regenerated on every run (cheap, no dependencies) and is automatically
+removed once a real photo is uploaded or the person leaves board.csv.
 """
 
 import csv
@@ -37,7 +43,20 @@ import html
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CSV_PATH = os.path.join(ROOT, "people", "board.csv")
 PEOPLE_DIR = os.path.join(ROOT, "people")
+ASSETS_DIR = os.path.join(ROOT, "assets")
 INDEX_PATH = os.path.join(ROOT, "index.html")
+
+# Extensions checked, in order, when looking for a real uploaded photo.
+PHOTO_EXTENSIONS = ["jpg", "jpeg", "png", "webp"]
+
+# Filenames (without extension) in assets/ that are site graphics, not
+# person photos — never flag these as "orphaned" even though they share
+# an image extension with real photos.
+SITE_ASSET_FILENAMES = {
+    "nemo_logo", "favicon", "favicon-32", "apple-touch-icon",
+    "nemomarathon", "eths", "mci",
+}
+ORPHANED_PHOTOS_REPORT = os.path.join(ROOT, "orphaned_photos.txt")
 
 # Marker placed in every generated profile page so cleanup only ever deletes
 # pages this script made — never a hand-authored file.
@@ -54,6 +73,121 @@ def slugify(name):
     s = re.sub(r"\s+", "-", s)
     s = re.sub(r"[^a-z0-9-]", "", s)
     return s
+
+
+def initials(name):
+    """First letter of the first word + first letter of the last word.
+    A single-word name just uses its first two letters."""
+    words = [w for w in re.split(r"\s+", name.strip()) if w]
+    if not words:
+        return "?"
+    if len(words) == 1:
+        return words[0][:2].upper()
+    return (words[0][0] + words[-1][0]).upper()
+
+
+def placeholder_svg(name, role):
+    """Builds a placeholder graphic in the site's own palette: big initials,
+    a faint diagonal accent (matching .photo-frame::before on the live
+    site), a small 'PLACEHOLDER' label, and the person's name — so a
+    missing photo still looks intentional instead of a broken image icon."""
+    ini = html.escape(initials(name))
+    name_upper = html.escape(name.strip().upper())
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 1200">
+  <rect width="960" height="1200" fill="#F5EFE3"/>
+  <rect x="3" y="3" width="954" height="1194" fill="none" stroke="#4E2A84" stroke-width="2"/>
+  <line x1="0" y1="1200" x2="960" y2="0" stroke="#4E2A84" stroke-width="90" stroke-opacity="0.08"/>
+  <text x="480" y="640" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="340" fill="#4E2A84" fill-opacity="0.42">{ini}</text>
+  <text x="480" y="1050" text-anchor="middle" font-family="'Courier New', monospace" font-size="20" letter-spacing="6" fill="#4E2A84" fill-opacity="0.6">&#183; PLACEHOLDER &#183;</text>
+  <text x="480" y="1102" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="46" fill="#4E2A84">{name_upper}</text>
+</svg>
+"""
+
+
+def find_real_photo(slug):
+    """Returns the filename (e.g. 'adam-dipasquale.jpg') of an already
+    uploaded photo for this slug, or None if the person has no real photo
+    yet."""
+    for ext in PHOTO_EXTENSIONS:
+        if os.path.exists(os.path.join(ASSETS_DIR, f"{slug}.{ext}")):
+            return f"{slug}.{ext}"
+    return None
+
+
+def ensure_photo_asset(slug, name, role):
+    """Makes sure assets/ has *something* to show for this person and
+    returns the filename to use as the image src (relative to assets/).
+    Prefers a real uploaded photo; otherwise (re)writes a placeholder SVG
+    so it always reflects the current name/role."""
+    real = find_real_photo(slug)
+    placeholder_path = os.path.join(ASSETS_DIR, f"{slug}-placeholder.svg")
+    if real:
+        # A real photo exists now — remove any stale placeholder for this slug.
+        if os.path.exists(placeholder_path):
+            os.remove(placeholder_path)
+            print(f"placeholder removed (real photo now on file): {slug}-placeholder.svg")
+        return real
+
+    svg = placeholder_svg(name, role)
+    existing = None
+    if os.path.exists(placeholder_path):
+        with open(placeholder_path, encoding="utf-8") as f:
+            existing = f.read()
+    if existing != svg:
+        with open(placeholder_path, "w", encoding="utf-8") as f:
+            f.write(svg)
+        print(f"placeholder generated: assets/{slug}-placeholder.svg")
+    return f"{slug}-placeholder.svg"
+
+
+def cleanup_orphaned_placeholders(rows):
+    """Removes placeholder SVGs left over from people no longer in board.csv."""
+    wanted = {f"{p['_slug']}-placeholder.svg" for p in rows}
+    for fname in os.listdir(ASSETS_DIR):
+        if fname.endswith("-placeholder.svg") and fname not in wanted:
+            os.remove(os.path.join(ASSETS_DIR, fname))
+            print(f"placeholder removed (no longer in CSV): {fname}")
+
+
+def find_orphaned_photos(rows):
+    """Real photo files in assets/ whose slug doesn't match anyone
+    currently in board.csv. These are NEVER deleted automatically —
+    just reported, so a graduated member's photo (or a typo in the CSV)
+    doesn't silently vanish."""
+    wanted_slugs = {p["_slug"] for p in rows}
+    orphaned = []
+    for fname in sorted(os.listdir(ASSETS_DIR)):
+        stem, ext = os.path.splitext(fname)
+        ext = ext.lstrip(".").lower()
+        if ext not in PHOTO_EXTENSIONS:
+            continue
+        if stem in SITE_ASSET_FILENAMES or stem.endswith("-placeholder"):
+            continue
+        if stem in wanted_slugs:
+            continue
+        orphaned.append(fname)
+    return orphaned
+
+
+def write_orphaned_photos_report(orphaned):
+    """Writes (or removes) orphaned_photos.txt — a plain list for a human
+    to review. This script never deletes the photos themselves."""
+    if not orphaned:
+        if os.path.exists(ORPHANED_PHOTOS_REPORT):
+            os.remove(ORPHANED_PHOTOS_REPORT)
+        return
+    lines = [
+        "Photos in assets/ that don't match anyone currently in people/board.csv.",
+        "",
+        "Nothing has been deleted. If someone here has actually graduated or",
+        "left the board, delete their file from assets/ yourself once you've",
+        "confirmed it — this list is regenerated every build, so it'll clear",
+        "itself once the file is gone or the person is back in board.csv.",
+        "",
+    ]
+    lines += [f"- assets/{f}" for f in orphaned]
+    with open(ORPHANED_PHOTOS_REPORT, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
 
 
 def esc(s):
@@ -132,6 +266,7 @@ def build_profile_html(p):
     name_t = esct(p["name"])       # used in visible text
     role = esct(p["role"])
     slug = p["_slug"]
+    photo_file = esc(ensure_photo_asset(slug, p["name"], p["role"]))
 
     # Info cells — only render rows that have a value.
     cells = []
@@ -201,7 +336,7 @@ def build_profile_html(p):
 
   <div class="header-grid">
     <div class="photo-frame">
-      <img src="../assets/{slug}.jpg" alt="{name}" />
+      <img src="../assets/{photo_file}" alt="{name}" />
     </div>
     <div class="header-text">
       <div class="role">{role}</div>
@@ -228,9 +363,10 @@ def build_index_cards(rows):
         name = esc(p["name"])      # attribute-safe (alt="")
         name_t = esct(p["name"])   # visible text
         role = esct(p["role"])
+        photo_file = esc(ensure_photo_asset(slug, p["name"], p["role"]))
         cards.append(
             f'    <a href="people/{slug}.html" class="person">\n'
-            f'      <div class="photo-frame"><img src="assets/{slug}.jpg" alt="{name}" /></div>\n'
+            f'      <div class="photo-frame"><img src="assets/{photo_file}" alt="{name}" /></div>\n'
             f'      <div class="role">{role}</div>\n'
             f'      <div class="name">{name_t}</div>\n'
             f'    </a>'
@@ -305,6 +441,12 @@ def main():
         die("board.csv has no people in it.")
     write_profiles(rows)
     update_index(rows)
+    cleanup_orphaned_placeholders(rows)
+    orphaned = find_orphaned_photos(rows)
+    write_orphaned_photos_report(orphaned)
+    if orphaned:
+        print(f"\n{len(orphaned)} photo(s) in assets/ don't match anyone in board.csv.")
+        print("See orphaned_photos.txt — nothing was deleted.")
     print(f"\nDone. {len(rows)} people processed.")
 
 

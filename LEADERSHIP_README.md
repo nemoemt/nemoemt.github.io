@@ -24,8 +24,13 @@ You edit the CSV, push it to GitHub, and the site rebuilds itself.
 3. **Upload the person's photo** to the `assets/` folder, named
    `firstname-lastname.jpg` — all lowercase, with a hyphen between names.
    Example: **Adam DiPasquale → `assets/adam-dipasquale.jpg`**.
-   (The page links to that filename automatically. No photo = blank photo
-   frame until you add it.)
+   (The page links to that filename automatically.)
+
+   **No photo yet? That's fine.** The build automatically generates a
+   placeholder graphic — the person's initials, in NEMO's colors, labeled
+   "PLACEHOLDER" — so the page never shows a broken image. Upload the real
+   photo whenever it's ready and it replaces the placeholder on the next
+   build, with no other change needed.
 4. **Commit / save.** Within a minute the homepage row and the person's
    profile page update on their own.
 
@@ -72,6 +77,37 @@ should go.
 
 ---
 
+## Photo placeholders
+
+If `assets/<slug>.jpg` (or `.jpeg`/`.png`/`.webp`) doesn't exist for
+someone, the build writes a placeholder in their place —
+`assets/<slug>-placeholder.svg` — showing their initials and name in NEMO's
+colors, so nothing on the site shows a broken image. This is fully
+automatic:
+
+- It's regenerated every build, so it always reflects the current name/role
+  in the CSV.
+- The moment you upload a real photo with the matching filename, the
+  placeholder is deleted and the real photo takes over.
+- If someone is removed from the CSV entirely, their leftover placeholder
+  (if any) is deleted too.
+
+You never need to create or touch these `-placeholder.svg` files by hand.
+
+## Old photos left behind (`orphaned_photos.txt`)
+
+Every build also scans `assets/` for real photo files that don't match
+anyone currently in the CSV — typically a graduated exec whose row was
+removed. Their filenames are written to **`orphaned_photos.txt`** at the
+root of the repo, purely as a list to review.
+
+**The build never deletes these photos itself.** If you check the list and
+confirm someone really has left the board, delete their file from `assets/`
+yourself. The report updates itself on the next build — it clears once the
+file is gone (or the person is added back to the CSV).
+
+---
+
 ## If the build fails
 
 If the CSV is malformed (a missing required field, two people with the same
@@ -88,4 +124,5 @@ You don't need to, but if you have Python you can preview locally:
 python3 build_leadership.py
 ```
 
-This rewrites `index.html` and the `people/*.html` pages from the CSV.
+This rewrites `index.html`, the `people/*.html` pages, any needed photo
+placeholders in `assets/`, and `orphaned_photos.txt` — all from the CSV.

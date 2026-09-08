@@ -23,8 +23,8 @@ button.
 | **Once a year** (spring exec turnover) | The status banner dates | `index.html` — see §1 |
 | **Once a year** (spring exec turnover) | The leadership board | `people/board.csv` — see §2 |
 | **A few times a year** | Open / close the application form | automatic via the banner dates — see §1 |
-| **Every couple of years** | Renew the web domain | external — see §3 (current expiration: **2028**) |
-| **As needed** | Add/replace a person's photo | `assets/` folder — see §2 |
+| **Every couple of years** | Renew the web domain | Squarespace (external) — see §3 (current expiration: **2028**) |
+| **As needed** | Add/replace a person's photo | `assets/` folder — see §2 (no photo yet = auto placeholder) |
 
 ---
 
@@ -107,9 +107,24 @@ the pages for you automatically.
 
 The site finds each person's photo by their name. Upload the photo to the
 **`assets/`** folder named **`firstname-lastname.jpg`**, all lowercase, with a
-hyphen — for example **`adam-dipasquale.jpg`**. If the photo isn't there, the
-person's photo frame is simply blank until you add it. *The website cannot
-create a photo for you — you have to upload the image file.*
+hyphen — for example **`adam-dipasquale.jpg`**.
+
+**You don't have to have a photo ready.** If a person's photo isn't uploaded
+yet, the site automatically generates a placeholder graphic for them
+(their initials, in NEMO's colors, labeled "PLACEHOLDER") so the page never
+shows a broken image. The moment you upload their real photo with the
+matching filename, it replaces the placeholder automatically on the next
+build — no other change needed.
+
+### Old photos left behind (`orphaned_photos.txt`)
+
+Every build also checks `assets/` for photos that don't match anyone
+currently in `board.csv` — usually graduated execs whose row was removed.
+It writes their filenames to **`orphaned_photos.txt`** in the main repo
+folder. **Nothing is ever deleted automatically.** If you open that file and
+confirm someone really is gone for good, delete their photo from `assets/`
+yourself; the report clears itself the next time the site builds. If the
+file is empty or missing, there's nothing to clean up.
 
 ### A note on bios with long text
 
@@ -125,25 +140,26 @@ it's tidier to fix.)
 
 ## 3. Renewing the web domain
 
-The site is reached at its web address (domain). **The current registration
-is paid through 2028.** Before it expires, someone needs to renew it with
-whatever registrar NEMO used to buy it, using the NEMO account/payment on
-file.
+The site is reached at its web address (domain), **nemonu.org**. **The
+current registration is paid through 2028.** Before it expires, someone
+needs to renew it.
 
-> **Action for the exec who set this up:** record *which registrar* the domain
-> was purchased from and *which account/email* it's under, right here:
->
-> - Registrar: _______________________
-> - Account / login email: _______________________
-> - Expiration date: **2028** (confirm exact date at renewal time)
->
-> Filling this in now saves a future exec from a scramble if the site ever
-> goes dark because the domain lapsed. Set a calendar reminder a month before
-> expiration.
+- **Registrar:** Squarespace Domains
+- **Manage / renew here:** https://account.squarespace.com/domains/managed/nemonu.org
+- **Login:** through Google (use the NEMO Google account — "Sign in with
+  Google" on the Squarespace login page, not a separate Squarespace
+  password)
+- **Expiration date:** **2028** (confirm exact date at renewal time by
+  checking the link above)
+
+> Set a calendar reminder a month before expiration so a future exec doesn't
+> get caught off guard.
 
 If the domain ever does lapse, the site itself isn't lost — all the files are
 still safe here in GitHub. Only the custom web address stops pointing at it
-until the domain is renewed.
+until the domain is renewed. Squarespace here is **only** the domain
+registrar — the actual website is not built on Squarespace and does not live
+there; it's this GitHub repo, served by GitHub Pages.
 
 ---
 
@@ -169,8 +185,16 @@ earlier version, and you can restore it. Nothing is ever permanently lost.
 
 - **The banner shows the wrong thing:** check the dates in `BANNER_CONFIG`
   (§1). The message is decided entirely by today's date vs. those dates.
-- **A new exec's photo is blank:** the photo file is missing or misnamed in
-  `assets/`. It must be `firstname-lastname.jpg`, lowercase (§2).
+- **A new exec's photo is blank:** it shouldn't be — a missing photo now
+  shows an auto-generated placeholder with their initials, not a blank
+  frame. If you're seeing a broken-image icon instead, double check the
+  `name` column in `board.csv` actually has the person's real name in it
+  (not a leftover role title like "Treasurer") — that's what the
+  placeholder is built from.
+- **A graduated exec's old photo is cluttering `assets/`:** check
+  `orphaned_photos.txt` at the next build — it lists any photo that no
+  longer matches anyone in `board.csv`. Delete it yourself once confirmed;
+  nothing is removed automatically.
 - **The board didn't update after editing the CSV:** go to the **Actions** tab
   at the top of the repo. There should be a recent "Build leadership pages" run
   with a green check. If it has a red ✗, click it — the log says what's wrong
@@ -180,8 +204,10 @@ earlier version, and you can restore it. Nothing is ever permanently lost.
 
 ---
 
-*This site is plain HTML hosted on GitHub Pages. The leadership pages are
-generated by `build_leadership.py` (run automatically by GitHub Actions when
-`people/board.csv` changes). The status banner is driven by `BANNER_CONFIG` in
-`index.html`. No servers, databases, or paid hosting are involved — just these
-files.*
+*This site is plain HTML hosted on GitHub Pages. The leadership pages, photo
+placeholders, and orphaned-photo report are generated by
+`build_leadership.py` (run automatically by GitHub Actions when
+`people/board.csv` changes). The status banner is driven by `BANNER_CONFIG`
+in `index.html`. The domain (nemonu.org) is registered through Squarespace
+but the site itself is not hosted there. No servers, databases, or paid
+hosting are involved beyond the domain registration — just these files.*

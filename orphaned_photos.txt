@@ -1,0 +1,18 @@
+Photos in assets/ that don't match anyone currently in people/board.csv.
+
+Nothing has been deleted. If someone here has actually graduated or
+left the board, delete their file from assets/ yourself once you've
+confirmed it — this list is regenerated every build, so it'll clear
+itself once the file is gone or the person is back in board.csv.
+
+- assets/abby-wertz.jpg
+- assets/adam-dipasquale.jpg
+- assets/anay-patel.jpg
+- assets/ben-cruz.jpg
+- assets/blake-hansen.jpg
+- assets/james-mendelson.jpg
+- assets/mason-spodek.jpg
+- assets/niko-delis.jpg
+- assets/ritvik-viniak.jpg
+- assets/saniya-patel.jpg
+- assets/victoria-sefen.jpg
