@@ -18,7 +18,7 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   background: var(--paper);
   color: var(--ink);
   line-height: 1.5;
@@ -110,7 +110,7 @@ body {
 .photo-frame img:not([src]) { display: none; }
 
 .photo-frame .initials {
-  font-family: 'Fraunces', serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 110px;
   font-weight: 800;
   color: var(--purple);
@@ -127,7 +127,7 @@ body {
   margin-bottom: 16px;
 }
 .header-text h1 {
-  font-family: 'Fraunces', serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: clamp(48px, 7vw, 88px);
   font-weight: 800;
   color: var(--purple-ink);
@@ -157,7 +157,7 @@ body {
   margin-bottom: 8px;
 }
 .info-cell .value {
-  font-family: 'Fraunces', serif;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 18px;
   color: var(--purple-ink);
   font-weight: 500;
