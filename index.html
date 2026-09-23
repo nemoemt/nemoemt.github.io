@@ -1072,6 +1072,53 @@
     opacity: 1;
     transform: translateY(0);
   }
+  /* ---------- MENTOR MODAL: yes/no choices ---------- */
+  .contact-field fieldset { border: 0; padding: 0; margin: 0; }
+  .contact-field legend {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--purple-ink);
+    margin-bottom: 10px;
+    padding: 0;
+  }
+  .choice-row { display: flex; gap: 8px; }
+  .choice-row label {
+    flex: 1;
+    position: relative;
+    cursor: pointer;
+  }
+  .choice-row input {
+    position: absolute; opacity: 0; width: 1px; height: 1px;
+  }
+  .choice-row span {
+    display: block;
+    text-align: center;
+    padding: 12px 14px;
+    background: var(--cream);
+    border: 1px solid rgba(78, 42, 132, 0.25);
+    border-bottom: 1px solid var(--purple);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--purple);
+    transition: background 0.2s, color 0.2s;
+  }
+  .choice-row label:hover span { background: #fff; }
+  .choice-row input:checked + span { background: var(--purple); color: var(--cream); border-color: var(--purple); }
+  .choice-row input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .field-optional { opacity: 0.6; font-weight: 400; }
+  .field-error {
+    display: none;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--red);
+  }
+  .contact-field.has-error .field-error { display: block; }
+  .contact-field.has-error input[type="text"],
+  .contact-field.has-error input[type="email"] { border-bottom-color: var(--red); }
+
   /* ---------- CONTACT MODAL ---------- */
   .contact-modal {
     position: fixed;
@@ -1411,7 +1458,7 @@
     <div class="course-prose">
       <p>NEMO runs on its mentors. Past NEMO graduates and working EMTs come back each year to help facilitate the course alongside our instructors.</p>
       <p>You don't need to have taken NEMO to mentor. If you hold an EMT-B license, you can apply at any time.</p>
-      <a class="btn btn-ink" href="https://docs.google.com/forms/d/e/1FAIpQLScJ4ZrnuEmT_Ci-Ii_NnckSA2e_IAk8iqpi4M1hpawaG_MD3A/viewform?usp=header" target="_blank" rel="noopener">Apply to be a mentor</a>
+      <a class="btn btn-ink" href="https://docs.google.com/forms/d/e/1FAIpQLScJ4ZrnuEmT_Ci-Ii_NnckSA2e_IAk8iqpi4M1hpawaG_MD3A/viewform?usp=header" target="_blank" rel="noopener" data-mentor-open>Apply to be a mentor</a>
     </div>
     <aside class="specs-card">
       <h3>Mentoring at a glance</h3>
@@ -1659,7 +1706,7 @@
     </details>
     <details class="faq-item">
       <summary><h4>Can I still join NEMO if I'm already an EMT?</h4><span class="toggle">+</span></summary>
-      <div class="answer">Yes! NEMO runs on previous NEMO graduates and current EMTs coming back as mentors to help facilitate the class. Anyone with an EMT-B license can become a NEMO mentor, and mentor applications are reviewed on a rolling basis. <a href="https://docs.google.com/forms/d/e/1FAIpQLScJ4ZrnuEmT_Ci-Ii_NnckSA2e_IAk8iqpi4M1hpawaG_MD3A/viewform?usp=header" target="_blank" rel="noopener">Apply to be a mentor here</a>, or read more in the <a href="#mentor">mentor section</a> above.</div>
+      <div class="answer">Yes! NEMO runs on previous NEMO graduates and current EMTs coming back as mentors to help facilitate the class. Anyone with an EMT-B license can become a NEMO mentor, and mentor applications are reviewed on a rolling basis. <a href="https://docs.google.com/forms/d/e/1FAIpQLScJ4ZrnuEmT_Ci-Ii_NnckSA2e_IAk8iqpi4M1hpawaG_MD3A/viewform?usp=header" target="_blank" rel="noopener" data-mentor-open>Apply to be a mentor here</a>, or read more in the <a href="#mentor">mentor section</a> above.</div>
     </details>
     <details class="faq-item">
       <summary><h4>What happens if I don't pass the NREMT?</h4><span class="toggle">+</span></summary>
@@ -1686,7 +1733,7 @@
     <a class="btn" id="applyBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSeM-ljrgdJ4vfgUBzIKiPcJtHCsWEryOoh6pcTabnWJoQ5TOA/viewform?usp=header" target="_blank" rel="noopener">Application</a>
     <a class="btn btn-secondary" href="#" data-mailinglist-open>Join the interest list</a>
     <!-- MENTOR FORM: rolling applications, so this button is always active -->
-    <a class="btn btn-secondary" href="https://docs.google.com/forms/d/e/1FAIpQLScJ4ZrnuEmT_Ci-Ii_NnckSA2e_IAk8iqpi4M1hpawaG_MD3A/viewform?usp=header" target="_blank" rel="noopener">Apply to be a mentor</a>
+    <a class="btn btn-secondary" href="https://docs.google.com/forms/d/e/1FAIpQLScJ4ZrnuEmT_Ci-Ii_NnckSA2e_IAk8iqpi4M1hpawaG_MD3A/viewform?usp=header" target="_blank" rel="noopener" data-mentor-open>Apply to be a mentor</a>
     <a class="btn btn-secondary" href="#" data-contact-open>Email NEMO</a>
   </div>
 </section>
@@ -1752,6 +1799,66 @@
       <div class="check">&#10003;</div>
       <h4>Message sent.</h4>
       <p>Thanks for reaching out. A NEMO exec board member will be in touch soon.</p>
+    </div>
+  </div>
+</div>
+
+<!-- MENTOR INTEREST MODAL -->
+<!-- Submits to the "NEMO Mentor Interest Form" Google Form in the background.
+     Responses land in that form exactly as if someone filled it out on Google. -->
+<div class="contact-modal" id="mentorModal" role="dialog" aria-modal="true" aria-labelledby="mentorTitle">
+  <div class="contact-modal-box">
+    <button class="contact-close" id="mentorClose" aria-label="Close">&times;</button>
+
+    <div id="mentorFormWrap">
+      <div class="contact-modal-eyebrow">Mentor Interest</div>
+      <h3 id="mentorTitle">Help train <em>the next cohort.</em></h3>
+      <p class="lede">Mentors keep the class running smoothly and earn continuing education hours toward keeping their EMT license. We also staff events through the year, like Chicago races and Northwestern events, and teach classes at Evanston Township High School.</p>
+
+      <form id="mentorForm" novalidate>
+        <div class="contact-field" data-required>
+          <label for="mf-name">Full name</label>
+          <input type="text" id="mf-name" name="name" autocomplete="name" />
+          <p class="field-error">Enter your full name.</p>
+        </div>
+        <div class="contact-field" data-required>
+          <label for="mf-email">Email</label>
+          <input type="email" id="mf-email" name="email" autocomplete="email" />
+          <p class="field-error">Enter a valid email address.</p>
+        </div>
+        <div class="contact-field" data-required>
+          <fieldset>
+            <legend>Would you like to help out as a mentor for the class next year? This isn't an official commitment; we'll reach out again closer to the start of the course.</legend>
+            <div class="choice-row">
+              <label><input type="radio" name="mentor" value="Yes" /><span>Yes</span></label>
+              <label><input type="radio" name="mentor" value="No" /><span>No</span></label>
+            </div>
+          </fieldset>
+          <p class="field-error">Choose yes or no.</p>
+        </div>
+        <div class="contact-field" data-required>
+          <fieldset>
+            <legend>Would you be interested in joining us for events run by licensed EMTs next year?</legend>
+            <div class="choice-row">
+              <label><input type="radio" name="events" value="Yes" /><span>Yes</span></label>
+              <label><input type="radio" name="events" value="No" /><span>No</span></label>
+            </div>
+          </fieldset>
+          <p class="field-error">Choose yes or no.</p>
+        </div>
+        <div class="contact-field">
+          <label for="mf-ideas">Ideas for new events or opportunities we could offer <span class="field-optional">(optional)</span></label>
+          <textarea id="mf-ideas" name="ideas"></textarea>
+        </div>
+        <button type="submit" class="contact-submit" id="mentorSubmit">Submit</button>
+        <p class="contact-fineprint">Rolling applications · EMT-B license required</p>
+      </form>
+    </div>
+
+    <div class="contact-success" id="mentorSuccess">
+      <div class="check">&#10003;</div>
+      <h4>Thanks for signing up.</h4>
+      <p>We'll reach out closer to the start of the course.</p>
     </div>
   </div>
 </div>
@@ -1893,6 +2000,109 @@
       // Google Forms returns an opaque response with no-cors; we treat any
       // settled fetch as success because Google rejects CORS preflight but
       // still records the submission.
+      fetch(FORM_ACTION, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: data
+      }).finally(() => {
+        formWrap.style.display = 'none';
+        successEl.classList.add('show');
+      });
+    });
+  })();
+
+  // Mentor interest modal — submits to the Mentor Interest Google Form in the background
+  (function() {
+    const FORM_ID = '1FAIpQLScJ4ZrnuEmT_Ci-Ii_NnckSA2e_IAk8iqpi4M1hpawaG_MD3A';
+    const FIELDS = {
+      name:   'entry.90934954',    // Full Name
+      email:  'entry.863606255',   // Email
+      mentor: 'entry.54694379',    // Help out as a mentor next year? (Yes/No)
+      events: 'entry.1919053241',  // Join events run by licensed EMTs? (Yes/No)
+      ideas:  'entry.28252017'     // Ideas for new events (optional)
+    };
+    const FORM_ACTION = `https://docs.google.com/forms/d/e/${FORM_ID}/formResponse`;
+
+    const modal     = document.getElementById('mentorModal');
+    const form      = document.getElementById('mentorForm');
+    const formWrap  = document.getElementById('mentorFormWrap');
+    const successEl = document.getElementById('mentorSuccess');
+    const submitBtn = document.getElementById('mentorSubmit');
+    const closeBtn  = document.getElementById('mentorClose');
+    if (!modal) return;
+
+    function open() {
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => form.elements.name.focus(), 200);
+    }
+    function close() {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(() => {
+        formWrap.style.display = '';
+        successEl.classList.remove('show');
+        form.reset();
+        form.querySelectorAll('.has-error').forEach(f => f.classList.remove('has-error'));
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit';
+      }, 350);
+    }
+
+    document.querySelectorAll('[data-mentor-open]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        open();
+      });
+    });
+    closeBtn.addEventListener('click', close);
+    modal.addEventListener('click', e => {
+      if (e.target === modal) close();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && modal.classList.contains('open')) close();
+    });
+
+    // Clear a field's error as soon as it's fixed
+    form.addEventListener('input', e => {
+      const f = e.target.closest('.contact-field');
+      if (f) f.classList.remove('has-error');
+    });
+
+    function valueOf(name) {
+      const el = form.elements[name];
+      return el ? (el.value || '').trim() : '';
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+
+      // Google silently drops submissions missing a required answer,
+      // so check them here before sending.
+      let firstBad = null;
+      form.querySelectorAll('[data-required]').forEach(f => {
+        const input = f.querySelector('input');
+        const v = input.value.trim();
+        const ok = input.type === 'radio' ? !!valueOf(input.name)
+                 : input.type === 'email' ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+                 : !!v;
+        f.classList.toggle('has-error', !ok);
+        if (!ok && !firstBad) firstBad = input;
+      });
+      if (firstBad) { firstBad.focus(); return; }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending…';
+
+      const data = new FormData();
+      data.append(FIELDS.name,   valueOf('name'));
+      data.append(FIELDS.email,  valueOf('email'));
+      data.append(FIELDS.mentor, valueOf('mentor'));
+      data.append(FIELDS.events, valueOf('events'));
+      if (valueOf('ideas')) data.append(FIELDS.ideas, valueOf('ideas'));
+
+      // Same approach as the contact form: Google records the response even
+      // though no-cors hides the reply from us.
       fetch(FORM_ACTION, {
         method: 'POST',
         mode: 'no-cors',
