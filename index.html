@@ -1117,7 +1117,8 @@
   }
   .contact-field.has-error .field-error { display: block; }
   .contact-field.has-error input[type="text"],
-  .contact-field.has-error input[type="email"] { border-bottom-color: var(--red); }
+  .contact-field.has-error input[type="email"],
+  .contact-field.has-error input[type="tel"] { border-bottom-color: var(--red); }
 
   /* ---------- CONTACT MODAL ---------- */
   .contact-modal {
@@ -1822,9 +1823,14 @@
           <p class="field-error">Enter your full name.</p>
         </div>
         <div class="contact-field" data-required>
-          <label for="mf-email">Email</label>
+          <label for="mf-email">Email <span class="field-optional">(Northwestern one)</span></label>
           <input type="email" id="mf-email" name="email" autocomplete="email" />
           <p class="field-error">Enter a valid email address.</p>
+        </div>
+        <div class="contact-field" data-required>
+          <label for="mf-phone">Phone number</label>
+          <input type="tel" id="mf-phone" name="phone" autocomplete="tel" inputmode="tel" />
+          <p class="field-error">Enter a phone number with area code.</p>
         </div>
         <div class="contact-field" data-required>
           <fieldset>
@@ -2017,6 +2023,7 @@
     const FIELDS = {
       name:   'entry.90934954',    // Full Name
       email:  'entry.863606255',   // Email
+      phone:  'entry.858719405',   // Phone number
       mentor: 'entry.54694379',    // Help out as a mentor next year? (Yes/No)
       events: 'entry.1919053241',  // Join events run by licensed EMTs? (Yes/No)
       ideas:  'entry.28252017'     // Ideas for new events (optional)
@@ -2085,6 +2092,7 @@
         const v = input.value.trim();
         const ok = input.type === 'radio' ? !!valueOf(input.name)
                  : input.type === 'email' ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+                 : input.type === 'tel' ? v.replace(/\D/g, '').length >= 10
                  : !!v;
         f.classList.toggle('has-error', !ok);
         if (!ok && !firstBad) firstBad = input;
@@ -2097,6 +2105,7 @@
       const data = new FormData();
       data.append(FIELDS.name,   valueOf('name'));
       data.append(FIELDS.email,  valueOf('email'));
+      data.append(FIELDS.phone,  valueOf('phone'));
       data.append(FIELDS.mentor, valueOf('mentor'));
       data.append(FIELDS.events, valueOf('events'));
       if (valueOf('ideas')) data.append(FIELDS.ideas, valueOf('ideas'));
