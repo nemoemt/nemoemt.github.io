@@ -25,6 +25,7 @@ button.
 | **A few times a year** | Open / close the application form | automatic via the banner dates — see §1 |
 | **Every couple of years** | Renew the web domain | Squarespace (external) — see §3 (current expiration: **2028**) |
 | **As needed** | Add/replace a person's photo | `assets/` folder — see §2 (no photo yet = auto placeholder) |
+| **After each info session** | Post the recording link | `index.html` — search for `INFO_SESSION` |
 
 ---
 

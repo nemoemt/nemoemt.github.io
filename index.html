@@ -457,6 +457,104 @@
     .news-card { grid-template-columns: 1fr; gap: 24px; }
   }
 
+  /* ---------- INFO SESSION VIDEO (under the news slider) ---------- */
+  .info-session {
+    margin-top: 64px;
+    padding-top: 48px;
+    border-top: 1px dashed rgba(78,42,132,0.3);
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .info-session h3 {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 800;
+    font-size: clamp(24px, 3vw, 38px);
+    line-height: 1.05;
+    color: var(--purple-ink);
+    letter-spacing: -0.02em;
+    margin: 0 0 16px;
+  }
+  .info-session h3 em { font-style: italic; font-weight: 400; color: var(--purple); }
+  .info-session p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink);
+    max-width: 46ch;
+  }
+  .video-frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: var(--purple);
+    border: 1px solid var(--purple);
+    overflow: hidden;
+  }
+  .video-frame iframe,
+  .video-frame video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #000;
+  }
+  .video-poster {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 24px;
+    background:
+      linear-gradient(135deg, transparent 49%, rgba(245,239,227,0.06) 49%, rgba(245,239,227,0.06) 51%, transparent 51%),
+      var(--purple);
+    color: var(--cream);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  button.video-poster { cursor: pointer; }
+  .video-poster .play {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s;
+  }
+  .video-poster .play::before {
+    content: '';
+    margin-left: 6px;
+    border-style: solid;
+    border-width: 16px 0 16px 26px;
+    border-color: transparent transparent transparent var(--purple-ink);
+  }
+  button.video-poster:hover .play { transform: scale(1.08); }
+  button.video-poster:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+  .video-poster .when {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-transform: none;
+    color: var(--cream);
+  }
+  .video-poster .soon { color: var(--accent); }
+  @media (max-width: 720px) {
+    .info-session { grid-template-columns: 1fr; gap: 24px; margin-top: 48px; padding-top: 36px; }
+  }
+
   /* ---------- COURSE OVERVIEW ---------- */
   .course-grid {
     display: grid;
@@ -1526,6 +1624,18 @@
   </div>
 
   <div class="news-dots" data-news-dots></div>
+
+  <!-- INFO SESSION VIDEO: the text and video link are set in INFO_SESSION
+       near the bottom of this file. Until a video link is pasted there, this
+       shows an "upcoming session" card instead of a play button. -->
+  <div class="info-session" id="info-session">
+    <div>
+      <div class="news-card-tag">Info Session <span class="news-card-date" id="infoSessionDate"></span></div>
+      <h3>Watch the NEMO <em>information session.</em></h3>
+      <p id="infoSessionBlurb">Everything you need to know about the course, the application, and what the year looks like, straight from the executive board.</p>
+    </div>
+    <div class="video-frame" id="infoSessionVideo"></div>
+  </div>
 </section>
 
 <!-- SCHEDULE -->
@@ -2345,6 +2455,92 @@
   document.querySelector('[data-news-next]').addEventListener('click', function () { go(i + 1); reset(); });
   document.querySelector('[data-news-prev]').addEventListener('click', function () { go(i - 1); reset(); });
   reset();
+})();
+</script>
+<!-- ============================================================
+     INFO SESSION VIDEO  —  EDIT THIS AFTER THE SESSION
+     ============================================================
+     Shows up under the news slider. Paste the recording's link into
+     videoUrl and commit — the "upcoming" card turns into a click-to-play
+     video. Works with:
+       - YouTube (set the video to Unlisted or Public):
+           https://www.youtube.com/watch?v=XXXXXXXXXXX  or  https://youtu.be/XXXXXXXXXXX
+       - Google Drive (Share > General access > "Anyone with the link"):
+           https://drive.google.com/file/d/XXXXXXXX/view
+       - A video file uploaded to this repo, e.g. "assets/info-session.mp4"
+     To hide the whole section, set show to false.
+     ============================================================ -->
+<script>
+(function infoSession() {
+  const INFO_SESSION = {
+    show: true,
+    date: "Thursday, October 1",   // shown next to the "Info Session" tag
+    videoUrl: ""                    // <-- paste the recording link here
+  };
+
+  const wrap = document.getElementById("info-session");
+  const frame = document.getElementById("infoSessionVideo");
+  if (!wrap || !frame) return;
+  if (!INFO_SESSION.show) { wrap.remove(); return; }
+
+  const dateEl = document.getElementById("infoSessionDate");
+  if (dateEl && INFO_SESSION.date) dateEl.textContent = "— " + INFO_SESSION.date;
+
+  const url = (INFO_SESSION.videoUrl || "").trim();
+
+  // Turn a share link into something the page can play inline.
+  function embedFor(link) {
+    let m = link.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/)|youtu\.be\/)([\w-]{11})/);
+    if (m) return { type: "iframe", src: "https://www.youtube-nocookie.com/embed/" + m[1] + "?autoplay=1&rel=0" };
+    m = link.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/);
+    if (m) return { type: "iframe", src: "https://drive.google.com/file/d/" + m[1] + "/preview" };
+    if (/\.(mp4|webm|mov)(\?|$)/i.test(link)) return { type: "video", src: link };
+    return null;
+  }
+
+  if (!url) {
+    // Before the recording exists: a static "coming soon" card.
+    frame.innerHTML =
+      '<div class="video-poster">' +
+        '<span>Information Session</span>' +
+        '<span class="when">' + (INFO_SESSION.date || "Coming soon") + '</span>' +
+        '<span class="soon">Recording will be posted here</span>' +
+      '</div>';
+    return;
+  }
+
+  const embed = embedFor(url);
+  const poster = document.createElement(embed ? "button" : "a");
+  poster.className = "video-poster";
+  poster.innerHTML = '<span class="play" aria-hidden="true"></span><span>Play the info session</span>';
+  if (embed) {
+    poster.type = "button";
+    poster.setAttribute("aria-label", "Play the NEMO information session video");
+    poster.addEventListener("click", function () {
+      let player;
+      if (embed.type === "video") {
+        player = document.createElement("video");
+        player.src = embed.src;
+        player.controls = true;
+        player.autoplay = true;
+        player.playsInline = true;
+      } else {
+        player = document.createElement("iframe");
+        player.src = embed.src;
+        player.title = "NEMO information session";
+        player.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+        player.allowFullscreen = true;
+      }
+      frame.innerHTML = "";
+      frame.appendChild(player);
+    });
+  } else {
+    // Unrecognized link: still clickable, just opens in a new tab.
+    poster.href = url;
+    poster.target = "_blank";
+    poster.rel = "noopener";
+  }
+  frame.appendChild(poster);
 })();
 </script>
 <!-- ============================================================
