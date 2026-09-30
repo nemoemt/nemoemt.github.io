@@ -25,6 +25,7 @@ button.
 | **A few times a year** | Open / close the application form | automatic via the banner dates — see §1 |
 | **Every couple of years** | Renew the web domain | Squarespace (external) — see §3 (current expiration: **2028**) |
 | **As needed** | Add/replace a person's photo | `assets/` folder — see §2 (no photo yet = auto placeholder) |
+| **After each info session** | Post the recording link | `index.html` — search for `INFO_SESSION` |
 
 ---
 
@@ -39,7 +40,7 @@ The banner moves through these phases on its own as the calendar passes each
 date:
 
 1. **Before applications open** → "Applications for the 2027 cohort open October 1"
-2. **While applications are open** → "Applications are open — apply by November 15" (and the Apply button turns on)
+2. **While applications are open** → "Applications are open — apply by November 1" (and the Apply button turns on)
 3. **After they close, before class** → "Applications are closed — the cohort begins January 6"
 4. **While the course is running** → "The 2027 cohort is currently in training"
 5. **Right after the course ends** → "Congratulations to the 2027 cohort!"
@@ -55,9 +56,9 @@ date:
      cohortYear: 2027,                // the cohort being recruited / taught now
 
      applicationsOpen:  "2026-10-01", // apps OPEN on this date
-     applicationsClose: "2026-11-15", // apps CLOSE (deadline) on this date
+     applicationsClose: "2026-11-01", // apps CLOSE (deadline) on this date
      classStarts:       "2027-01-06", // first day of the EMT course
-     classEnds:         "2027-03-14"  // last day of the course / graduation
+     classEnds:         "2027-05-14"  // last day of the course / graduation
    };
    ```
 

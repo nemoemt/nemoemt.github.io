@@ -233,4 +233,6 @@ body {
   .header-grid { grid-template-columns: 1fr; gap: 32px; }
   .photo-frame { max-width: 240px; }
   .info-grid { grid-template-columns: 1fr; }
+  .info-cell { min-width: 0; }
+  .info-cell .value { overflow-wrap: anywhere; }
 }
