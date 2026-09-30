@@ -1,13 +1,14 @@
 name: Build leadership pages
 
 # Regenerates the leadership row on index.html and every people/<slug>.html
-# whenever the board CSV (or the generator) changes on the main branch.
+# whenever the board CSV, the generator, or a photo changes on the main branch.
 on:
   push:
     branches: [ main ]
     paths:
       - "people/board.csv"
       - "build_leadership.py"
+      - "assets/**"             # a new photo replaces that person's placeholder
       - ".github/workflows/build-leadership.yml"
   workflow_dispatch:        # lets you run it manually from the Actions tab
 
@@ -33,7 +34,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html people/*.html
+          # Everything the build can touch: the homepage row, profile pages,
+          # photo placeholders, and the orphaned-photo report (incl. deletions).
+          git add -A index.html people assets
+          git add -A orphaned_photos.txt 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "Nothing changed."
           else

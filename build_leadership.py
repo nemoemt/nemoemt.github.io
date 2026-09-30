@@ -54,7 +54,7 @@ PHOTO_EXTENSIONS = ["jpg", "jpeg", "png", "webp"]
 # an image extension with real photos.
 SITE_ASSET_FILENAMES = {
     "nemo_logo", "favicon", "favicon-32", "apple-touch-icon",
-    "nemomarathon", "eths", "mci",
+    "nemomarathon", "eths", "mci", "og-image",
 }
 ORPHANED_PHOTOS_REPORT = os.path.join(ROOT, "orphaned_photos.txt")
 
@@ -271,7 +271,7 @@ def build_profile_html(p):
     # Info cells — only render rows that have a value.
     cells = []
     cells.append(("Position", role, False))
-    if p.get("email"):
+    if "@" in (p.get("email") or ""):
         email = esc(p["email"])
         cells.append(("Email", f'<a href="mailto:{email}">{esct(p["email"])}</a>', True))
     if p.get("school_year"):
