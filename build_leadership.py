@@ -282,6 +282,13 @@ def build_profile_html(p):
     if p.get("fun_value"):
         cells.append((esct(fun_label), esct(p["fun_value"]), False, True))  # full width
 
+    # An odd number of half-width cells would leave an empty (purple) slot in
+    # the two-column grid, so stretch the last one across the row.
+    half = [i for i, c in enumerate(cells) if not (len(c) > 3 and c[3])]
+    if len(half) % 2:
+        c = cells[half[-1]]
+        cells[half[-1]] = (c[0], c[1], c[2], True)
+
     info_cells_html = []
     for c in cells:
         label, value = c[0], c[1]
