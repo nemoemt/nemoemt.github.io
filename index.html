@@ -523,6 +523,12 @@
     text-transform: uppercase;
   }
   button.video-poster { cursor: pointer; }
+  .video-poster.has-image {
+    background-size: cover;
+    background-position: center;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  }
+  .video-poster.has-image .label { display: none; }
   .video-poster .play {
     width: 84px;
     height: 84px;
@@ -2399,7 +2405,7 @@
     cohortYear: 2027,                // the cohort being recruited / taught now
 
     applicationsOpen:  "2026-10-01", // apps OPEN on this date
-    applicationsClose: "2026-11-01", // apps CLOSE (deadline) on this date
+    applicationsClose: "2026-10-16", // deadline: last day to apply (open through 11:59 PM)
     classStarts:       "2027-01-06", // first day of the EMT course
     classEnds:         "2027-05-14"  // last day of the course / graduation
   };
@@ -2416,6 +2422,9 @@
   const now = new Date();
   const open = d(BANNER_CONFIG.applicationsOpen);
   const close = d(BANNER_CONFIG.applicationsClose);
+  // Applications stay open through the whole deadline day.
+  const closeEnd = new Date(close.getTime());
+  closeEnd.setDate(closeEnd.getDate() + 1);
   const start = d(BANNER_CONFIG.classStarts);
   const end = d(BANNER_CONFIG.classEnds);
   // "graduation" message runs for ~30 days after the course ends, then the
@@ -2435,12 +2444,12 @@
     message = "\u00b7 APPLICATIONS FOR THE " + yr + " COHORT OPEN " + fmt(open).toUpperCase() + " \u00b7 JOIN THE INTEREST LIST ";
     eyebrow = "Next cohort: " + yr;
     blurb = "Applications open " + fmt(open) + ". Join the interest list to be notified.";
-  } else if (now >= open && now < close) {
+  } else if (now >= open && now < closeEnd) {
     message = "\u00b7 APPLICATIONS ARE OPEN \u2014 APPLY BY " + fmt(close).toUpperCase() + " ";
     applyEnabled = true;
     eyebrow = "Now accepting applications: " + yr + " cohort";
     blurb = "Applications are open through " + fmt(close) + ". Capacity is 120 seats.";
-  } else if (now >= close && now < start) {
+  } else if (now >= closeEnd && now < start) {
     message = "\u00b7 APPLICATIONS ARE CLOSED \u2014 THE " + yr + " COHORT BEGINS " + fmt(start).toUpperCase() + " ";
     eyebrow = yr + " cohort selected";
     blurb = "Applications for " + yr + " are closed. The course begins " + fmt(start) + ".";
@@ -2537,7 +2546,8 @@
   const INFO_SESSION = {
     show: true,
     date: "Thursday, October 1",   // shown next to the "Info Session" tag
-    videoUrl: "https://youtu.be/zR0e8BUPOZQ"  // <-- paste the recording link here
+    videoUrl: "https://youtu.be/zR0e8BUPOZQ", // <-- paste the recording link here
+    poster: "assets/info-session-poster.jpg"   // still shown behind the play button (optional)
   };
 
   const wrap = document.getElementById("info-session");
@@ -2574,7 +2584,12 @@
   const embed = embedFor(url);
   const poster = document.createElement(embed ? "button" : "a");
   poster.className = "video-poster";
-  poster.innerHTML = '<span class="play" aria-hidden="true"></span><span>Play the info session</span>';
+  poster.innerHTML = '<span class="play" aria-hidden="true"></span><span class="label">Play the info session</span>';
+  if (INFO_SESSION.poster) {
+    poster.classList.add("has-image");
+    poster.style.backgroundImage =
+      "linear-gradient(rgba(28,16,52,0.2), rgba(28,16,52,0.2)), url('" + INFO_SESSION.poster + "')";
+  }
   if (embed) {
     poster.type = "button";
     poster.setAttribute("aria-label", "Play the NEMO information session video");
