@@ -2099,25 +2099,6 @@
     observer.observe(s);
   });
 
-  // Star spin — continuous gentle rotation
-  (function() {
-    const star = document.querySelector('.hero-visual img');
-    if (!star) return;
-
-    const NORMAL_SPEED = 360 / 40000;   // 360° per 40s
-    let angle = 0;
-    let lastTime = performance.now();
-
-    function tick(now) {
-      const dt = now - lastTime;
-      lastTime = now;
-      angle = (angle + NORMAL_SPEED * dt) % 360;
-      star.style.transform = `rotate(${angle}deg)`;
-      requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  })();
-
   // Contact modal — submits to Google Forms in the background
   (function() {
     const FORM_ID = '1FAIpQLSfMzZ1x9UNJPrqDMr3q5DzggTZ4jNN5AYxNWyEOY9mWkwXdtQ';
