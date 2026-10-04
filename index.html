@@ -830,6 +830,11 @@
     mask-image: linear-gradient(to right, black 0%, black 92%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, black 0%, black 92%, transparent 100%);
   }
+  /* once scrolled to the end, drop the fade so the last card is fully visible */
+  .leadership-scroll.at-end {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
   .leadership-scroll::-webkit-scrollbar {
     height: 6px;
   }
@@ -2088,6 +2093,18 @@
 </div>
 
 <script>
+  // Leadership row — remove the right-edge fade once scrolled to the end
+  (function() {
+    const row = document.querySelector('.leadership-scroll');
+    if (!row) return;
+    function update() {
+      row.classList.toggle('at-end', row.scrollLeft + row.clientWidth >= row.scrollWidth - 2);
+    }
+    row.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  })();
+
   // Smooth fade-in on scroll
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
