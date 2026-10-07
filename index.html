@@ -140,12 +140,14 @@
   .hero-visual {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     position: relative;
   }
   .hero-visual img {
     width: 100%;
-    max-width: 920px;
+    max-width: 460px;
+    max-height: 65vh;
+    object-fit: contain;
     height: auto;
     filter: drop-shadow(0 8px 24px rgba(78,42,132,0.15));
     transition: filter 0.3s;
