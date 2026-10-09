@@ -1914,9 +1914,11 @@
   <div class="section-eyebrow" id="applyEyebrow">Next cohort: Winter 2027</div>
   <h2>Get on <em>the rig.</em></h2>
   <p id="applyBlurb">Applications open in fall quarter. Capacity is 120 seats.</p>
-  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
+  <div style="display: flex; justify-content: center; margin-bottom: 12px;">
     <!-- APPLICATION FORM: replace href with your Google Form URL when ready -->
     <a class="btn" id="applyBtn" href="https://docs.google.com/forms/d/e/1FAIpQLSeM-ljrgdJ4vfgUBzIKiPcJtHCsWEryOoh6pcTabnWJoQ5TOA/viewform?usp=header" target="_blank" rel="noopener">Application</a>
+  </div>
+  <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
     <a class="btn btn-secondary" href="#" data-mailinglist-open>Join the interest list</a>
     <!-- MENTOR FORM: rolling applications, so this button is always active -->
     <a class="btn btn-secondary" href="https://docs.google.com/forms/d/e/1FAIpQLScJ4ZrnuEmT_Ci-Ii_NnckSA2e_IAk8iqpi4M1hpawaG_MD3A/viewform?usp=header" target="_blank" rel="noopener" data-mentor-open>Apply to be a mentor</a>
@@ -2473,6 +2475,16 @@
   if (marquee) {
     const span = '<span>' + message + '</span>';
     marquee.innerHTML = span + span + span + span;
+    // Restart the scroll after the text (and later the web fonts) change its
+    // width; otherwise some browsers leave the animation stalled until a reload.
+    const restart = function () {
+      marquee.style.animation = "none";
+      void marquee.offsetWidth;
+      marquee.style.animation = "";
+    };
+    restart();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(restart);
+    window.addEventListener("pageshow", function (e) { if (e.persisted) restart(); });
   }
 
   const eb = document.getElementById("applyEyebrow");
