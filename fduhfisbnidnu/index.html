@@ -7,6 +7,14 @@
 // Catches any uncaught JS errors and shows them in the banner.
 // Runs as the very first script so it's ready when other scripts blow up.
 window.addEventListener('error', function(e) {
+  // "Script error." with no line/file comes from a script on another site
+  // (a CDN library or a browser extension) whose details the browser hides.
+  // It is not a bug in this page and the tool still works, so don't show the
+  // red banner for it; just note it in the console.
+  if (!e.lineno && !e.filename && /^script error\.?$/i.test(e.message || '')) {
+    if (window.console) console.warn('Ignored cross-origin script error');
+    return;
+  }
   var banner = document.getElementById('loadError');
   var msg = document.getElementById('loadErrorMsg');
   if (banner && msg) {
@@ -34,7 +42,7 @@ window.addEventListener('error', function(e) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400..800;1,14..32,400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
 <style>
   :root {
     /* === LIGHT THEME (default) ===
