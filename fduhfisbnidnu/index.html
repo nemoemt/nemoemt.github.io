@@ -1494,47 +1494,6 @@ window.addEventListener('error', function(e) {
     <div style="font-size:11px;opacity:0.85;margin-top:6px;">The JavaScript hit a syntax error before the page could finish loading. Fix it on GitHub, hard-refresh.</div>
   </div>
 </div>
-<div class="password-overlay" id="passwordOverlay">
-  <div class="password-card">
-    <div class="password-card-title">NEMO Assessment Tool</div>
-    <div class="password-card-sub">Evaluator access only</div>
-    <input type="password" class="password-input" id="passwordInput" placeholder="Enter password" autocomplete="off">
-    <button class="password-submit" id="passwordSubmit" type="button">Unlock</button>
-    <div class="password-error" id="passwordError"></div>
-  </div>
-</div>
-
-<script>
-const ACCESS_PASSWORD = 'dylanissosmart';
-
-(function passwordGate() {
-  const overlay = document.getElementById('passwordOverlay');
-  const input = document.getElementById('passwordInput');
-  const submit = document.getElementById('passwordSubmit');
-  const errorEl = document.getElementById('passwordError');
-  try {
-    if (sessionStorage.getItem('nemo_unlocked') === 'yes') {
-      overlay.remove();
-      return;
-    }
-  } catch (e) {}
-  setTimeout(() => input.focus(), 50);
-  function tryUnlock() {
-    if (input.value === ACCESS_PASSWORD) {
-      try { sessionStorage.setItem('nemo_unlocked', 'yes'); } catch (e) {}
-      overlay.remove();
-    } else {
-      errorEl.textContent = 'Incorrect password';
-      input.value = '';
-      input.focus();
-    }
-  }
-  submit.addEventListener('click', tryUnlock);
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); tryUnlock(); }
-  });
-})();
-</script>
 <div class="container">
 
   <header>
