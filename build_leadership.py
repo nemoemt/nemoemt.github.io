@@ -55,6 +55,7 @@ PHOTO_EXTENSIONS = ["jpg", "jpeg", "png", "webp"]
 SITE_ASSET_FILENAMES = {
     "nemo_logo", "favicon", "favicon-32", "apple-touch-icon",
     "nemomarathon", "eths", "mci", "og-image", "info-session-poster",
+    "chicago-marathon-2026",
 }
 ORPHANED_PHOTOS_REPORT = os.path.join(ROOT, "orphaned_photos.txt")
 
