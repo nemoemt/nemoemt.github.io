@@ -16,6 +16,37 @@ button.
 
 ---
 
+## Turnover checklist (new exec board, every spring)
+
+Work through this list when a new board takes over. Each item links to the
+section with the details.
+
+1. **Get access.** The incoming web lead needs to be added as a member of the
+   `nemoemt` GitHub organization with write access to this repository.
+2. **Leadership board.** Update `people/board.csv` with the new board and
+   upload their headshots to `assets/` (§2). Delete departing execs' photos
+   once `orphaned_photos.txt` lists them.
+3. **Banner dates.** Set next year's dates in `BANNER_CONFIG` (§1).
+4. **Application form.** If there's a new Google Form, swap the link (§1).
+5. **Assessment tool access.** Update who can sign in to the psychomotor
+   assessment tool, and transfer the Cloudflare account to the new board (§6).
+6. **News cards.** Swap in recent events on the homepage (§7).
+7. **Info session.** After the fall info session, post the recording (§8).
+8. **Accounts.** Make sure the new board can log in to every account in the
+   table below, and that nothing is tied only to a graduating member's
+   personal email.
+
+### Accounts the site depends on
+
+| Service | What it's for | How to get in |
+|---|---|---|
+| **GitHub** (`nemoemt` organization) | Hosts this repository and the live website (GitHub Pages) | Ask a current org owner to add you |
+| **Squarespace Domains** | Owns the address `nemonu.org` (paid through 2028) | "Sign in with Google" using the NEMO Google account (§3) |
+| **Cloudflare** | Hosts the psychomotor assessment tool behind a login (§6) | Account set up by Dylan Stone in Oct 2026; ask for an invite before he graduates |
+| **Google Forms** | The application, mentor, interest-list, and contact forms linked from the site | The NEMO Google account |
+
+---
+
 ## Quick reference: what to update and when
 
 | When | What | Where |
@@ -25,7 +56,9 @@ button.
 | **A few times a year** | Open / close the application form | automatic via the banner dates — see §1 |
 | **Every couple of years** | Renew the web domain | Squarespace (external) — see §3 (current expiration: **2028**) |
 | **As needed** | Add/replace a person's photo | `assets/` folder — see §2 (no photo yet = auto placeholder) |
-| **After each info session** | Post the recording link | `index.html` — search for `INFO_SESSION` |
+| **After each info session** | Post the recording link | `index.html` — see §8 |
+| **After events** | Add a news card with a photo | `index.html` — see §7 |
+| **At turnover / as needed** | Who can use the assessment tool | Cloudflare dashboard — see §6 |
 
 ---
 
@@ -205,10 +238,74 @@ earlier version, and you can restore it. Nothing is ever permanently lost.
 
 ---
 
+## 6. The psychomotor assessment tool (Cloudflare, login required)
+
+The evaluator tool used during skills exams lives in the folder
+**`fduhfisbnidnu/`**. (The odd name is historical; don't rename the folder
+without also changing the Cloudflare setting below, or the tool goes
+offline.)
+
+- **Address:** https://nemo-tool.pages.dev
+- **It is not on nemonu.org.** `_config.yml` keeps GitHub Pages from
+  publishing that folder, so the tool is only reachable through Cloudflare.
+- **Login:** Cloudflare Access. Each approved person types their own email
+  and receives a one-time code. There is no shared password.
+- **Editing the tool:** edit `fduhfisbnidnu/index.html` here like any other
+  file. Every commit to `main` redeploys it to Cloudflare automatically
+  within a minute or two.
+
+**To change who can sign in:** log in at dash.cloudflare.com → **Zero
+Trust** → **Access** → **Applications** → **NEMO Assessment Tool** →
+**Policies** → edit **Approved evaluators**, then add or remove email
+addresses and save.
+
+**Cloudflare settings to know about** (dash.cloudflare.com → **Workers &
+Pages** → **nemo-tool** → **Settings**): the project is connected to this
+GitHub repository, branch `main`, with **no build command** and **build
+output directory** `fduhfisbnidnu`.
+
+---
+
+## 7. News cards (the "NEMO around Evanston" slider)
+
+In `index.html`, search for **`Card: duplicate this block`**. Each
+`<article class="news-card">…</article>` block is one slide. To add one,
+copy a block, paste it at the top of the list (newest first), and change the
+image, tag, date, title, and one-sentence description. Upload the photo to
+`assets/` first. A landscape photo works best, since cards are shown in a
+4:3 frame; keep it around 1200 × 900 so the page loads quickly. Delete old
+blocks to retire them.
+
+---
+
+## 8. Info session video
+
+In `index.html`, search for **`INFO_SESSION`**. Paste the recording's link
+(an Unlisted YouTube link works best) into `videoUrl` and update `date`.
+`poster` is the still image shown before someone presses play; replace
+`assets/info-session-poster.jpg` with the first slide of the new deck, or
+set `poster` to `""` for a plain purple tile.
+
+---
+
+## 9. Headshot tips
+
+- Name the file `firstname-lastname.jpg`, all lowercase (§2).
+- Crop to a vertical 4:5 shape (for example 800 × 1000) with the face in
+  the upper third, so it matches everyone else's.
+- The current board's photos were all put on the same grey studio
+  background for a consistent look. New photos don't get this
+  automatically; any background-removal tool works, or leave the original
+  background.
+
+---
+
 *This site is plain HTML hosted on GitHub Pages. The leadership pages, photo
 placeholders, and orphaned-photo report are generated by
 `build_leadership.py` (run automatically by GitHub Actions when
 `people/board.csv` changes). The status banner is driven by `BANNER_CONFIG`
 in `index.html`. The domain (nemonu.org) is registered through Squarespace
-but the site itself is not hosted there. No servers, databases, or paid
-hosting are involved beyond the domain registration — just these files.*
+but the site itself is not hosted there. The only other service is
+Cloudflare, which hosts the login-protected assessment tool on its free
+plan. There are no databases or paid hosting; everything else is just these
+files.*
