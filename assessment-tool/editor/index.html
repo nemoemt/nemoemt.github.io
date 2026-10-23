@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>NEMO Scenario Editor</title>
+<link rel="icon" type="image/png" href="../nemo_logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!--
+  NEMO Scenario Editor
+  ====================
+  Edits the scenarios used by the assessment tool (../scenarios.js) with
+  forms instead of code. It never writes to the server: "Download" produces
+  a new scenarios.js, which you upload to the assessment-tool folder on
+  GitHub. Work in progress is kept in this browser (localStorage) so a
+  refresh doesn't lose it.
+
+  Access to /editor/ is restricted by Cloudflare Access (see README §6).
+-->
+<style>
+  :root {
+    --purple: #4E2A84; --ink: #1A0E33; --cream: #F5EFE3; --paper: #FFFDF8;
+    --line: #DDD3C2; --muted: #6B6080; --accent: #E8A33D; --danger: #A4262C;
+    --ok: #2E7D4F;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--cream); color: var(--ink); font: 14px/1.45 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+
+  .topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px;
+    padding: 12px 20px; background: var(--purple); color: white; }
+  .topbar h1 { font-size: 16px; margin: 0; font-weight: 800; letter-spacing: -0.01em; }
+  .topbar .status { font-size: 12px; opacity: 0.85; }
+  .topbar .status.dirty { color: var(--accent); opacity: 1; font-weight: 600; }
+  .topbar .spacer { flex: 1; }
+  .btn { border: 1px solid var(--line); background: white; border-radius: 6px; padding: 7px 12px; font-weight: 600; font-size: 13px; }
+  .btn:hover { border-color: var(--purple); }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+  .btn-primary:hover { filter: brightness(0.95); }
+  .btn-ghost { background: transparent; border-color: rgba(255,255,255,0.5); color: white; }
+  .btn-danger { color: var(--danger); }
+  .btn-small { padding: 3px 8px; font-size: 12px; }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+
+  .banner { margin: 12px 20px 0; padding: 10px 14px; border-radius: 8px; background: #FFF4DE; border: 1px solid var(--accent);
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .banner[hidden] { display: none; }
+
+  .layout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; padding: 16px 20px 80px; align-items: start; }
+  .sidebar { position: sticky; top: 64px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 12px; max-height: calc(100vh - 84px); overflow: auto; }
+  .sidebar h2 { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 12px 4px 6px; }
+  .sidebar h2:first-child { margin-top: 0; }
+  .scen-btn { display: block; width: 100%; text-align: left; border: 0; background: transparent; padding: 7px 8px; border-radius: 6px; }
+  .scen-btn:hover { background: var(--cream); }
+  .scen-btn.active { background: var(--purple); color: white; }
+  .scen-btn .k { font-size: 11px; opacity: 0.7; display: block; }
+  .scen-btn .t { font-weight: 600; }
+  .sidebar .new-row { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+
+  .main { min-width: 0; }
+  .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; }
+  .panel > h3 { margin: 0 0 4px; font-size: 15px; }
+  .panel > .help { margin: 0 0 14px; color: var(--muted); font-size: 12.5px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; flex: 1; min-width: 180px; }
+  .field label { font-size: 12px; font-weight: 600; color: var(--muted); }
+  input[type=text], select, textarea { width: 100%; border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; background: white; }
+  input[type=text]:focus, select:focus, textarea:focus, .rich:focus { outline: 2px solid rgba(78,42,132,0.35); border-color: var(--purple); }
+  textarea { resize: vertical; min-height: 34px; }
+  .head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .card { border: 1px solid var(--line); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: white; }
+  .card-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+  .card-head input[type=text] { flex: 1; min-width: 160px; font-weight: 600; }
+  .card-head select { width: auto; }
+  .card-head label.chk { font-size: 12px; color: var(--muted); display: flex; gap: 4px; align-items: center; }
+  .toolbar { display: flex; gap: 4px; margin-bottom: 4px; }
+  .toolbar button { border: 1px solid var(--line); background: var(--cream); border-radius: 4px; padding: 2px 8px; font-size: 12px; }
+  .rich { min-height: 70px; border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; background: white; }
+  .rich p { margin: 0 0 6px; }
+  .pairs { width: 100%; border-collapse: collapse; }
+  .pairs td { padding: 3px 4px 3px 0; vertical-align: top; }
+  .pairs td:first-child { width: 32%; }
+  .pairs td:last-child { width: 36px; }
+
+  .resp-section { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 10px; }
+  .resp-section summary { cursor: pointer; font-weight: 700; padding: 4px 0; }
+  .resp-section summary .count { font-weight: 500; color: var(--muted); font-size: 12px; margin-left: 6px; }
+  .resp-item { display: grid; grid-template-columns: minmax(180px, 38%) 1fr; gap: 10px; padding: 5px 0; align-items: start; }
+  .resp-item .label { padding-top: 7px; font-size: 13px; }
+  .resp-item.sub .label { padding-left: 14px; }
+  .subgroup-title { font-size: 12px; font-weight: 700; color: var(--muted); margin: 8px 0 0; text-transform: uppercase; letter-spacing: 0.08em; }
+  .orphan .label { color: var(--danger); }
+
+  .preview { background: white; border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .preview .pc { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font-size: 13px; }
+  .preview .pc.full { grid-column: 1 / -1; }
+  .preview .pc-title { font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--purple); margin-bottom: 4px; }
+  .preview table { border-collapse: collapse; width: 100%; }
+  .preview td { padding: 2px 6px 2px 0; border-bottom: 1px dotted var(--line); }
+  .preview .q { font-style: italic; color: var(--muted); }
+
+  .modal-bg { position: fixed; inset: 0; background: rgba(26,14,51,0.55); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+  .modal-bg[hidden] { display: none; }
+  .modal { background: var(--paper); border-radius: 12px; max-width: 560px; width: 100%; padding: 22px 24px; }
+  .modal h3 { margin: 0 0 10px; }
+  .modal ol { padding-left: 20px; }
+  .modal li { margin-bottom: 8px; }
+  .modal a { color: var(--purple); font-weight: 600; }
+  .empty { color: var(--muted); padding: 40px; text-align: center; }
+
+  @media (max-width: 820px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; max-height: none; }
+    .resp-item { grid-template-columns: 1fr; gap: 2px; }
+    .resp-item .label { padding-top: 0; }
+    .preview { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>NEMO Scenario Editor</h1>
+  <span class="status" id="status">No changes</span>
+  <span class="spacer"></span>
+  <a class="btn btn-ghost" href="../" target="_blank" rel="noopener">Open the tool ↗</a>
+  <button class="btn btn-primary" id="downloadBtn" type="button">Save &amp; download scenarios.js</button>
+</div>
+
+<div class="banner" id="draftBanner" hidden>
+  <span>You have unsaved edits from an earlier visit in this browser.</span>
+  <button class="btn btn-small" id="restoreDraft" type="button">Restore them</button>
+  <button class="btn btn-small btn-danger" id="discardDraft" type="button">Discard them</button>
+</div>
+
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"><div class="empty">Pick a scenario on the left.</div></main>
+</div>
+
+<div class="modal-bg" id="saveModal" hidden>
+  <div class="modal" role="dialog" aria-labelledby="saveTitle">
+    <h3 id="saveTitle">Downloaded scenarios.js — now publish it</h3>
+    <ol>
+      <li>Open the <a id="uploadLink" href="https://github.com/nemoemt/nemoemt.github.io/upload/main/assessment-tool" target="_blank" rel="noopener">assessment-tool folder upload page on GitHub</a>.</li>
+      <li>Drag the <strong>scenarios.js</strong> file you just downloaded onto that page. (If your browser renamed it, e.g. "scenarios (1).js", rename it back to <strong>scenarios.js</strong> first.)</li>
+      <li>Type a short note about what you changed, then click <strong>Commit changes</strong>.</li>
+      <li>Within a minute or two the assessment tool updates for everyone. Refresh this editor afterwards; it will show "No changes".</li>
+    </ol>
+    <div class="head-actions" style="justify-content:flex-end">
+      <button class="btn" id="closeModal" type="button">Done</button>
+    </div>
+  </div>
+</div>
+
+<script src="../checklists.js"></script>
+<script src="../scenarios.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  const DRAFT_KEY = 'nemo-scenario-editor-draft-v1';
+  const COMPLAINTS = MEDICAL_SHEET.complaints;   // { respiratory: {label, sections}, ... }
+  const published = JSON.stringify(SCENARIOS);  // what's live right now
+  let data = JSON.parse(published);              // working copy
+  let currentKey = null;
+
+  // ── storage helpers (never throw) ──────────────────────────────
+  function readDraft() { try { return localStorage.getItem(DRAFT_KEY); } catch (e) { return null; } }
+  function writeDraft(v) { try { localStorage.setItem(DRAFT_KEY, v); } catch (e) {} }
+  function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} }
+
+  // ── small DOM helper ───────────────────────────────────────────
+  function h(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    if (attrs) for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'class') n.className = v;
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+      else if (k === 'value') n.value = v;
+      else if (k === 'checked') n.checked = !!v;
+      else if (v !== null && v !== undefined && v !== false) n.setAttribute(k, v);
+    }
+    for (const kid of kids.flat()) if (kid !== null && kid !== undefined) n.append(kid);
+    return n;
+  }
+
+  // ── keys & ordering ────────────────────────────────────────────
+  const typeOf = k => k.split('-')[0];
+  const numOf = k => parseInt(k.split('-')[1], 10);
+  const keysOfType = t => Object.keys(data).filter(k => typeOf(k) === t).sort((a, b) => numOf(a) - numOf(b));
+  const nextKey = t => `${t}-${Math.max(0, ...keysOfType(t).map(numOf)) + 1}`;
+
+  // ── dirty tracking ─────────────────────────────────────────────
+  function changed() {
+    const now = JSON.stringify(data);
+    const dirty = now !== published;
+    if (dirty) writeDraft(now); else clearDraft();
+    const s = document.getElementById('status');
+    s.textContent = dirty ? 'Unsaved changes, download to publish' : 'No changes';
+    s.classList.toggle('dirty', dirty);
+    return dirty;
+  }
+
+  // ── rich text (brief card bodies are HTML) ────────────────────
+  // Keep only simple formatting tags so pasted content can't bring styles or scripts.
+  const ALLOWED = { P: 'p', BR: 'br', STRONG: 'strong', B: 'strong', EM: 'em', I: 'em', U: 'u', UL: 'ul', OL: 'ol', LI: 'li' };
+  function cleanHTML(html) {
+    const tpl = document.createElement('template');
+    tpl.innerHTML = html;
+    function walk(node) {
+      const out = document.createDocumentFragment();
+      node.childNodes.forEach(c => {
+        if (c.nodeType === 3) { out.append(c.textContent); return; }
+        if (c.nodeType !== 1) return;
+        const tag = ALLOWED[c.tagName];
+        const inner = walk(c);
+        if (tag) { const e = document.createElement(tag); if (tag !== 'br') e.append(inner); out.append(e); }
+        else if (c.tagName === 'DIV') { const e = document.createElement('p'); e.append(inner); out.append(e); }
+        else out.append(inner);   // unwrap span/font/etc.
+      });
+      return out;
+    }
+    const box = document.createElement('div');
+    box.append(walk(tpl.content));
+    return box.innerHTML.replace(/<p><\/p>/g, '').trim();
+  }
+
+  function richEditor(html, onChange) {
+    const area = h('div', { class: 'rich', contenteditable: 'true' });
+    area.innerHTML = html || '';
+    const cmd = (c) => (e) => { e.preventDefault(); area.focus(); document.execCommand(c); onChange(cleanHTML(area.innerHTML)); };
+    const bar = h('div', { class: 'toolbar' },
+      h('button', { type: 'button', title: 'Bold', onmousedown: cmd('bold') }, h('strong', null, 'B')),
+      h('button', { type: 'button', title: 'Italic', onmousedown: cmd('italic') }, h('em', null, 'I')),
+      h('button', { type: 'button', title: 'Bulleted list', onmousedown: cmd('insertUnorderedList') }, '• List'));
+    area.addEventListener('input', () => onChange(cleanHTML(area.innerHTML)));
+    area.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const html = e.clipboardData.getData('text/html');
+      const text = e.clipboardData.getData('text/plain');
+      document.execCommand('insertHTML', false, html ? cleanHTML(html) : text.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])).replace(/\n/g, '<br>'));
+    });
+    return h('div', null, bar, area);
+  }
+
+  // Textarea that grows with its content.
+  function autoText(value, placeholder, onInput) {
+    const t = h('textarea', { rows: 1, placeholder, value: value || '' });
+    const fit = () => { t.style.height = 'auto'; t.style.height = (t.scrollHeight + 2) + 'px'; };
+    t.addEventListener('input', () => { fit(); onInput(t.value); });
+    requestAnimationFrame(fit);
+    return t;
+  }
+
+  // ── sidebar ────────────────────────────────────────────────────
+  function renderSidebar() {
+    const sb = document.getElementById('sidebar');
+    sb.replaceChildren();
+    [['medical', 'Medical'], ['trauma', 'Trauma']].forEach(([t, label]) => {
+      sb.append(h('h2', null, label));
+      keysOfType(t).forEach(k => {
+        sb.append(h('button', {
+          class: 'scen-btn' + (k === currentKey ? ' active' : ''), type: 'button',
+          onclick: () => select(k)
+        }, h('span', { class: 'k' }, `${label} · Scenario ${numOf(k)}`), h('span', { class: 't' }, data[k].title || '(untitled)')));
+      });
+    });
+    sb.append(h('div', { class: 'new-row' },
+      h('button', { class: 'btn btn-small', type: 'button', onclick: () => addScenario('medical') }, '+ Medical'),
+      h('button', { class: 'btn btn-small', type: 'button', onclick: () => addScenario('trauma') }, '+ Trauma')));
+  }
+
+  function select(k) { currentKey = k; renderSidebar(); renderMain(); window.scrollTo(0, 0); }
+
+  function blankScenario(t) {
+    const n = numOf(nextKey(t));
+    const label = t === 'medical' ? 'Medical' : 'Trauma';
+    const s = { title: 'New scenario', tag: `${label} · Scenario ${n}` };
+    if (t === 'medical') s.autoComplaint = Object.keys(COMPLAINTS)[0];
+    s.brief = [
+      { title: 'Dispatch', fullWidth: true, body: '' },
+      { title: 'Scene & Presentation', fullWidth: true, body: '' },
+      { title: 'Vitals (Reference)', type: 'vitals', afterNote: '', rows: [['BP', ''], ['HR', ''], ['RR', ''], ['SpO₂', ''], ['Skin', '']] },
+      { title: 'Hidden Details (only if directly assessed)', type: 'hidden', items: [['', '']] },
+      { title: 'Expected Treatment', fullWidth: true, body: '' },
+      { title: 'Common Pitfalls', fullWidth: true, body: '' }
+    ];
+    s.itemResponses = {};
+    return s;
+  }
+
+  function addScenario(t) {
+    const k = nextKey(t);
+    data[k] = blankScenario(t);
+    changed(); select(k);
+  }
+
+  function duplicateScenario() {
+    const t = typeOf(currentKey), k = nextKey(t);
+    const copy = JSON.parse(JSON.stringify(data[currentKey]));
+    copy.title = copy.title + ' (copy)';
+    copy.tag = `${t === 'medical' ? 'Medical' : 'Trauma'} · Scenario ${numOf(k)}`;
+    data[k] = copy;
+    changed(); select(k);
+  }
+
+  function deleteScenario() {
+    const s = data[currentKey];
+    if (!confirm(`Delete "${s.title}" (${currentKey})? Evaluators won't see it once you publish.`)) return;
+    delete data[currentKey];
+    currentKey = null;
+    changed(); renderSidebar();
+    document.getElementById('main').replaceChildren(h('div', { class: 'empty' }, 'Scenario deleted. Pick another on the left.'));
+  }
+
+  // ── main editor ────────────────────────────────────────────────
+  function renderMain() {
+    const s = data[currentKey];
+    const t = typeOf(currentKey);
+    const main = document.getElementById('main');
+    main.replaceChildren();
+
+    // Basics
+    const basics = h('div', { class: 'panel' },
+      h('div', { class: 'row', style: 'align-items:center;justify-content:space-between' },
+        h('h3', null, `${t === 'medical' ? 'Medical' : 'Trauma'} · Scenario ${numOf(currentKey)}`),
+        h('div', { class: 'head-actions' },
+          h('button', { class: 'btn btn-small', type: 'button', onclick: duplicateScenario }, 'Duplicate'),
+          h('button', { class: 'btn btn-small btn-danger', type: 'button', onclick: deleteScenario }, 'Delete'))),
+      h('p', { class: 'help' }, 'The title and tag appear at the top of the scenario brief in the tool.'));
+    const row = h('div', { class: 'row' },
+      h('div', { class: 'field', style: 'flex:2' }, h('label', null, 'Title'),
+        h('input', { type: 'text', value: s.title || '', oninput: (e) => { s.title = e.target.value; changed(); renderSidebar(); } })),
+      h('div', { class: 'field' }, h('label', null, 'Tag'),
+        h('input', { type: 'text', value: s.tag || '', oninput: (e) => { s.tag = e.target.value; changed(); } })));
+    if (t === 'medical') {
+      const sel = h('select', { onchange: (e) => { s.autoComplaint = e.target.value; changed(); renderResponses(); } },
+        Object.entries(COMPLAINTS).map(([k, v]) => h('option', { value: k, selected: s.autoComplaint === k ? 'selected' : null }, v.label || k)));
+      row.append(h('div', { class: 'field' }, h('label', null, 'Complaint type (sets the checklist)'), sel));
+    }
+    basics.append(row);
+    main.append(basics);
+
+    // Brief cards
+    const briefPanel = h('div', { class: 'panel' },
+      h('h3', null, 'Scenario brief'),
+      h('p', { class: 'help' }, 'The cards proctors see above the checklist. Text cards support bold, italics and bullet lists. "Full width" cards span both columns.'));
+    const cardsBox = h('div');
+    briefPanel.append(cardsBox,
+      h('div', { class: 'head-actions' },
+        h('button', { class: 'btn btn-small', type: 'button', onclick: () => { s.brief.push({ title: 'New card', fullWidth: true, body: '' }); changed(); renderCards(); } }, '+ Text card'),
+        h('button', { class: 'btn btn-small', type: 'button', onclick: () => { s.brief.push({ title: 'Vitals (Reference)', type: 'vitals', afterNote: '', rows: [['', '']] }); changed(); renderCards(); } }, '+ Vitals table'),
+        h('button', { class: 'btn btn-small', type: 'button', onclick: () => { s.brief.push({ title: 'Hidden Details (only if directly assessed)', type: 'hidden', items: [['', '']] }); changed(); renderCards(); } }, '+ Hidden findings'),
+        h('button', { class: 'btn btn-small', type: 'button', onclick: renderPreview }, 'Preview brief')));
+    const previewBox = h('div', { style: 'margin-top:12px' });
+    briefPanel.append(previewBox);
+    main.append(briefPanel);
+
+    function renderPreview() {
+      previewBox.replaceChildren(h('div', { class: 'preview' }, s.brief.map(card => {
+        const c = h('div', { class: 'pc' + (card.fullWidth ? ' full' : '') }, h('div', { class: 'pc-title' }, card.title));
+        const body = h('div');
+        if (card.type === 'vitals') {
+          body.innerHTML = (card.afterNote ? `<div class="q">${card.afterNote}</div>` : '') +
+            '<table>' + (card.rows || []).map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td></tr>`).join('') + '</table>';
+        } else if (card.type === 'hidden') {
+          body.innerHTML = (card.items || []).map(([q, a]) => `<div><span class="q">${q}:</span> ${a}</div>`).join('');
+        } else body.innerHTML = card.body || '';
+        c.append(body);
+        return c;
+      })));
+    }
+
+    function pairTable(rows, leftPh, rightPh) {
+      const tbl = h('table', { class: 'pairs' });
+      const draw = () => {
+        tbl.replaceChildren(...rows.map((r, i) => h('tr', null,
+          h('td', null, h('input', { type: 'text', value: r[0], placeholder: leftPh, oninput: (e) => { r[0] = e.target.value; changed(); } })),
+          h('td', null, autoText(r[1], rightPh, (v) => { r[1] = v; changed(); })),
+          h('td', null, h('button', { class: 'btn btn-small btn-danger', type: 'button', title: 'Remove row', onclick: () => { rows.splice(i, 1); changed(); draw(); } }, '✕')))),
+          h('tr', null, h('td', { colspan: 3 }, h('button', { class: 'btn btn-small', type: 'button', onclick: () => { rows.push(['', '']); changed(); draw(); } }, '+ Add row'))));
+      };
+      draw();
+      return tbl;
+    }
+
+    function renderCards() {
+      cardsBox.replaceChildren(...s.brief.map((card, i) => {
+        const kind = card.type === 'vitals' ? 'vitals' : card.type === 'hidden' ? 'hidden' : 'text';
+        const head = h('div', { class: 'card-head' },
+          h('input', { type: 'text', value: card.title || '', 'aria-label': 'Card title', oninput: (e) => { card.title = e.target.value; changed(); } }),
+          h('span', { class: 'help', style: 'font-size:12px;color:var(--muted)' }, kind === 'text' ? 'Text' : kind === 'vitals' ? 'Vitals table' : 'Hidden findings'),
+          h('label', { class: 'chk' }, h('input', { type: 'checkbox', checked: card.fullWidth, onchange: (e) => { if (e.target.checked) card.fullWidth = true; else delete card.fullWidth; changed(); } }), 'Full width'),
+          h('button', { class: 'btn btn-small', type: 'button', title: 'Move up', disabled: i === 0 ? 'disabled' : null, onclick: () => { s.brief.splice(i - 1, 0, s.brief.splice(i, 1)[0]); changed(); renderCards(); } }, '↑'),
+          h('button', { class: 'btn btn-small', type: 'button', title: 'Move down', disabled: i === s.brief.length - 1 ? 'disabled' : null, onclick: () => { s.brief.splice(i + 1, 0, s.brief.splice(i, 1)[0]); changed(); renderCards(); } }, '↓'),
+          h('button', { class: 'btn btn-small btn-danger', type: 'button', onclick: () => { if (confirm(`Remove the "${card.title}" card?`)) { s.brief.splice(i, 1); changed(); renderCards(); } } }, 'Remove'));
+        const box = h('div', { class: 'card' }, head);
+        if (kind === 'vitals') {
+          card.rows = card.rows || [];
+          box.append(h('div', { class: 'field' }, h('label', null, 'Note above the table (optional, e.g. what changed after treatment)'),
+            autoText(card.afterNote, 'After O₂ + nebulizer, ~5 min into transport:', (v) => { if (v) card.afterNote = v; else delete card.afterNote; changed(); })),
+            pairTable(card.rows, 'Vital (e.g. BP)', 'Value (e.g. 138 / 86 → 132 / 82)'));
+        } else if (kind === 'hidden') {
+          card.items = card.items || [];
+          box.append(pairTable(card.items, 'Finding (e.g. JVD)', 'What to reveal if assessed'));
+        } else {
+          box.append(richEditor(card.body, (v) => { card.body = v; changed(); }));
+        }
+        return box;
+      }));
+    }
+
+    // Proctor responses
+    const respPanel = h('div', { class: 'panel' },
+      h('h3', null, 'Proctor responses'),
+      h('p', { class: 'help' }, 'What the proctor says when the candidate performs each checklist item. These show under the matching item in the tool. Leave blank for no prompt.'));
+    const respBox = h('div');
+    respPanel.append(respBox);
+    main.append(respPanel);
+
+    function sectionsFor() {
+      if (t === 'trauma') return TRAUMA_SHEET.sections;
+      const branch = COMPLAINTS[s.autoComplaint];
+      return MEDICAL_SHEET.sections.concat(branch ? branch.sections : []);
+    }
+
+    function respRow(text, sub) {
+      s.itemResponses = s.itemResponses || {};
+      return h('div', { class: 'resp-item' + (sub ? ' sub' : '') },
+        h('div', { class: 'label' }, text),
+        autoText(s.itemResponses[text], '', (v) => {
+          if (v.trim()) s.itemResponses[text] = v; else delete s.itemResponses[text];
+          changed();
+        }));
+    }
+
+    function renderResponses() {
+      const known = new Set();
+      const blocks = sectionsFor().map(sec => {
+        let filled = 0, total = 0;
+        const body = h('div');
+        sec.items.forEach(item => {
+          if (typeof item === 'string') {
+            known.add(item); total++; if (s.itemResponses && s.itemResponses[item]) filled++;
+            body.append(respRow(item, false));
+          } else {
+            body.append(h('div', { class: 'subgroup-title' }, item.subgroup));
+            item.items.forEach(sub => { known.add(sub); total++; if (s.itemResponses && s.itemResponses[sub]) filled++; body.append(respRow(sub, true)); });
+          }
+        });
+        return h('details', { class: 'resp-section' }, h('summary', null, sec.title, h('span', { class: 'count' }, `${filled} of ${total} filled`)), body);
+      });
+      // Responses whose item text isn't on the current checklist (renamed item, or a
+      // different complaint type). Shown so nothing is silently lost.
+      const orphans = Object.keys(s.itemResponses || {}).filter(k => !known.has(k));
+      if (orphans.length) {
+        const body = h('div', null, h('p', { class: 'help' }, 'These responses don\'t match any item on this scenario\'s checklist, so the tool never shows them. This usually means the item was renamed or the complaint type changed. Copy them where they belong, or remove them.'));
+        orphans.forEach(k => body.append(h('div', { class: 'resp-item orphan' },
+          h('div', { class: 'label' }, k, ' ', h('button', { class: 'btn btn-small btn-danger', type: 'button', onclick: () => { delete s.itemResponses[k]; changed(); renderResponses(); } }, 'Remove')),
+          autoText(s.itemResponses[k], '', (v) => { s.itemResponses[k] = v; changed(); }))));
+        blocks.push(h('details', { class: 'resp-section' }, h('summary', null, 'Not on this checklist', h('span', { class: 'count' }, `${orphans.length}`)), body));
+      }
+      respBox.replaceChildren(...blocks);
+    }
+
+    renderCards();
+    renderResponses();
+  }
+
+  // ── download ───────────────────────────────────────────────────
+  function buildFile() {
+    // Keep keys in a stable order: medical by number, then trauma by number.
+    const ordered = {};
+    ['medical', 'trauma'].forEach(t => keysOfType(t).forEach(k => { ordered[k] = data[k]; }));
+    Object.keys(data).filter(k => !(k in ordered)).forEach(k => { ordered[k] = data[k]; });
+    const header = '/* ─────────────────────────────────────────────────────────────\n' +
+      '   SCENARIO DATA — generated by the scenario editor (editor/).\n' +
+      "   Don't edit by hand: open nemo-tool.pages.dev/editor/, make changes,\n" +
+      '   download this file, and upload it to the assessment-tool folder on GitHub.\n' +
+      '   ───────────────────────────────────────────────────────────── */\n\n';
+    return header + 'const SCENARIOS = ' + JSON.stringify(ordered, null, 2) + ';\n';
+  }
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    const problems = Object.entries(data).filter(([, s]) => !(s.title || '').trim()).map(([k]) => k);
+    if (problems.length) { alert('Every scenario needs a title. Missing: ' + problems.join(', ')); return; }
+    const blob = new Blob([buildFile()], { type: 'text/javascript' });
+    const a = h('a', { href: URL.createObjectURL(blob), download: 'scenarios.js' });
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    document.getElementById('saveModal').hidden = false;
+  });
+  document.getElementById('closeModal').addEventListener('click', () => { document.getElementById('saveModal').hidden = true; });
+
+  // ── unsaved draft from an earlier visit ────────────────────────
+  const draft = readDraft();
+  if (draft && draft !== published) {
+    document.getElementById('draftBanner').hidden = false;
+    document.getElementById('restoreDraft').onclick = () => {
+      try { data = JSON.parse(draft); } catch (e) { alert('That draft could not be read.'); return; }
+      document.getElementById('draftBanner').hidden = true;
+      changed(); currentKey = null; renderSidebar();
+      document.getElementById('main').replaceChildren(h('div', { class: 'empty' }, 'Draft restored. Pick a scenario on the left.'));
+    };
+    document.getElementById('discardDraft').onclick = () => { clearDraft(); document.getElementById('draftBanner').hidden = true; };
+  } else if (draft) {
+    clearDraft();   // the draft was published; nothing to restore
+  }
+
+  window.addEventListener('beforeunload', (e) => { if (JSON.stringify(data) !== published) { e.preventDefault(); e.returnValue = ''; } });
+
+  try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch (e) {}
+  renderSidebar();
+})();
+</script>
+</body>
+</html>

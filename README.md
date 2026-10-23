@@ -255,10 +255,41 @@ offline.
   file. Every commit to `main` redeploys it to Cloudflare automatically
   within a minute or two.
 
+**What's in the folder:**
+
+| File | What it is |
+|---|---|
+| `index.html` | The tool itself (layout, scoring, PDF export) |
+| `scenarios.js` | All medical and trauma scenarios. **Edit these with the scenario editor, not by hand.** |
+| `checklists.js` | The medical and trauma skill-sheet checklists the tool grades on |
+| `editor/index.html` | The scenario editor |
+
+### Editing scenarios (no code needed)
+
+1. Go to **https://nemo-tool.pages.dev/editor/** and sign in with
+   **captain.nemo@u.northwestern.edu**. That's the only address allowed into
+   the editor.
+2. Pick a scenario on the left (or **+ Medical** / **+ Trauma** to add one) and
+   edit the title, brief cards, vitals, hidden findings, and the proctor
+   response next to each checklist item. Your work is kept in that browser
+   until you publish, so a refresh won't lose it.
+3. Click **Save & download scenarios.js**, then follow the on-screen steps:
+   drag the downloaded file onto the
+   [assessment-tool upload page](https://github.com/nemoemt/nemoemt.github.io/upload/main/assessment-tool)
+   and click **Commit changes**. The tool updates for everyone within a
+   minute or two.
+
+The editor's **"Not on this checklist"** section lists proctor responses whose
+item no longer exists on that scenario's checklist (usually because an item
+was renamed). The tool never shows those; move the text to the right item or
+remove it. If you ever rename a checklist item in `checklists.js`, its
+responses end up there too.
+
 **To change who can sign in:** log in at dash.cloudflare.com → **Zero
 Trust** → **Access** → **Applications** → **NEMO Assessment Tool** →
 **Policies** → edit **Approved evaluators**, then add or remove email
-addresses and save.
+addresses and save. The editor has its own, stricter login: the application
+**NEMO Scenario Editor** (path `/editor`), policy **Captain only**.
 
 **Cloudflare settings to know about** (dash.cloudflare.com → **Workers &
 Pages** → **nemo-tool** → **Settings**): the project is connected to this
