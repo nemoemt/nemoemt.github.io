@@ -241,9 +241,9 @@ earlier version, and you can restore it. Nothing is ever permanently lost.
 ## 6. The psychomotor assessment tool (Cloudflare, login required)
 
 The evaluator tool used during skills exams lives in the folder
-**`fduhfisbnidnu/`**. (The odd name is historical; don't rename the folder
-without also changing the Cloudflare setting below, or the tool goes
-offline.)
+**`assessment-tool/`**. Don't rename this folder without also changing the
+Cloudflare "build output directory" setting below to match, or the tool goes
+offline.
 
 - **Address:** https://nemo-tool.pages.dev (short link: **nemonu.org/assessment**,
   which forwards there; it's the `assessment/` folder in this repo)
@@ -251,7 +251,7 @@ offline.)
   publishing that folder, so the tool is only reachable through Cloudflare.
 - **Login:** Cloudflare Access. Each approved person types their own email
   and receives a one-time code. There is no shared password.
-- **Editing the tool:** edit `fduhfisbnidnu/index.html` here like any other
+- **Editing the tool:** edit `assessment-tool/index.html` here like any other
   file. Every commit to `main` redeploys it to Cloudflare automatically
   within a minute or two.
 
@@ -263,7 +263,7 @@ addresses and save.
 **Cloudflare settings to know about** (dash.cloudflare.com → **Workers &
 Pages** → **nemo-tool** → **Settings**): the project is connected to this
 GitHub repository, branch `main`, with **no build command** and **build
-output directory** `fduhfisbnidnu`.
+output directory** `assessment-tool`.
 
 ---
 

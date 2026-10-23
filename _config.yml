@@ -1,8 +1,8 @@
 # GitHub Pages (Jekyll) settings for nemonu.org.
 #
-# The psychomotor assessment tool in fduhfisbnidnu/ is published separately on
+# The psychomotor assessment tool in assessment-tool/ is published separately on
 # Cloudflare Pages (nemo-tool.pages.dev) behind a Cloudflare Access login, so
 # it is excluded here to keep it off the public site. Edits to that folder
 # still deploy to Cloudflare automatically.
 exclude:
-  - fduhfisbnidnu
+  - assessment-tool
