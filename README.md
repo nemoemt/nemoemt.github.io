@@ -245,7 +245,8 @@ The evaluator tool used during skills exams lives in the folder
 without also changing the Cloudflare setting below, or the tool goes
 offline.)
 
-- **Address:** https://nemo-tool.pages.dev
+- **Address:** https://nemo-tool.pages.dev (short link: **nemonu.org/assessment**,
+  which forwards there; it's the `assessment/` folder in this repo)
 - **It is not on nemonu.org.** `_config.yml` keeps GitHub Pages from
   publishing that folder, so the tool is only reachable through Cloudflare.
 - **Login:** Cloudflare Access. Each approved person types their own email
