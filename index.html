@@ -823,7 +823,7 @@
   /* ---------- CALENDAR (live Google Calendar embed) ---------- */
   .cal-lede { font-size: 17px; max-width: 720px; line-height: 1.6; color: var(--ink); margin-bottom: 32px; }
   .cal-frame-wrap { border: 1px solid var(--purple); background: #fff; }
-  .cal-frame-wrap iframe { display: block; width: 100%; height: 760px; border: 0; }
+  .cal-frame-wrap iframe { display: block; width: 100%; height: 500px; border: 0; }
   .cal-empty { padding: 56px 32px; text-align: center; background: var(--cream); font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--purple); }
   .cal-legend { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-bottom: 20px; }
   .cal-legend span { display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--purple-ink); }
@@ -832,7 +832,7 @@
   /* Each button takes its calendar's color from the key (--cal-color / --cal-text, set in the script). */
   .cal-btn { display: inline-block; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; padding: 12px 20px; border: 1px solid var(--cal-color, var(--purple)); background: var(--cal-color, var(--purple)); color: var(--cal-text, var(--cream)); transition: background 0.2s, color 0.2s; }
   .cal-btn:hover { background: transparent; color: var(--cal-color, var(--purple)); }
-  @media (max-width: 900px) { .cal-frame-wrap iframe { height: 600px; } }
+  @media (max-width: 900px) { .cal-frame-wrap iframe { height: 460px; } }
 
   /* ---------- LEADERSHIP ---------- */
   .leadership-scroll {
@@ -2781,7 +2781,7 @@
 
     var frame = document.createElement('iframe');
     frame.src = 'https://calendar.google.com/calendar/embed?' + srcs +
-      '&ctz=' + tz + '&mode=WEEK&showTitle=0&showPrint=0&showTz=0&showCalendars=0';
+      '&ctz=' + tz + '&mode=AGENDA&showTitle=0&showPrint=0&showTz=0&showCalendars=0';
     frame.title = 'NEMO calendar';
     frame.loading = 'lazy';
     frame.setAttribute('scrolling', 'no');
