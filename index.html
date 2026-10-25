@@ -829,10 +829,9 @@
   .cal-legend span { display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--purple-ink); }
   .cal-legend i { width: 12px; height: 12px; display: inline-block; }
   .cal-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-  .cal-btn { display: inline-block; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; padding: 12px 20px; border: 1px solid var(--purple); color: var(--purple); background: transparent; transition: background 0.2s, color 0.2s; }
-  .cal-btn:hover { background: var(--purple); color: var(--cream); }
-  .cal-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--purple-ink); font-weight: 600; }
-  .cal-btn.primary:hover { background: transparent; color: var(--accent); }
+  /* Each button takes its calendar's color from the key (--cal-color / --cal-text, set in the script). */
+  .cal-btn { display: inline-block; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; padding: 12px 20px; border: 1px solid var(--cal-color, var(--purple)); background: var(--cal-color, var(--purple)); color: var(--cal-text, var(--cream)); transition: background 0.2s, color 0.2s; }
+  .cal-btn:hover { background: transparent; color: var(--cal-color, var(--purple)); }
   @media (max-width: 900px) { .cal-frame-wrap iframe { height: 600px; } }
 
   /* ---------- LEADERSHIP ---------- */
@@ -2799,7 +2798,12 @@
       legend.appendChild(key);
 
       var a = document.createElement('a');
-      a.className = 'cal-btn' + (i === 0 ? ' primary' : '');
+      a.className = 'cal-btn';
+      // Match the button to this calendar's key color; dark text on light colors.
+      var hex = c.color.replace('#', '');
+      var lum = (0.299 * parseInt(hex.substr(0, 2), 16) + 0.587 * parseInt(hex.substr(2, 2), 16) + 0.114 * parseInt(hex.substr(4, 2), 16)) / 255;
+      a.style.setProperty('--cal-color', c.color);
+      a.style.setProperty('--cal-text', lum > 0.6 ? '#1A0E33' : '#FFFFFF');
       a.target = '_blank'; a.rel = 'noopener';
       a.href = 'https://calendar.google.com/calendar/u/0/r?cid=' + encodeURIComponent(c.id);
       a.textContent = '+ Add ' + c.name;
