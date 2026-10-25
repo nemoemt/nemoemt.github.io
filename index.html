@@ -820,6 +820,21 @@
   margin-top: 14px;
   }
 
+  /* ---------- CALENDAR (live Google Calendar embed) ---------- */
+  .cal-lede { font-size: 17px; max-width: 720px; line-height: 1.6; color: var(--ink); margin-bottom: 32px; }
+  .cal-frame-wrap { border: 1px solid var(--purple); background: #fff; }
+  .cal-frame-wrap iframe { display: block; width: 100%; height: 760px; border: 0; }
+  .cal-empty { padding: 56px 32px; text-align: center; background: var(--cream); font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--purple); }
+  .cal-legend { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-bottom: 20px; }
+  .cal-legend span { display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--purple-ink); }
+  .cal-legend i { width: 12px; height: 12px; display: inline-block; }
+  .cal-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .cal-btn { display: inline-block; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; padding: 12px 20px; border: 1px solid var(--purple); color: var(--purple); background: transparent; transition: background 0.2s, color 0.2s; }
+  .cal-btn:hover { background: var(--purple); color: var(--cream); }
+  .cal-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--purple-ink); font-weight: 600; }
+  .cal-btn.primary:hover { background: transparent; color: var(--accent); }
+  @media (max-width: 900px) { .cal-frame-wrap iframe { height: 600px; } }
+
   /* ---------- LEADERSHIP ---------- */
   .leadership-scroll {
     display: flex;
@@ -1461,7 +1476,7 @@
     .topbar nav { gap: 10px; }
     .topbar nav a.nav-pill { padding: 5px 10px; }
     /* Keep Apply (gold pill) and Training visible on phones; hide other nav links */
-    .topbar nav a:not(.nav-pill):not([href="training.html"]):not([href="calendar.html"]) { display: none; }
+    .topbar nav a:not(.nav-pill):not([href="training.html"]) { display: none; }
   }
 </style>
 </head>
@@ -1491,7 +1506,7 @@
     <a href="#schedule">Schedule</a>
     <a href="#faq">FAQ</a>
     <a href="training.html">Training</a>
-    <a href="calendar.html">Calendar</a>
+    <a href="#calendar">Calendar</a>
   </nav>
 </div>
 
@@ -1566,9 +1581,26 @@
   </ul>
 </section>
 
+<!-- CALENDAR -->
+<!-- Live Google Calendars. Which calendars show (and their names/colors) is set
+     in CALENDARS in the calendar script near the bottom of this file. -->
+<section id="calendar">
+  <div class="section-num">§ 03 / CALENDAR</div>
+  <div class="section-eyebrow">Live · Google Calendar</div>
+  <h2 class="section-title">What's <em>coming up.</em></h2>
+  <p class="cal-lede">Class sessions, skills labs, exams, and events, all in one place. Times are shown in Central Time, and the calendar updates automatically whenever the exec board changes something. Use the buttons below to add it to your own calendar app.</p>
+
+  <div class="cal-legend" id="cal-legend"></div>
+  <div class="cal-frame-wrap" id="cal-wrap">
+    <div class="cal-empty" id="cal-empty">Calendar loading…</div>
+  </div>
+  <noscript><p style="margin-top:16px">JavaScript is required to display the embedded calendar.</p></noscript>
+  <div class="cal-actions" id="cal-actions" hidden></div>
+</section>
+
 <!-- MENTORS -->
 <section class="mentor" id="mentor">
-  <div class="section-num">§ 03 / MENTORS</div>
+  <div class="section-num">§ 04 / MENTORS</div>
   <div class="section-eyebrow">Already an EMT?</div>
   <h2 class="section-title">Come back and <em>help train the next cohort.</em></h2>
 
@@ -1589,7 +1621,7 @@
 
 <!-- NEWSROOM -->
 <section id="news">
-  <div class="section-num">§ 04 / NEWSROOM</div>
+  <div class="section-num">§ 05 / NEWSROOM</div>
   <div class="news-head">
     <div>
       <div class="section-eyebrow">What we're up to</div>
@@ -1658,7 +1690,7 @@
 
 <!-- SCHEDULE -->
 <section id="schedule">
-  <div class="section-num">§ 05 / SCHEDULE</div>
+  <div class="section-num">§ 06 / SCHEDULE</div>
   <div class="section-eyebrow">What you'll cover</div>
   <h2 class="section-title">A 5-month course, end with <em>a National Certification.</em></h2>
 
@@ -1745,7 +1777,7 @@
 
 <!-- LEADERSHIP -->
 <section id="leadership">
-  <div class="section-num">§ 06 / LEADERSHIP</div>
+  <div class="section-num">§ 07 / LEADERSHIP</div>
   <div class="section-eyebrow">Who runs this</div>
   <h2 class="section-title">The executive board <em>behind the certification.</em></h2>
 
@@ -1873,7 +1905,7 @@
 
 <!-- FAQ -->
 <section id="faq">
-  <div class="section-num">§ 07 / FAQ</div>
+  <div class="section-num">§ 08 / FAQ</div>
   <div class="section-eyebrow">Things you should ask</div>
   <h2 class="section-title">Frequently asked <em>questions.</em></h2>
 
@@ -2720,6 +2752,61 @@
     load();
   }
 })();
+</script>
+<!-- ============================================================
+     CALENDAR — edit CALENDARS below to add/remove Google Calendars
+     ============================================================ -->
+<script>
+// ── EDIT THIS ────────────────────────────────────────────────────────────
+  // One entry per Google Calendar. "id" is the Calendar ID (Calendar settings →
+  // "Integrate calendar"); "name" is the label shown on this page; "color" is
+  // the event color. Each calendar must be shared publicly ("Make available to
+  // public") or visitors who aren't signed in will not see its events.
+  var CALENDARS = [
+    { name: "Volunteering", color: "#4E2A84", id: "c_da4ff8639bc5605f017368aa64ee5007095969748f86b35083dd1871dc916969@group.calendar.google.com" },
+    { name: "Informational", color: "#E8A33D", id: "c_ed38d264b4300dee6564e8a52a5b2c8b82a701713e435730d3c5953c15448e8d@group.calendar.google.com" },
+    { name: "2027 EMT-B Course", color: "#B83A2A", id: "c_b578c72d9847484e36e5e999a8d4ce27b9cc646092c6ebee5faab01b824a8113@group.calendar.google.com" }
+  ];
+  var TIMEZONE = "America/Chicago";
+  // ─────────────────────────────────────────────────────────────────────────
+
+  (function () {
+    var wrap = document.getElementById('cal-wrap');
+    var empty = document.getElementById('cal-empty');
+    if (!CALENDARS.length) { empty.textContent = 'Calendar coming soon'; return; }
+
+    var tz = encodeURIComponent(TIMEZONE);
+    var srcs = CALENDARS.map(function (c) {
+      return 'src=' + encodeURIComponent(c.id) + '&color=' + encodeURIComponent(c.color);
+    }).join('&');
+
+    var frame = document.createElement('iframe');
+    frame.src = 'https://calendar.google.com/calendar/embed?' + srcs +
+      '&ctz=' + tz + '&mode=MONTH&showTitle=0&showPrint=0&showTz=0&showCalendars=0';
+    frame.title = 'NEMO calendar';
+    frame.loading = 'lazy';
+    frame.setAttribute('scrolling', 'no');
+    wrap.replaceChild(frame, empty);
+
+    var legend = document.getElementById('cal-legend');
+    var actions = document.getElementById('cal-actions');
+    CALENDARS.forEach(function (c, i) {
+      var key = document.createElement('span');
+      var dot = document.createElement('i');
+      dot.style.background = c.color;
+      key.appendChild(dot);
+      key.appendChild(document.createTextNode(c.name));
+      legend.appendChild(key);
+
+      var a = document.createElement('a');
+      a.className = 'cal-btn' + (i === 0 ? ' primary' : '');
+      a.target = '_blank'; a.rel = 'noopener';
+      a.href = 'https://calendar.google.com/calendar/u/0/r?cid=' + encodeURIComponent(c.id);
+      a.textContent = '+ Add ' + c.name;
+      actions.appendChild(a);
+    });
+    actions.hidden = false;
+  })();
 </script>
 </body>
 </html>
