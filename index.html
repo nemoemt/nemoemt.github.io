@@ -2799,8 +2799,8 @@
   var moreBtn = document.getElementById('cal-more');
   var actions = document.getElementById('cal-actions');
   var updatedEl = document.getElementById('cal-updated');
-  var PAGE = 12;               // events shown before "Show more"
-  var shown = PAGE;
+  var PAGE = 6;                // events shown before "Show more"
+  var expanded = false;        // "Show more" reveals every upcoming event
   var hidden = {};             // calendar name -> true when filtered out
   var TZ = 'America/Chicago';
   var data = null;
@@ -2851,7 +2851,7 @@
     var todayKey = dayKey(now);
     var tomorrowKey = dayKey(new Date(now.getTime() + 864e5));
     var groups = [], byKey = {};
-    upcoming.slice(0, shown).forEach(function (e) {
+    upcoming.slice(0, expanded ? upcoming.length : PAGE).forEach(function (e) {
       var d = parse(e), k = dayKey(d);
       if (!byKey[k]) { byKey[k] = { date: d, items: [] }; groups.push(byKey[k]); }
       byKey[k].items.push(e);
@@ -2901,7 +2901,8 @@
       day.appendChild(evs);
       list.appendChild(day);
     });
-    moreBtn.hidden = upcoming.length <= shown;
+    moreBtn.hidden = upcoming.length <= PAGE;
+    moreBtn.textContent = expanded ? 'Show less' : 'Show more (' + (upcoming.length - PAGE) + ')';
   }
 
   function setup() {
@@ -2915,7 +2916,7 @@
       chip.onclick = function () {
         hidden[c.name] = !hidden[c.name];
         chip.setAttribute('aria-pressed', hidden[c.name] ? 'false' : 'true');
-        shown = PAGE; render();
+        render();
       };
       filtersEl.appendChild(chip);
 
@@ -2930,7 +2931,11 @@
       actions.appendChild(a);
     });
     actions.hidden = false;
-    moreBtn.onclick = function () { shown += PAGE; render(); };
+    moreBtn.onclick = function () {
+      expanded = !expanded;
+      render();
+      if (!expanded) document.getElementById('calendar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
     if (data.updated) updatedEl.textContent = 'Last synced ' + new Date(data.updated).toLocaleString('en-US', { timeZone: TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
     render();
   }
