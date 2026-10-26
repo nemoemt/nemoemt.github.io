@@ -820,19 +820,51 @@
   margin-top: 14px;
   }
 
-  /* ---------- CALENDAR (live Google Calendar embed) ---------- */
-  .cal-lede { font-size: 17px; max-width: 720px; line-height: 1.6; color: var(--ink); margin-bottom: 32px; }
-  .cal-frame-wrap { border: 1px solid var(--purple); background: #fff; }
-  .cal-frame-wrap iframe { display: block; width: 100%; height: 500px; border: 0; }
-  .cal-empty { padding: 56px 32px; text-align: center; background: var(--cream); font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--purple); }
-  .cal-legend { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-bottom: 20px; }
-  .cal-legend span { display: inline-flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--purple-ink); }
-  .cal-legend i { width: 12px; height: 12px; display: inline-block; }
-  .cal-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  /* ---------- CALENDAR (custom list from calendar-data/events.json) ---------- */
+  .cal-lede { font-size: 17px; max-width: 720px; line-height: 1.6; color: var(--ink); margin-bottom: 28px; }
+  .cal-filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+  .cal-chip { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; padding: 8px 14px; border: 1px solid var(--chip, var(--purple)); background: transparent; color: var(--purple-ink); transition: background 0.2s, opacity 0.2s; }
+  .cal-chip i { width: 10px; height: 10px; background: var(--chip, var(--purple)); display: inline-block; }
+  .cal-chip[aria-pressed="false"] { opacity: 0.45; border-style: dashed; }
+  .cal-chip[aria-pressed="false"] i { background: transparent; border: 1px solid var(--chip, var(--purple)); }
+  .cal-list { border-top: 1px solid var(--purple); }
+  .cal-day { display: grid; grid-template-columns: 120px 1fr; gap: 24px; padding: 20px 0; border-bottom: 1px solid rgba(78,42,132,0.25); }
+  .cal-date { line-height: 1; }
+  .cal-date .dow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--purple); }
+  .cal-date .num { font-family: 'Inter', system-ui, sans-serif; font-weight: 800; font-size: 44px; letter-spacing: -0.03em; color: var(--purple-ink); margin: 6px 0 4px; }
+  .cal-date .mon { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--purple); opacity: 0.7; }
+  .cal-date .rel { display: inline-block; margin-top: 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; background: var(--accent); color: var(--purple-ink); padding: 3px 7px; font-weight: 600; }
+  .cal-events { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .cal-event { border-left: 4px solid var(--ev, var(--purple)); background: rgba(255,255,255,0.55); padding: 12px 16px; }
+  .cal-event summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 150px 1fr; gap: 4px 16px; align-items: baseline; }
+  .cal-event summary::-webkit-details-marker { display: none; }
+  .cal-event .time { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.04em; color: var(--purple); }
+  .cal-event .title { font-weight: 700; font-size: 17px; color: var(--purple-ink); line-height: 1.3; }
+  .cal-event .meta { grid-column: 2; font-size: 13px; color: var(--ink); opacity: 0.75; }
+  .cal-event .meta .tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ev, var(--purple)); opacity: 1; font-weight: 600; }
+  .cal-event[open] { background: #fff; }
+  .cal-detail { margin: 12px 0 2px 166px; font-size: 15px; line-height: 1.55; color: var(--ink); white-space: pre-line; }
+  .cal-detail a { color: var(--purple); font-weight: 600; word-break: break-all; }
+  .cal-detail .gcal { display: inline-block; margin-top: 10px; white-space: normal; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; word-break: normal; }
+  .cal-empty { padding: 48px 24px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--purple); }
+  .cal-empty a { color: var(--purple); }
+  .cal-more-row { text-align: center; }
+  .cal-more { margin-top: 20px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; padding: 12px 22px; border: 1px solid var(--purple); background: transparent; color: var(--purple); }
+  .cal-more:hover { background: var(--purple); color: var(--cream); }
+  .cal-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
   /* Each button takes its calendar's color from the key (--cal-color / --cal-text, set in the script). */
   .cal-btn { display: inline-block; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; padding: 12px 20px; border: 1px solid var(--cal-color, var(--purple)); background: var(--cal-color, var(--purple)); color: var(--cal-text, var(--cream)); transition: background 0.2s, color 0.2s; }
   .cal-btn:hover { background: transparent; color: var(--cal-color, var(--purple)); }
-  @media (max-width: 900px) { .cal-frame-wrap iframe { height: 460px; } }
+  .cal-updated { margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--purple); opacity: 0.55; }
+  @media (max-width: 700px) {
+    .cal-day { grid-template-columns: 1fr; gap: 10px; }
+    .cal-date { display: flex; align-items: baseline; gap: 10px; }
+    .cal-date .num { font-size: 28px; margin: 0; }
+    .cal-date .rel { margin-top: 0; }
+    .cal-event summary { grid-template-columns: 1fr; }
+    .cal-event .meta { grid-column: 1; }
+    .cal-detail { margin-left: 0; }
+  }
 
   /* ---------- LEADERSHIP ---------- */
   .leadership-scroll {
@@ -1581,20 +1613,22 @@
 </section>
 
 <!-- CALENDAR -->
-<!-- Live Google Calendars. Which calendars show (and their names/colors) is set
-     in CALENDARS in the calendar script near the bottom of this file. -->
+<!-- Drawn from calendar-data/events.json, which a GitHub Action refreshes from
+     the public Google Calendars about every 30 minutes. To add/remove a
+     calendar or change its color, edit calendar-data/calendars.json. -->
 <section id="calendar">
   <div class="section-num">§ 03 / CALENDAR</div>
-  <div class="section-eyebrow">Live · Google Calendar</div>
+  <div class="section-eyebrow">Upcoming</div>
   <h2 class="section-title">What's <em>coming up.</em></h2>
-  <p class="cal-lede">Class sessions, skills labs, exams, and events, all in one place. Times are shown in Central Time, and the calendar updates automatically whenever the exec board changes something. Use the buttons below to add it to your own calendar app.</p>
+  <p class="cal-lede">Class sessions, skills labs, exams, and events, all in one place. Times are in Central Time. Tap an event for details, or use the buttons below to add a calendar to your own calendar app.</p>
 
-  <div class="cal-legend" id="cal-legend"></div>
-  <div class="cal-frame-wrap" id="cal-wrap">
-    <div class="cal-empty" id="cal-empty">Calendar loading…</div>
+  <div class="cal-filters" id="cal-filters" role="group" aria-label="Show calendars"></div>
+  <div class="cal-list" id="cal-list" aria-live="polite">
+    <div class="cal-empty">Loading events…</div>
   </div>
-  <noscript><p style="margin-top:16px">JavaScript is required to display the embedded calendar.</p></noscript>
+  <div class="cal-more-row"><button class="cal-more" id="cal-more" type="button" hidden>Show more</button></div>
   <div class="cal-actions" id="cal-actions" hidden></div>
+  <div class="cal-updated" id="cal-updated"></div>
 </section>
 
 <!-- MENTORS -->
@@ -2753,64 +2787,161 @@
 })();
 </script>
 <!-- ============================================================
-     CALENDAR — edit CALENDARS below to add/remove Google Calendars
+     CALENDAR — draws the event list from calendar-data/events.json.
+     Calendars, colors and how far ahead to look are set in
+     calendar-data/calendars.json (not here).
      ============================================================ -->
 <script>
-// ── EDIT THIS ────────────────────────────────────────────────────────────
-  // One entry per Google Calendar. "id" is the Calendar ID (Calendar settings →
-  // "Integrate calendar"); "name" is the label shown on this page; "color" is
-  // the event color. Each calendar must be shared publicly ("Make available to
-  // public") or visitors who aren't signed in will not see its events.
-  var CALENDARS = [
-    { name: "Volunteering", color: "#4E2A84", id: "c_da4ff8639bc5605f017368aa64ee5007095969748f86b35083dd1871dc916969@group.calendar.google.com" },
-    { name: "Informational", color: "#E8A33D", id: "c_ed38d264b4300dee6564e8a52a5b2c8b82a701713e435730d3c5953c15448e8d@group.calendar.google.com" },
-    { name: "2027 EMT-B Course", color: "#B83A2A", id: "c_b578c72d9847484e36e5e999a8d4ce27b9cc646092c6ebee5faab01b824a8113@group.calendar.google.com" }
-  ];
-  var TIMEZONE = "America/Chicago";
-  // ─────────────────────────────────────────────────────────────────────────
+(function nemoCalendar() {
+  var list = document.getElementById('cal-list');
+  if (!list) return;
+  var filtersEl = document.getElementById('cal-filters');
+  var moreBtn = document.getElementById('cal-more');
+  var actions = document.getElementById('cal-actions');
+  var updatedEl = document.getElementById('cal-updated');
+  var PAGE = 12;               // events shown before "Show more"
+  var shown = PAGE;
+  var hidden = {};             // calendar name -> true when filtered out
+  var TZ = 'America/Chicago';
+  var data = null;
 
-  (function () {
-    var wrap = document.getElementById('cal-wrap');
-    var empty = document.getElementById('cal-empty');
-    if (!CALENDARS.length) { empty.textContent = 'Calendar coming soon'; return; }
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function fmt(d, opts) { return d.toLocaleString('en-US', Object.assign({ timeZone: TZ }, opts)); }
+  function dayKey(d) { return fmt(d, { year: 'numeric', month: '2-digit', day: '2-digit' }); }
+  function time(d) { return fmt(d, { hour: 'numeric', minute: '2-digit' }).replace(':00', '').replace(' AM', 'am').replace(' PM', 'pm'); }
+  function parse(e) {
+    // All-day events are plain dates ("2026-11-04"); treat them as local midnight.
+    return e.allDay ? new Date(e.start + 'T12:00:00') : new Date(e.start);
+  }
+  function gcalDate(d) { return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); }
 
-    var tz = encodeURIComponent(TIMEZONE);
-    var srcs = CALENDARS.map(function (c) {
-      return 'src=' + encodeURIComponent(c.id) + '&color=' + encodeURIComponent(c.color);
-    }).join('&');
+  // Turn plain text into nodes, making http(s) links clickable.
+  function linkify(text) {
+    var frag = document.createDocumentFragment();
+    String(text).split(/(https?:\/\/[^\s<]+)/g).forEach(function (part, i) {
+      if (i % 2) { var a = el('a', null, part); a.href = part; a.target = '_blank'; a.rel = 'noopener'; frag.appendChild(a); }
+      else if (part) frag.appendChild(document.createTextNode(part));
+    });
+    return frag;
+  }
 
-    var frame = document.createElement('iframe');
-    frame.src = 'https://calendar.google.com/calendar/embed?' + srcs +
-      '&ctz=' + tz + '&mode=AGENDA&showTitle=0&showPrint=0&showTz=0&showCalendars=0';
-    frame.title = 'NEMO calendar';
-    frame.loading = 'lazy';
-    frame.setAttribute('scrolling', 'no');
-    wrap.replaceChild(frame, empty);
+  function colorOf(name) {
+    var c = (data.calendars || []).filter(function (x) { return x.name === name; })[0];
+    return c ? c.color : '#4E2A84';
+  }
 
-    var legend = document.getElementById('cal-legend');
-    var actions = document.getElementById('cal-actions');
-    CALENDARS.forEach(function (c, i) {
-      var key = document.createElement('span');
-      var dot = document.createElement('i');
-      dot.style.background = c.color;
-      key.appendChild(dot);
-      key.appendChild(document.createTextNode(c.name));
-      legend.appendChild(key);
+  function render() {
+    var now = new Date();
+    var upcoming = data.events.filter(function (e) {
+      if (hidden[e.calendar]) return false;
+      var end = e.end ? (e.allDay ? new Date(e.end + 'T00:00:00') : new Date(e.end)) : parse(e);
+      return end > now;
+    });
+    list.replaceChildren();
+    if (!upcoming.length) {
+      list.appendChild(el('div', 'cal-empty', 'Nothing scheduled right now. Check back soon.'));
+      moreBtn.hidden = true;
+      return;
+    }
+    var todayKey = dayKey(now);
+    var tomorrowKey = dayKey(new Date(now.getTime() + 864e5));
+    var groups = [], byKey = {};
+    upcoming.slice(0, shown).forEach(function (e) {
+      var d = parse(e), k = dayKey(d);
+      if (!byKey[k]) { byKey[k] = { date: d, items: [] }; groups.push(byKey[k]); }
+      byKey[k].items.push(e);
+    });
+    groups.forEach(function (g) {
+      var day = el('div', 'cal-day');
+      var date = el('div', 'cal-date');
+      date.appendChild(el('div', 'dow', fmt(g.date, { weekday: 'short' })));
+      date.appendChild(el('div', 'num', fmt(g.date, { day: 'numeric' })));
+      date.appendChild(el('div', 'mon', fmt(g.date, { month: 'short' })));
+      var k = dayKey(g.date);
+      if (k === todayKey) date.appendChild(el('span', 'rel', 'Today'));
+      else if (k === tomorrowKey) date.appendChild(el('span', 'rel', 'Tomorrow'));
+      day.appendChild(date);
 
-      var a = document.createElement('a');
-      a.className = 'cal-btn';
-      // Match the button to this calendar's key color; dark text on light colors.
+      var evs = el('div', 'cal-events');
+      g.items.forEach(function (e) {
+        var start = parse(e);
+        var card = el('details', 'cal-event');
+        card.style.setProperty('--ev', colorOf(e.calendar));
+        var sum = el('summary');
+        var when = e.allDay ? 'All day' : time(start) + (e.end ? ' – ' + time(new Date(e.end)) : '');
+        sum.appendChild(el('span', 'time', when));
+        sum.appendChild(el('span', 'title', e.title));
+        var meta = el('span', 'meta');
+        meta.appendChild(el('span', 'tag', e.calendar));
+        if (e.location) meta.appendChild(document.createTextNode('  ·  ' + e.location.split(',')[0]));
+        sum.appendChild(meta);
+        card.appendChild(sum);
+
+        var detail = el('div', 'cal-detail');
+        if (e.location) { detail.appendChild(document.createTextNode('📍 ')); detail.appendChild(linkify(e.location)); detail.appendChild(document.createTextNode('\n')); }
+        if (e.description) detail.appendChild(linkify(e.description));
+        var end = e.end ? (e.allDay ? new Date(e.end + 'T00:00:00') : new Date(e.end)) : new Date(start.getTime() + 36e5);
+        var add = el('a', 'gcal', '+ Add this event to Google Calendar');
+        add.href = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+          '&text=' + encodeURIComponent(e.title) +
+          '&dates=' + (e.allDay ? e.start.replace(/-/g, '') + '/' + (e.end || e.start).replace(/-/g, '') : gcalDate(start) + '/' + gcalDate(end)) +
+          (e.location ? '&location=' + encodeURIComponent(e.location) : '') +
+          (e.description ? '&details=' + encodeURIComponent(e.description) : '');
+        add.target = '_blank'; add.rel = 'noopener';
+        if (e.location || e.description) detail.appendChild(document.createTextNode('\n'));
+        detail.appendChild(add);
+        card.appendChild(detail);
+        evs.appendChild(card);
+      });
+      day.appendChild(evs);
+      list.appendChild(day);
+    });
+    moreBtn.hidden = upcoming.length <= shown;
+  }
+
+  function setup() {
+    (data.calendars || []).forEach(function (c) {
+      var chip = el('button', 'cal-chip');
+      chip.type = 'button';
+      chip.setAttribute('aria-pressed', 'true');
+      chip.style.setProperty('--chip', c.color);
+      chip.appendChild(el('i'));
+      chip.appendChild(document.createTextNode(c.name));
+      chip.onclick = function () {
+        hidden[c.name] = !hidden[c.name];
+        chip.setAttribute('aria-pressed', hidden[c.name] ? 'false' : 'true');
+        shown = PAGE; render();
+      };
+      filtersEl.appendChild(chip);
+
+      // Subscribe buttons, colored to match the key (dark text on light colors).
+      var a = el('a', 'cal-btn', '+ Add ' + c.name);
       var hex = c.color.replace('#', '');
       var lum = (0.299 * parseInt(hex.substr(0, 2), 16) + 0.587 * parseInt(hex.substr(2, 2), 16) + 0.114 * parseInt(hex.substr(4, 2), 16)) / 255;
       a.style.setProperty('--cal-color', c.color);
       a.style.setProperty('--cal-text', lum > 0.6 ? '#1A0E33' : '#FFFFFF');
-      a.target = '_blank'; a.rel = 'noopener';
       a.href = 'https://calendar.google.com/calendar/u/0/r?cid=' + encodeURIComponent(c.id);
-      a.textContent = '+ Add ' + c.name;
+      a.target = '_blank'; a.rel = 'noopener';
       actions.appendChild(a);
     });
     actions.hidden = false;
-  })();
+    moreBtn.onclick = function () { shown += PAGE; render(); };
+    if (data.updated) updatedEl.textContent = 'Last synced ' + new Date(data.updated).toLocaleString('en-US', { timeZone: TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    render();
+  }
+
+  fetch('calendar-data/events.json', { cache: 'no-cache' })
+    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function (json) { data = json; setup(); })
+    .catch(function () {
+      list.replaceChildren(el('div', 'cal-empty', 'The calendar could not load right now. Please try again later.'));
+    });
+})();
 </script>
 </body>
 </html>

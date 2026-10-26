@@ -1,0 +1,50 @@
+name: Update calendar
+
+# Refreshes calendar-data/events.json from the public Google Calendars listed
+# in calendar-data/calendars.json. The homepage draws its calendar from that
+# file. Commits only when events actually change.
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # about every 30 minutes (GitHub may run it a bit late)
+  push:
+    branches: [ main ]
+    paths:
+      - "calendar-data/calendars.json"
+      - "calendar-data/fetch_calendar.py"
+      - ".github/workflows/update-calendar.yml"
+  workflow_dispatch:          # "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-calendar
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch calendars
+        run: |
+          pip install --quiet icalendar recurring-ical-events
+          python3 calendar-data/fetch_calendar.py
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- calendar-data/events.json; then
+            echo "No calendar changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add calendar-data/events.json
+          git commit -m "Update calendar events"
+          git pull --rebase origin main
+          git push
