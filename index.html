@@ -2936,7 +2936,7 @@
       render();
       if (!expanded) document.getElementById('calendar').scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
-    if (data.updated) updatedEl.textContent = 'Last synced ' + new Date(data.updated).toLocaleString('en-US', { timeZone: TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    if (data.updated) updatedEl.textContent = 'Calendar last changed ' + new Date(data.updated).toLocaleString('en-US', { timeZone: TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' · checked for updates every 10 minutes';
     render();
   }
 
