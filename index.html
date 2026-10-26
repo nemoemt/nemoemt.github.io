@@ -1614,7 +1614,7 @@
 
 <!-- CALENDAR -->
 <!-- Drawn from calendar-data/events.json, which a GitHub Action refreshes from
-     the public Google Calendars every 10 minutes. To add/remove a
+     the public Google Calendars every 20 minutes. To add/remove a
      calendar or change its color, edit calendar-data/calendars.json. -->
 <section id="calendar">
   <div class="section-num">§ 03 / CALENDAR</div>
@@ -2936,7 +2936,17 @@
       render();
       if (!expanded) document.getElementById('calendar').scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
-    if (data.updated) updatedEl.textContent = 'Calendar last changed ' + new Date(data.updated).toLocaleString('en-US', { timeZone: TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' · checked for updates every 10 minutes';
+    // "Last checked" = the most recent successful run of the Update calendar
+    // GitHub Action (read from GitHub's public API, so no commit is needed per
+    // check). Falls back to when the events last changed.
+    function stamp(iso, label) {
+      updatedEl.textContent = label + ' ' + new Date(iso).toLocaleString('en-US', { timeZone: TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' · checks every 20 minutes';
+    }
+    if (data.updated) stamp(data.updated, 'Calendar last updated');
+    fetch('https://api.github.com/repos/nemoemt/nemoemt.github.io/actions/workflows/update-calendar.yml/runs?status=success&per_page=1')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { var run = j && j.workflow_runs && j.workflow_runs[0]; if (run) stamp(run.updated_at, 'Calendar last checked'); })
+      .catch(function () {});
     render();
   }
 

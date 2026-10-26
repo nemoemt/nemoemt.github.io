@@ -3,7 +3,7 @@
 Build calendar-data/events.json from the public Google Calendars listed in
 calendar-data/calendars.json.
 
-Run automatically by .github/workflows/update-calendar.yml (every 10
+Run automatically by .github/workflows/update-calendar.yml (every 20
 minutes). The homepage reads events.json to draw its own calendar list,
 because browsers can't read Google's calendar feeds directly from another site.
 

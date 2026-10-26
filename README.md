@@ -336,10 +336,10 @@ set `poster` to `""` for a plain purple tile.
 
 The "What's coming up" list on the homepage is built from NEMO's public
 Google Calendars. **To add or change an event, just edit it in Google
-Calendar.** The website picks it up automatically, usually within 10–20 minutes.
+Calendar.** The website picks it up automatically, usually within about 20–30 minutes.
 
 How it works: a GitHub Action (**Update calendar**, in the **Actions** tab)
-runs every 10 minutes, reads the calendars, and saves the next 120
+runs every 20 minutes, reads the calendars, and saves the next 120
 days of events to `calendar-data/events.json`; the homepage draws the list
 from that file. It only commits when something actually changed.
 
