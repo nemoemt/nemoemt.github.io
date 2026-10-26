@@ -5,7 +5,7 @@ name: Update calendar
 # file. Commits only when events actually change.
 on:
   schedule:
-    - cron: "*/30 * * * *"   # about every 30 minutes (GitHub may run it a bit late)
+    - cron: "*/10 * * * *"   # every 10 minutes (GitHub may run it a few minutes late)
   push:
     branches: [ main ]
     paths:
