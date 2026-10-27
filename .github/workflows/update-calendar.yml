@@ -1,10 +1,10 @@
 name: Update calendar
 
 # Refreshes calendar-data/events.json from the public Google Calendars listed
-# in calendar-data/calendars.json. The homepage draws its calendar from that
+# in calendar-data/calendars.json. The homepage falls back to that
 # file. Commits only when events actually change.
-# A Cloudflare Worker (calendar-data/worker/calendar-timer.js) also starts
-# this every 10 minutes, since GitHub's schedule often runs hours late.
+# The homepage normally reads events live from a Cloudflare Worker
+# (calendar-data/worker/calendar-worker.js); this file is the backup.
 on:
   schedule:
     - cron: "*/20 * * * *"   # every 20 minutes (GitHub may run it a few minutes late)

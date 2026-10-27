@@ -1613,8 +1613,9 @@
 </section>
 
 <!-- CALENDAR -->
-<!-- Drawn from calendar-data/events.json, which a GitHub Action refreshes from
-     the public Google Calendars every 20 minutes. To add/remove a
+<!-- Drawn live from Google Calendar by a Cloudflare Worker, with
+     calendar-data/events.json as the backup. That file is refreshed from
+     the public Google Calendars by a GitHub Action. To add/remove a
      calendar or change its color, edit calendar-data/calendars.json. -->
 <section id="calendar">
   <div class="section-num">§ 03 / CALENDAR</div>
@@ -2826,7 +2827,8 @@
 })();
 </script>
 <!-- ============================================================
-     CALENDAR — draws the event list from calendar-data/events.json.
+     CALENDAR — draws the event list from the nemo-calendar Cloudflare
+     Worker, or calendar-data/events.json if the Worker is unavailable.
      Calendars, colors and how far ahead to look are set in
      calendar-data/calendars.json (not here).
      ============================================================ -->
@@ -2975,22 +2977,32 @@
       render();
       if (!expanded) document.getElementById('calendar').scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
-    // "Last checked" = the most recent successful run of the Update calendar
-    // GitHub Action (read from GitHub's public API, so no commit is needed per
-    // check). Falls back to when the events last changed.
-    function stamp(iso, label) {
-      updatedEl.textContent = label + ' ' + new Date(iso).toLocaleString('en-US', { timeZone: TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' · checks every 20 minutes';
+    // Live data from the Cloudflare Worker carries "checked" (when Google
+    // Calendar was read). The backup file instead uses the most recent
+    // successful run of the Update calendar GitHub Action.
+    function stamp(iso, label, note) {
+      updatedEl.textContent = label + ' ' + new Date(iso).toLocaleString('en-US', { timeZone: TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' · ' + note;
     }
-    if (data.updated) stamp(data.updated, 'Calendar last updated');
+    if (data.checked) { stamp(data.checked, 'Calendar last checked', 'new events show within a few minutes'); render(); return; }
+    if (data.updated) stamp(data.updated, 'Calendar last updated', 'checks every 20 minutes');
     fetch('https://api.github.com/repos/nemoemt/nemoemt.github.io/actions/workflows/update-calendar.yml/runs?status=success&per_page=1')
       .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (j) { var run = j && j.workflow_runs && j.workflow_runs[0]; if (run) stamp(run.updated_at, 'Calendar last checked'); })
+      .then(function (j) { var run = j && j.workflow_runs && j.workflow_runs[0]; if (run) stamp(run.updated_at, 'Calendar last checked', 'checks every 20 minutes'); })
       .catch(function () {});
     render();
   }
 
-  fetch('calendar-data/events.json', { cache: 'no-cache' })
-    .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+  // Live events from the Cloudflare Worker (calendar-data/worker/); if it's
+  // slow or down, use calendar-data/events.json from the GitHub Action.
+  function getJson(url, ms) {
+    var ctrl = window.AbortController ? new AbortController() : null;
+    if (ctrl) setTimeout(function () { ctrl.abort(); }, ms);
+    return fetch(url, { cache: 'no-cache', signal: ctrl ? ctrl.signal : undefined })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (j) { if (!j || !j.events) throw new Error('bad data'); return j; });
+  }
+  getJson('https://nemo-calendar.nemo-9bb.workers.dev/events.json', 6000)
+    .catch(function () { return getJson('calendar-data/events.json', 15000); })
     .then(function (json) { data = json; setup(); })
     .catch(function () {
       list.replaceChildren(el('div', 'cal-empty', 'The calendar could not load right now. Please try again later.'));
