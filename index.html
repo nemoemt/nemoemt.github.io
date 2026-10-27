@@ -1640,13 +1640,13 @@
   <div class="course-grid">
     <div class="course-prose">
       <p>NEMO runs on its mentors. Past NEMO graduates and working EMTs come back each year to help facilitate the course alongside our instructors.</p>
-      <p>You don't need to have taken NEMO to mentor. If you hold an EMT-B license, you can apply at any time.</p>
+      <p>You don't need to have taken NEMO to mentor. If you hold an EMT-B license, you can apply. <strong data-mentor-deadline></strong></p>
       <a class="btn btn-ink" href="https://docs.google.com/forms/d/e/1FAIpQLScJ4ZrnuEmT_Ci-Ii_NnckSA2e_IAk8iqpi4M1hpawaG_MD3A/viewform?usp=header" target="_blank" rel="noopener" data-mentor-open>Apply to be a mentor</a>
     </div>
     <aside class="specs-card">
       <h3>Mentoring at a glance</h3>
       <div class="spec-row"><span class="key">Requirement</span><span class="val">EMT-B license</span></div>
-      <div class="spec-row"><span class="key">Applications</span><span class="val">Rolling</span></div>
+      <div class="spec-row"><span class="key">Applications</span><span class="val" id="mentorDeadlineSpec">Close November 1</span></div>
       <div class="spec-row"><span class="key">Open to</span><span class="val">NEMO alumni &amp; current EMTs</span></div>
     </aside>
   </div>
@@ -1708,9 +1708,18 @@
 
   <div class="news-dots" data-news-dots></div>
 
-  <!-- INFO SESSION VIDEO: the text and video link are set in INFO_SESSION
-       near the bottom of this file. Until a video link is pasted there, this
-       shows an "upcoming session" card instead of a play button. -->
+  <!-- SESSION VIDEOS: the text and video links are set in SESSION_VIDEOS
+       near the bottom of this file. Until a video link is pasted there, a
+       card shows an "upcoming session" placeholder instead of a play button. -->
+  <div class="info-session" id="mentor-session">
+    <div>
+      <div class="news-card-tag">Mentor Meeting <span class="news-card-date" id="mentorSessionDate"></span></div>
+      <h3>Thinking about <em>mentoring?</em></h3>
+      <p>Watch our mentor meeting to see what mentoring with NEMO involves: helping run skills sessions and labs, coaching students through their psychomotor exams, and earning continuing education hours toward your own EMT license. <strong data-mentor-deadline></strong></p>
+    </div>
+    <div class="video-frame" id="mentorSessionVideo"></div>
+  </div>
+
   <div class="info-session" id="info-session">
     <div>
       <div class="news-card-tag">Info Session <span class="news-card-date" id="infoSessionDate"></span></div>
@@ -1965,7 +1974,7 @@
     </details>
     <details class="faq-item">
       <summary><h4>Can I still join NEMO if I'm already an EMT?</h4><span class="toggle">+</span></summary>
-      <div class="answer">Yes! NEMO runs on previous NEMO graduates and current EMTs coming back as mentors to help facilitate the class. Anyone with an EMT-B license can become a NEMO mentor, and mentor applications are reviewed on a rolling basis. <a href="https://docs.google.com/forms/d/e/1FAIpQLScJ4ZrnuEmT_Ci-Ii_NnckSA2e_IAk8iqpi4M1hpawaG_MD3A/viewform?usp=header" target="_blank" rel="noopener" data-mentor-open>Apply to be a mentor here</a>, or read more in the <a href="#mentor">mentor section</a> above.</div>
+      <div class="answer">Yes! NEMO runs on previous NEMO graduates and current EMTs coming back as mentors to help facilitate the class. Anyone with an EMT-B license can become a NEMO mentor. <span data-mentor-deadline></span> <a href="https://docs.google.com/forms/d/e/1FAIpQLScJ4ZrnuEmT_Ci-Ii_NnckSA2e_IAk8iqpi4M1hpawaG_MD3A/viewform?usp=header" target="_blank" rel="noopener" data-mentor-open>Apply to be a mentor here</a>, or read more in the <a href="#mentor">mentor section</a> above.</div>
     </details>
     <details class="faq-item">
       <summary><h4>What happens if I don't pass the NREMT?</h4><span class="toggle">+</span></summary>
@@ -1993,7 +2002,7 @@
   </div>
   <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
     <a class="btn btn-secondary" href="#" data-mailinglist-open>Join the interest list</a>
-    <!-- MENTOR FORM: rolling applications, so this button is always active -->
+    <!-- MENTOR FORM: deadline is mentorApplicationsClose in BANNER_CONFIG (text only; the button stays clickable) -->
     <a class="btn btn-secondary" href="https://docs.google.com/forms/d/e/1FAIpQLScJ4ZrnuEmT_Ci-Ii_NnckSA2e_IAk8iqpi4M1hpawaG_MD3A/viewform?usp=header" target="_blank" rel="noopener" data-mentor-open>Apply to be a mentor</a>
     <a class="btn btn-secondary" href="#" data-contact-open>Email NEMO</a>
   </div>
@@ -2482,7 +2491,9 @@
     applicationsOpen:  "2026-10-01", // apps OPEN on this date
     applicationsClose: "2026-10-16", // deadline: last day to apply (open through 11:59 PM)
     classStarts:       "2027-01-11", // first day of the EMT course
-    classEnds:         "2027-05-14"  // last day of the course / graduation
+    classEnds:         "2027-05-14", // last day of the course / graduation
+
+    mentorApplicationsClose: "2026-11-01" // mentor deadline: last day to apply to mentor this cohort
   };
   // ----------------------------------------------------------
   // No need to edit anything below this line.
@@ -2560,6 +2571,21 @@
     window.addEventListener("pageshow", function (e) { if (e.persisted) restart(); });
   }
 
+  // Mentor application deadline (shown in the mentor section, the mentor
+  // meeting card and the FAQ). Open through 11:59 PM on the deadline day.
+  if (BANNER_CONFIG.mentorApplicationsClose) {
+    const mClose = d(BANNER_CONFIG.mentorApplicationsClose);
+    const mCloseEnd = new Date(mClose.getTime());
+    mCloseEnd.setDate(mCloseEnd.getDate() + 1);
+    const mOpen = now < mCloseEnd;
+    const mText = mOpen
+      ? "Mentor applications for the " + yr + " cohort close " + fmt(mClose) + "."
+      : "Mentor applications for the " + yr + " cohort closed " + fmt(mClose) + ".";
+    document.querySelectorAll("[data-mentor-deadline]").forEach(function (el) { el.textContent = mText; });
+    const mSpec = document.getElementById("mentorDeadlineSpec");
+    if (mSpec) mSpec.textContent = mOpen ? "Close " + fmt(mClose) : "Closed for " + yr;
+  }
+
   const eb = document.getElementById("applyEyebrow");
   const bl = document.getElementById("applyBlurb");
   if (eb) eb.textContent = eyebrow;
@@ -2614,36 +2640,38 @@
 })();
 </script>
 <!-- ============================================================
-     INFO SESSION VIDEO  —  EDIT THIS AFTER THE SESSION
+     SESSION VIDEOS  —  EDIT THIS AFTER EACH SESSION
      ============================================================
-     Shows up under the news slider. Paste the recording's link into
-     videoUrl and commit — the "upcoming" card turns into a click-to-play
-     video. Works with:
+     The mentor meeting and info session cards under the news slider.
+     Paste a recording's link into videoUrl and commit; the "upcoming"
+     card turns into a click-to-play video. Works with:
        - YouTube (set the video to Unlisted or Public):
            https://www.youtube.com/watch?v=XXXXXXXXXXX  or  https://youtu.be/XXXXXXXXXXX
        - Google Drive (Share > General access > "Anyone with the link"):
            https://drive.google.com/file/d/XXXXXXXX/view
        - A video file uploaded to this repo, e.g. "assets/info-session.mp4"
-     To hide the whole section, set show to false.
+     To hide a card, set its show to false.
      ============================================================ -->
 <script>
-(function infoSession() {
-  const INFO_SESSION = {
-    show: true,
-    date: "Thursday, October 1",   // shown next to the "Info Session" tag
-    videoUrl: "https://youtu.be/zR0e8BUPOZQ", // <-- paste the recording link here
-    poster: "assets/info-session-poster.jpg"   // still shown behind the play button (optional)
-  };
-
-  const wrap = document.getElementById("info-session");
-  const frame = document.getElementById("infoSessionVideo");
-  if (!wrap || !frame) return;
-  if (!INFO_SESSION.show) { wrap.remove(); return; }
-
-  const dateEl = document.getElementById("infoSessionDate");
-  if (dateEl && INFO_SESSION.date) dateEl.textContent = "— " + INFO_SESSION.date;
-
-  const url = (INFO_SESSION.videoUrl || "").trim();
+(function sessionVideos() {
+  const SESSION_VIDEOS = [
+    {
+      card: "mentor-session", frame: "mentorSessionVideo", dateEl: "mentorSessionDate",
+      name: "Mentor Meeting",               // used on the placeholder and play button
+      show: true,
+      date: "",                              // e.g. "Tuesday, October 20" (shown next to the tag)
+      videoUrl: "https://youtu.be/Zn13huv5uvg",
+      poster: ""                             // optional still image behind the play button
+    },
+    {
+      card: "info-session", frame: "infoSessionVideo", dateEl: "infoSessionDate",
+      name: "Info Session",
+      show: true,
+      date: "Thursday, October 1",
+      videoUrl: "https://youtu.be/zR0e8BUPOZQ",
+      poster: "assets/info-session-poster.jpg"
+    }
+  ];
 
   // Turn a share link into something the page can play inline.
   function embedFor(link) {
@@ -2655,54 +2683,65 @@
     return null;
   }
 
-  if (!url) {
-    // Before the recording exists: a static "coming soon" card.
-    frame.innerHTML =
-      '<div class="video-poster">' +
-        '<span>Information Session</span>' +
-        '<span class="when">' + (INFO_SESSION.date || "Coming soon") + '</span>' +
-        '<span class="soon">Recording will be posted here</span>' +
-      '</div>';
-    return;
-  }
+  SESSION_VIDEOS.forEach(function (cfg) {
+    const wrap = document.getElementById(cfg.card);
+    const frame = document.getElementById(cfg.frame);
+    if (!wrap || !frame) return;
+    if (!cfg.show) { wrap.remove(); return; }
 
-  const embed = embedFor(url);
-  const poster = document.createElement(embed ? "button" : "a");
-  poster.className = "video-poster";
-  poster.innerHTML = '<span class="play" aria-hidden="true"></span><span class="label">Play the info session</span>';
-  if (INFO_SESSION.poster) {
-    poster.classList.add("has-image");
-    poster.style.backgroundImage =
-      "linear-gradient(rgba(28,16,52,0.2), rgba(28,16,52,0.2)), url('" + INFO_SESSION.poster + "')";
-  }
-  if (embed) {
-    poster.type = "button";
-    poster.setAttribute("aria-label", "Play the NEMO information session video");
-    poster.addEventListener("click", function () {
-      let player;
-      if (embed.type === "video") {
-        player = document.createElement("video");
-        player.src = embed.src;
-        player.controls = true;
-        player.autoplay = true;
-        player.playsInline = true;
-      } else {
-        player = document.createElement("iframe");
-        player.src = embed.src;
-        player.title = "NEMO information session";
-        player.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
-        player.allowFullscreen = true;
-      }
-      frame.innerHTML = "";
-      frame.appendChild(player);
-    });
-  } else {
-    // Unrecognized link: still clickable, just opens in a new tab.
-    poster.href = url;
-    poster.target = "_blank";
-    poster.rel = "noopener";
-  }
-  frame.appendChild(poster);
+    const dateEl = document.getElementById(cfg.dateEl);
+    if (dateEl && cfg.date) dateEl.textContent = "— " + cfg.date;
+
+    const url = (cfg.videoUrl || "").trim();
+    if (!url) {
+      // Before the recording exists: a static "coming soon" card.
+      frame.innerHTML =
+        '<div class="video-poster">' +
+          '<span>' + cfg.name + '</span>' +
+          '<span class="when">' + (cfg.date || "Coming soon") + '</span>' +
+          '<span class="soon">Recording will be posted here</span>' +
+        '</div>';
+      return;
+    }
+
+    const embed = embedFor(url);
+    const poster = document.createElement(embed ? "button" : "a");
+    poster.className = "video-poster";
+    poster.innerHTML = '<span class="play" aria-hidden="true"></span><span class="label">Play the ' + cfg.name.toLowerCase() + '</span>';
+    if (cfg.poster) {
+      poster.classList.add("has-image");
+      poster.style.backgroundImage =
+        "linear-gradient(rgba(28,16,52,0.2), rgba(28,16,52,0.2)), url('" + cfg.poster + "')";
+    }
+    if (embed) {
+      poster.type = "button";
+      poster.setAttribute("aria-label", "Play the NEMO " + cfg.name.toLowerCase() + " video");
+      poster.addEventListener("click", function () {
+        let player;
+        if (embed.type === "video") {
+          player = document.createElement("video");
+          player.src = embed.src;
+          player.controls = true;
+          player.autoplay = true;
+          player.playsInline = true;
+        } else {
+          player = document.createElement("iframe");
+          player.src = embed.src;
+          player.title = "NEMO " + cfg.name.toLowerCase();
+          player.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+          player.allowFullscreen = true;
+        }
+        frame.innerHTML = "";
+        frame.appendChild(player);
+      });
+    } else {
+      // Unrecognized link: still clickable, just opens in a new tab.
+      poster.href = url;
+      poster.target = "_blank";
+      poster.rel = "noopener";
+    }
+    frame.appendChild(poster);
+  });
 })();
 </script>
 <!-- ============================================================

@@ -51,12 +51,12 @@ section with the details.
 
 | When | What | Where |
 |------|------|-------|
-| **Once a year** (spring exec turnover) | The status banner dates | `index.html` — see §1 |
+| **Once a year** (spring exec turnover) | The status banner dates and the mentor application deadline | `index.html` — see §1 |
 | **Once a year** (spring exec turnover) | The leadership board | `people/board.csv` — see §2 |
 | **A few times a year** | Open / close the application form | automatic via the banner dates — see §1 |
 | **Every couple of years** | Renew the web domain | Squarespace (external) — see §3 (current expiration: **2028**) |
 | **As needed** | Add/replace a person's photo | `assets/` folder — see §2 (no photo yet = auto placeholder) |
-| **After each info session** | Post the recording link | `index.html` — see §8 |
+| **After each info session / mentor meeting** | Post the recording link | `index.html` — see §8 |
 | **After events** | Add a news card with a photo | `index.html` — see §7 |
 | **At turnover / as needed** | Who can use the assessment tool | Cloudflare dashboard — see §6 |
 
@@ -90,16 +90,23 @@ date:
 
      applicationsOpen:  "2026-10-01", // apps OPEN on this date
      applicationsClose: "2026-10-16", // deadline: last day to apply (open through 11:59 PM)
-     classStarts:       "2027-01-06", // first day of the EMT course
-     classEnds:         "2027-05-14"  // last day of the course / graduation
+     classStarts:       "2027-01-11", // first day of the EMT course
+     classEnds:         "2027-05-14", // last day of the course / graduation
+
+     mentorApplicationsClose: "2026-11-01" // mentor deadline: last day to apply to mentor this cohort
    };
    ```
 
-4. Change the five values:
+4. Change the six values:
    - **`cohortYear`** — the year of the cohort you're recruiting/teaching now.
-   - The **four dates** — keep the quotes and the `YYYY-MM-DD` format.
+   - The **four course dates** — keep the quotes and the `YYYY-MM-DD` format.
      `2026-10-01` means **October 1, 2026** (Year-Month-Day, with leading zeros).
 5. Commit. That's it — the banner will show the right message all year.
+   - **`mentorApplicationsClose`** — the last day to apply to be a mentor for
+     that cohort (same `YYYY-MM-DD` format). The mentor section, the mentor
+     meeting card, and the FAQ all show "Mentor applications for the 2027
+     cohort close November 1." from this date, and switch to "closed" the
+     day after.
 
 > **The Apply button opens and closes itself.** When today's date is between
 > `applicationsOpen` and `applicationsClose`, the button says "Apply now" and
@@ -310,10 +317,12 @@ blocks to retire them.
 
 ---
 
-## 8. Info session video
+## 8. Info session and mentor meeting videos
 
-In `index.html`, search for **`INFO_SESSION`**. Paste the recording's link
-(an Unlisted YouTube link works best) into `videoUrl` and update `date`.
+In `index.html`, search for **`SESSION_VIDEOS`**. There's one entry for the
+mentor meeting and one for the info session. Paste each recording's link (an
+Unlisted YouTube link works best) into its `videoUrl` and update `date`. Set
+`show` to `false` to hide a card.
 `poster` is the still image shown before someone presses play; replace
 `assets/info-session-poster.jpg` with the first slide of the new deck, or
 set `poster` to `""` for a plain purple tile.
