@@ -357,6 +357,17 @@ from that file. It only commits when something actually changed.
   `calendar-data/calendars.json` (name, color, and the Calendar ID from
   Google Calendar → Settings → Integrate calendar). The calendar must be
   set to **Make available to public** or its events won't show.
+- **What keeps it on time:** GitHub's own 20-minute schedule often runs
+  hours late, so a free Cloudflare Worker, **nemo-calendar-timer**
+  (dash.cloudflare.com → **Workers & Pages**), starts the Action every 10
+  minutes. Its code is in `calendar-data/worker/calendar-timer.js`. It
+  uses a GitHub token saved in the Worker as the secret `GITHUB_TOKEN`
+  (Settings → Variables and Secrets). The token is a fine-grained token
+  limited to this repository with **Actions: Read and write**. If the
+  calendar goes back to updating only every few hours, the token has
+  probably expired: make a new one the same way and paste it into that
+  secret. Set the new token's expiration as long as GitHub allows and
+  add the renewal date to your calendar.
 - **Need it to update right now:** Actions tab → **Update calendar** →
   **Run workflow**.
 - **List looks stale:** check the Actions tab for a failed **Update
