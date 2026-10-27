@@ -43,7 +43,7 @@ section with the details.
 | **GitHub** (`nemoemt` account, signs in with nemo@u.northwestern.edu) | Hosts this repository and the live website (GitHub Pages) | Sign in as `nemoemt`, or have it add you as a collaborator |
 | **Squarespace Domains** | Owns the address `nemonu.org` (paid through 2028) | "Sign in with Google" using the NEMO Google account (§3) |
 | **Cloudflare** (account of nemo@u.northwestern.edu) | Hosts the psychomotor assessment tool behind a login (§6) and the live calendar Worker (§10) | Sign in with nemo@u.northwestern.edu |
-| **YouTube** | The info session and mentor meeting videos (§8) | Currently on Dylan Stone's personal channel; re-upload to a NEMO channel before Dylan graduates |
+| **YouTube** | The info session and mentor meeting videos (§8) | Northwestern accounts can't create YouTube channels, so these videos have to be on a board member's **personal** channel (currently Dylan Stone's). See §8. |
 | **Google Forms** | The application, mentor, interest-list, and contact forms linked from the site | The NEMO Google account |
 
 ---
@@ -324,6 +324,14 @@ In `index.html`, search for **`SESSION_VIDEOS`**. There's one entry for the
 mentor meeting and one for the info session. Paste each recording's link (an
 Unlisted YouTube link works best) into its `videoUrl` and update `date`. Set
 `show` to `false` to hide a card.
+
+**YouTube videos have to go on a personal YouTube account.** Northwestern
+(u.northwestern.edu) accounts can't create YouTube channels, so a board
+member uploads each recording to their own channel as **Unlisted**. The
+current videos are on Dylan Stone's channel. If the uploader's video is
+deleted or their channel closed, the card stops playing. So at turnover,
+make sure next year's info session and mentor meeting are uploaded by
+someone still on the board, and replace the links here.
 `poster` is the still image shown before someone presses play; replace
 `assets/info-session-poster.jpg` or `assets/mentor-meeting-poster.jpg` with
 a screenshot of the new deck's first slide (16:9, about 1280 × 720), or
