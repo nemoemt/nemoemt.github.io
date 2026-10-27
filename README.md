@@ -51,7 +51,7 @@ section with the details.
 
 | When | What | Where |
 |------|------|-------|
-| **Once a year** (spring exec turnover) | The status banner dates and the mentor application deadline | `index.html` — see §1 |
+| **Once a year** (spring exec turnover) | The status banner dates and the mentor application deadline | `index.html` — see §1 (every other date on the site is listed in §11) |
 | **Once a year** (spring exec turnover) | The leadership board | `people/board.csv` — see §2 |
 | **A few times a year** | Open / close the application form | automatic via the banner dates — see §1 |
 | **Every couple of years** | Renew the web domain | Squarespace (external) — see §3 (current expiration: **2028**) |
@@ -362,6 +362,37 @@ from that file. It only commits when something actually changed.
   calendar** run. GitHub also pauses scheduled Actions on repositories with
   no activity for 60 days; if that happens, open the workflow and click
   **Enable workflow**.
+
+---
+
+## 11. Every date on the site
+
+This is every date or time-of-year written anywhere on the site, and
+whether you need to touch it. Search `index.html` for the text in the
+"Search for" column to find it.
+
+**Updates itself once you change `BANNER_CONFIG` (§1):**
+
+| What visitors see | Where it comes from |
+|---|---|
+| Scrolling banner (applications open / close, class starts / ends) | `BANNER_CONFIG` dates |
+| "Next cohort: Winter 2027" and the Apply blurb | `BANNER_CONFIG` (`cohortYear`, dates). The text written in the HTML is only a fallback. |
+| Apply button opening and closing | `applicationsOpen` / `applicationsClose` |
+| "Mentor applications for the 2027 cohort close November 1" (mentor meeting card, Mentors section, "At a glance" row, FAQ) | `mentorApplicationsClose` |
+| Calendar events | Google Calendar (§10), next 120 days (`days_ahead` in `calendar-data/calendars.json`) |
+
+**Change by hand when it's out of date:**
+
+| Date | File | Search for | When to change |
+|---|---|---|---|
+| Course length "Jan – Mid-May" (hero "Duration") | `index.html` | `Jan – Mid-May` | Only if the course calendar shifts |
+| Course outline month labels (JANUARY, JAN – FEB, FEBRUARY, FEB – MAR, MARCH, APRIL ×4, LATE APRIL, MAY) | `index.html` | `JAN – FEB` | Only if the syllabus order or timing changes |
+| News card dates ("— October 2026", "— Winter 2026", "— Spring 2025") | `index.html` | `news-card-date` | Set on each new card (§7) |
+| Mentor meeting and info session dates (currently: mentor blank, info "Thursday, October 1") | `index.html` | `SESSION_VIDEOS` | After each new recording (§8) |
+| Fallback text "Next cohort: Winter 2027" / "Applications open in fall quarter. Capacity is 120 seats." | `index.html` | `applyEyebrow` | Once a year, to match `cohortYear`, so it's right even if the script fails. If the seat count changes, also change `120 seats` in the `BANNER_CONFIG` script further down. |
+| CPR practice exam version "Oct 22, 2025" and "© 2025 American Heart Association" | `cpr/index.html` | `Oct 22, 2025` | Only if the exam questions are replaced with a newer AHA version |
+| Domain expiration (2028) | Squarespace, and the Quick reference table above | n/a | When renewed (§3) |
+| "Est. 2006" | every page | `EST. 2006` | Never; it's the founding year |
 
 ---
 
