@@ -101,12 +101,12 @@ date:
    - **`cohortYear`** — the year of the cohort you're recruiting/teaching now.
    - The **four course dates** — keep the quotes and the `YYYY-MM-DD` format.
      `2026-10-01` means **October 1, 2026** (Year-Month-Day, with leading zeros).
-5. Commit. That's it — the banner will show the right message all year.
    - **`mentorApplicationsClose`** — the last day to apply to be a mentor for
      that cohort (same `YYYY-MM-DD` format). The mentor section, the mentor
      meeting card, and the FAQ all show "Mentor applications for the 2027
      cohort close November 1." from this date, and switch to "closed" the
      day after.
+5. Commit. That's it — the banner will show the right message all year.
 
 > **The Apply button opens and closes itself.** When today's date is between
 > `applicationsOpen` and `applicationsClose`, the button says "Apply now" and
