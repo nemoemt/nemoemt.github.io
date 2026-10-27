@@ -324,7 +324,8 @@ mentor meeting and one for the info session. Paste each recording's link (an
 Unlisted YouTube link works best) into its `videoUrl` and update `date`. Set
 `show` to `false` to hide a card.
 `poster` is the still image shown before someone presses play; replace
-`assets/info-session-poster.jpg` with the first slide of the new deck, or
+`assets/info-session-poster.jpg` or `assets/mentor-meeting-poster.jpg` with
+a screenshot of the new deck's first slide (16:9, about 1280 × 720), or
 set `poster` to `""` for a plain purple tile.
 
 ---
