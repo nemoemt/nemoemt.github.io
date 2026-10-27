@@ -90,8 +90,8 @@ date:
 
      applicationsOpen:  "2026-10-01", // apps OPEN on this date
      applicationsClose: "2026-10-16", // deadline: last day to apply (open through 11:59 PM)
-     classStarts:       "2027-01-11", // first day of the EMT course
-     classEnds:         "2027-05-14", // last day of the course / graduation
+     classStarts:       "2027-01-10", // first day of the EMT course
+     classEnds:         "2027-05-16", // last day of the course / graduation
 
      mentorApplicationsClose: "2026-11-01" // mentor deadline: last day to apply to mentor this cohort
    };
@@ -395,7 +395,8 @@ whether you need to touch it. Search `index.html` for the text in the
 | Date | File | Search for | When to change |
 |---|---|---|---|
 | Course length "Jan – Mid-May" (hero "Duration") | `index.html` | `Jan – Mid-May` | Only if the course calendar shifts |
-| Course outline month labels (JANUARY, JAN – FEB, FEBRUARY, FEB – MAR, MARCH, APRIL ×4, LATE APRIL, MAY) | `index.html` | `JAN – FEB` | Only if the syllabus order or timing changes |
+| Course schedule section: the 12 blocks (JANUARY … MAY, including Spring Break "March 14–28" and "The course ends May 16") and the lecture/skills/office-hour times above them | `index.html` | `What you'll cover` | Once a year, from the new course schedule |
+| Full course schedule PDF (`assets/NEMO_Schedule_2027.pdf`, linked as "See the full 2027 schedule") | `assets/` and `index.html` | `NEMO_Schedule_` | Once a year: upload the new PDF, change the link's filename and year, and delete the old PDF |
 | News card dates ("— October 2026", "— Winter 2026", "— Spring 2025") | `index.html` | `news-card-date` | Set on each new card (§7) |
 | Mentor meeting and info session dates (currently: mentor blank, info "Thursday, October 1") | `index.html` | `SESSION_VIDEOS` | After each new recording (§8) |
 | Fallback text "Next cohort: Winter 2027" / "Applications open in fall quarter. Capacity is 120 seats." | `index.html` | `applyEyebrow` | Once a year, to match `cohortYear`, so it's right even if the script fails. If the seat count changes, also change `120 seats` in the `BANNER_CONFIG` script further down. |
