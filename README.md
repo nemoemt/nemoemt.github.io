@@ -40,9 +40,10 @@ section with the details.
 
 | Service | What it's for | How to get in |
 |---|---|---|
-| **GitHub** (`nemoemt` organization) | Hosts this repository and the live website (GitHub Pages) | Ask a current org owner to add you |
+| **GitHub** (`nemoemt` account, signs in with nemo@u.northwestern.edu) | Hosts this repository and the live website (GitHub Pages) | Sign in as `nemoemt`, or have it add you as a collaborator |
 | **Squarespace Domains** | Owns the address `nemonu.org` (paid through 2028) | "Sign in with Google" using the NEMO Google account (§3) |
-| **Cloudflare** | Hosts the psychomotor assessment tool behind a login (§6) | Account set up by Dylan Stone in Oct 2026; ask for an invite before he graduates |
+| **Cloudflare** (account of nemo@u.northwestern.edu) | Hosts the psychomotor assessment tool behind a login (§6) and the live calendar Worker (§10) | Sign in with nemo@u.northwestern.edu |
+| **YouTube** | The info session and mentor meeting videos (§8) | Currently on Dylan Stone's personal channel; re-upload to a NEMO channel before Dylan graduates |
 | **Google Forms** | The application, mentor, interest-list, and contact forms linked from the site | The NEMO Google account |
 
 ---
