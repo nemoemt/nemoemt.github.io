@@ -19,15 +19,6 @@
  ],
  "events": [
   {
-   "calendar": "Informational",
-   "title": "Mentor Info Session",
-   "start": "2026-10-26T18:30:00-05:00",
-   "end": "2026-10-26T19:30:00-05:00",
-   "allDay": false,
-   "location": "",
-   "description": "https://northwestern.zoom.us/j/99038259848"
-  },
-  {
    "calendar": "Volunteering",
    "title": "ETHS Narcan",
    "start": "2026-11-04T10:05:00-06:00",
@@ -296,7 +287,16 @@
    "allDay": false,
    "location": "",
    "description": ""
+  },
+  {
+   "calendar": "2027 EMT-B Course",
+   "title": "Zoom Lecture",
+   "start": "2027-02-23T18:00:00-06:00",
+   "end": "2027-02-23T22:00:00-06:00",
+   "allDay": false,
+   "location": "",
+   "description": ""
   }
  ],
- "updated": "2026-10-26T23:18-05:00"
+ "updated": "2026-10-27T04:54-05:00"
 }
