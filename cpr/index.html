@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AHA BLS Practice Quiz — Exam A / B</title>
+<title>CPR NEMO Exam — Exam A / B</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400..800;1,14..32,400..800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -741,7 +741,7 @@
 </script>
 <div id="gate">
   <form id="gateForm" autocomplete="off">
-    <h1>BLS Practice Exam</h1>
+    <h1>CPR NEMO Exam</h1>
     <p>For NEMO students. Enter the password from class to continue.</p>
     <input id="gatePw" type="password" placeholder="Password" aria-label="Password" autofocus />
     <button type="submit">Open exam</button>
@@ -1573,7 +1573,7 @@ function switchExam(version) {
     mailLink.href = 'mailto:nemo@u.northwestern.edu?subject=BLS%20Exam%20'
       + version + '%20Answer%20Sheet';
   }
-  document.title = 'AHA BLS Practice Quiz — Exam ' + version;
+  document.title = 'CPR NEMO Exam — Exam ' + version;
 
   // Toggle button active states
   document.getElementById('verBtnA').classList.toggle('active', version === 'A');

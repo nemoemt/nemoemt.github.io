@@ -25,7 +25,7 @@ button.
 | Medical protocols | https://nemonu.org/medical-protocols.html | Anyone |
 | Trauma protocols | https://nemonu.org/trauma-protocols.html | Anyone |
 | Resource vault | https://nemonu.org/resource-vault.html | Anyone (the Drive folders it opens have their own sharing) |
-| BLS (CPR) practice exam | https://nemonu.org/cpr/ (linked from the training portal) | Password **`AHA2026`**, given out in class. How to change it is at the top of `cpr/index.html`. |
+| CPR NEMO Exam | https://nemonu.org/cpr/ (linked from the training portal) | Password **`AHA2026`**, given out in class. How to change it is at the top of `cpr/index.html`. |
 | Psychomotor skills tester (assessment tool) | https://nemo-tool.pages.dev (short link https://nemonu.org/assessment) | Evaluators on the Cloudflare login list (§6) |
 | Scenario editor for the skills tester | https://nemo-tool.pages.dev/editor/ | captain.nemo@u.northwestern.edu only (§6) |
 | Live calendar data | https://nemo-calendar.nemo-9bb.workers.dev/events.json | Anyone (the homepage reads it; §10) |
