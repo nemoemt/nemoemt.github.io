@@ -18,7 +18,7 @@ button.
 
 ## Site links
 
-**Quick links:** [Website](https://nemonu.org) · [Training portal](https://nemonu.org/training.html) · [Skills tester](https://nemonu.org/assessment) · [Scenario editor](https://nemo-tool.pages.dev/editor/) · [CPR NEMO Exam](https://nemonu.org/cpr/) (password `AHA2026`)
+**Quick links:** [Website](https://nemonu.org) · [Training portal](https://nemonu.org/training.html) · [Skills tester](https://nemonu.org/assessment) · [Scenario editor](https://nemo-tool.pages.dev/editor/) · [Access Manager](https://nemo-tool.pages.dev/admin/) · [CPR NEMO Exam](https://nemonu.org/cpr/) (password `AHA2026`)
 
 | Page | Address | Who can open it |
 |---|---|---|
@@ -29,7 +29,8 @@ button.
 | Resource vault | https://nemonu.org/resource-vault.html | Anyone (the Drive folders it opens have their own sharing) |
 | CPR NEMO Exam | https://nemonu.org/cpr/ (linked from the training portal) | Password **`AHA2026`**, given out in class. How to change it is at the top of `cpr/index.html`. |
 | **Skills tester (psychomotor scenarios)** | https://nemonu.org/assessment (forwards to https://nemo-tool.pages.dev); also linked at the very bottom of the training page | Evaluators on the Cloudflare login list (§6) |
-| Scenario editor for the skills tester | https://nemo-tool.pages.dev/editor/ | captain.nemo@u.northwestern.edu only (§6) |
+| Scenario editor for the skills tester | https://nemo-tool.pages.dev/editor/ | People on the Scenario editor list (§6) |
+| **Access Manager** (who can use the tester and editor) | https://nemo-tool.pages.dev/admin/ | Admins (§6) |
 | Live calendar data | https://nemo-calendar.nemo-9bb.workers.dev/events.json | Anyone (the homepage reads it; §10) |
 | 2027 course schedule (PDF) | https://nemonu.org/assets/NEMO_Schedule_2027.pdf | Anyone |
 
@@ -305,9 +306,8 @@ offline.
 
 ### Editing scenarios (no code needed)
 
-1. Go to **https://nemo-tool.pages.dev/editor/** and sign in with
-   **captain.nemo@u.northwestern.edu**. That's the only address allowed into
-   the editor.
+1. Go to **https://nemo-tool.pages.dev/editor/** and sign in with an email
+   on the **Scenario editor** list (manage it in the Access Manager, below).
 2. Pick a scenario on the left (or **+ Medical** / **+ Trauma** to add one) and
    edit the title, brief cards, vitals, hidden findings, and the proctor
    response next to each checklist item. Your work is kept in that browser
@@ -334,11 +334,31 @@ was renamed). The tool never shows those; move the text to the right item or
 remove it. If you ever rename a checklist item in `checklists.js`, its
 responses end up there too.
 
-**To change who can sign in:** log in at dash.cloudflare.com → **Zero
-Trust** → **Access** → **Applications** → **NEMO Assessment Tool** →
-**Policies** → edit **Approved evaluators**, then add or remove email
-addresses and save. The editor has its own, stricter login: the application
-**NEMO Scenario Editor** (path `/editor`), policy **Captain only**.
+**To change who can sign in, use the Access Manager:**
+**https://nemo-tool.pages.dev/admin/** (admins only: captain.nemo@ and
+nemo@u.northwestern.edu to start). It has three lists, each with an Add box
+and Remove buttons:
+
+- **Skills tester**: evaluators who can open the tool.
+- **Scenario editor**: people who can edit and Publish scenarios. Adding
+  someone here also gives them skills tester access, which the editor needs.
+- **Access manager**: people who can use that page. You can't remove
+  yourself, so there's always at least one admin.
+
+People sign in with a one-time code emailed to the address you add. The page
+changes the Cloudflare Access logins directly (code:
+`functions/admin/api/access.js`), using the **CF_API_TOKEN** secret on the
+nemo-tool project (dash.cloudflare.com → **Workers & Pages** → **nemo-tool**
+→ **Settings** → **Variables and Secrets**). That secret is a Cloudflare API
+token with only **Account → Access: Apps and Policies → Edit**. If the page
+ever says Cloudflare rejected the request, that token was deleted or
+expired: make a new one with that permission and paste it into the secret.
+
+Behind the scenes these are three Cloudflare Access applications (dash →
+**Zero Trust** → **Access** → **Applications**), which you can still edit
+there directly: **NEMO Assessment Tool** (policy **Approved evaluators**),
+**NEMO Scenario Editor** (path `/editor`, policy **Captain only**) and
+**NEMO Access Manager** (path `/admin`, policy **Admins**).
 
 **Cloudflare settings to know about** (dash.cloudflare.com → **Workers &
 Pages** → **nemo-tool** → **Settings**): the project is connected to this
