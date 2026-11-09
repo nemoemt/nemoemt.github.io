@@ -719,6 +719,58 @@
 </head>
 <body>
 
+<!-- PASSWORD GATE — keeps the practice exam to NEMO students. The password is
+     shared in class (current: see README "Site links"). To change it, put the
+     new password's SHA-256 in GATE_HASH below (any online SHA-256 tool works,
+     or: printf 'NEWPASSWORD' | sha256sum). This is a light lock for a practice
+     quiz, not real security: anyone who reads the page code can get past it. -->
+<style>
+  #gate { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 16px; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+  #gate form { background: var(--paper); border: 1px solid var(--rule); box-shadow: var(--shadow); padding: 32px 28px; max-width: 360px; width: 100%; }
+  #gate h1 { margin: 0 0 8px; font-size: 22px; color: var(--accent-deep); }
+  #gate p { margin: 0 0 20px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+  #gate input { width: 100%; font-size: 16px; padding: 10px 12px; border: 1px solid var(--rule); background: #fff; color: var(--ink); }
+  #gate button { margin-top: 12px; width: 100%; font-size: 15px; font-weight: 600; padding: 11px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+  #gate .err { color: var(--bad); font-size: 13px; margin-top: 10px; min-height: 1em; }
+  html.unlocked #gate { display: none; }
+</style>
+<script>
+  (function () {
+    try { if (localStorage.getItem('nemoCprUnlocked') === '1') document.documentElement.classList.add('unlocked'); } catch (e) {}
+  })();
+</script>
+<div id="gate">
+  <form id="gateForm" autocomplete="off">
+    <h1>BLS Practice Exam</h1>
+    <p>For NEMO students. Enter the password from class to continue.</p>
+    <input id="gatePw" type="password" placeholder="Password" aria-label="Password" autofocus />
+    <button type="submit">Open exam</button>
+    <div class="err" id="gateErr" role="alert"></div>
+  </form>
+</div>
+<script>
+  (function () {
+    var GATE_HASH = 'f0518d2f1985fe7b1ba56ef9e3eda85e420c92fd2ddd07724b60c9eaf7da371e';
+    function sha256(text) {
+      return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(function (buf) {
+        return Array.prototype.map.call(new Uint8Array(buf), function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');
+      });
+    }
+    document.getElementById('gateForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var pw = document.getElementById('gatePw').value.trim();
+      sha256(pw).then(function (h) {
+        if (h === GATE_HASH) {
+          try { localStorage.setItem('nemoCprUnlocked', '1'); } catch (err) {}
+          document.documentElement.classList.add('unlocked');
+        } else {
+          document.getElementById('gateErr').textContent = 'That password isn\'t right. Check with your instructor.';
+        }
+      });
+    });
+  })();
+</script>
+
 <div class="wrap">
 
   <header class="masthead">
