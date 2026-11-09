@@ -345,7 +345,7 @@ and Remove buttons:
 - **Access manager**: people who can use that page. You can't remove
   yourself, so there's always at least one admin.
 
-People sign in with a one-time code emailed to the address you add. The page
+People sign in with a one-time code emailed to the address you add, and stay signed in for a month on that device. Removing someone signs everyone out of that tool, so the removed person is locked out at once (everyone else enters one new code). The page
 changes the Cloudflare Access logins directly (code:
 `functions/admin/api/access.js`), using the **CF_API_TOKEN** secret on the
 nemo-tool project (dash.cloudflare.com → **Workers & Pages** → **nemo-tool**

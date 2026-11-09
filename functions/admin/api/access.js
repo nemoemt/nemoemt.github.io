@@ -87,6 +87,10 @@ export async function onRequest({ env, request }) {
         return reply(400, { error: email + ' is a scenario editor, and the editor needs skills tester access. Remove them from Scenario editor first.' });
       }
       await setEmails(env, list, lists[list].filter((e) => e !== email));
+      // Sign-ins last a month, so end everyone's current sign-in to this tool;
+      // the removed person is locked out now, everyone else enters one new code.
+      await cf(env, '/apps/' + LISTS[list].app + '/revoke_tokens', { method: 'POST' });
+      notes.push('Everyone signed in to the ' + LISTS[list].label.toLowerCase() + ' will be asked for a new code once.');
     }
     return reply(200, { you, lists: await readAll(env), notes });
   } catch (e) {
