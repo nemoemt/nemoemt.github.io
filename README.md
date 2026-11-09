@@ -21,7 +21,7 @@ button.
 | Page | Address | Who can open it |
 |---|---|---|
 | Homepage | https://nemonu.org | Anyone |
-| Training portal | https://nemonu.org/training.html | Anyone |
+| Training portal | https://nemonu.org/training.html (a small link at the very bottom goes to the skills tester) | Anyone |
 | Medical protocols | https://nemonu.org/medical-protocols.html | Anyone |
 | Trauma protocols | https://nemonu.org/trauma-protocols.html | Anyone |
 | Resource vault | https://nemonu.org/resource-vault.html | Anyone (the Drive folders it opens have their own sharing) |
