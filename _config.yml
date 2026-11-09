@@ -6,3 +6,4 @@
 # still deploy to Cloudflare automatically.
 exclude:
   - assessment-tool
+  - functions   # Cloudflare Pages Functions for the assessment tool, not part of nemonu.org

@@ -312,11 +312,21 @@ offline.
    edit the title, brief cards, vitals, hidden findings, and the proctor
    response next to each checklist item. Your work is kept in that browser
    until you publish, so a refresh won't lose it.
-3. Click **Save & download scenarios.js**, then follow the on-screen steps:
-   drag the downloaded file onto the
-   [assessment-tool upload page](https://github.com/nemoemt/nemoemt.github.io/upload/main/assessment-tool)
-   and click **Commit changes**. The tool updates for everyone within a
-   minute or two.
+3. Click **Publish**. The skills tester shows the changes right away (testers
+   just refresh). Nothing to upload.
+4. Optional: **Download backup** saves a `scenarios.js` copy. Uploading it to
+   the [assessment-tool folder](https://github.com/nemoemt/nemoemt.github.io/upload/main/assessment-tool)
+   updates the fallback copy kept in this repository; do that once in a
+   while, e.g. at turnover.
+
+**Where published scenarios live:** in Cloudflare, not in this repository.
+Publish saves them to the Workers KV namespace bound to the **nemo-tool**
+project as `SCENARIOS_KV` (code: `functions/editor/api/publish.js`); the tool
+loads them from `/api/scenarios` (`functions/api/scenarios.js`). Every publish
+keeps the previous version as a `backup:<date>` entry in that namespace (the
+last 30), so an older version can be restored from dash.cloudflare.com →
+**Storage & databases** → **KV**. If the KV is missing or empty, the tool falls
+back to `assessment-tool/scenarios.js` in this repository.
 
 The editor's **"Not on this checklist"** section lists proctor responses whose
 item no longer exists on that scenario's checklist (usually because an item
@@ -333,7 +343,9 @@ addresses and save. The editor has its own, stricter login: the application
 **Cloudflare settings to know about** (dash.cloudflare.com → **Workers &
 Pages** → **nemo-tool** → **Settings**): the project is connected to this
 GitHub repository, branch `main`, with **no build command** and **build
-output directory** `assessment-tool`.
+output directory** `assessment-tool`. The `functions/` folder at the top of
+this repository holds its server code (Pages Functions), and the KV namespace
+is attached under **Settings → Bindings** as `SCENARIOS_KV`.
 
 ---
 

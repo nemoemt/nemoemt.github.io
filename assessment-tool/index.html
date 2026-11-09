@@ -1617,7 +1617,10 @@ window.addEventListener('error', function(e) {
 </div>
 
 <script src="checklists.js"></script>
-<script src="scenarios.js"></script>
+<!-- Scenarios: the live copy published from the editor (functions/api/scenarios.js).
+     If that can't load, fall back to the scenarios.js file in this folder. -->
+<script src="api/scenarios"></script>
+<script>if (typeof SCENARIOS === 'undefined') document.write('<script src="scenarios.js"><\/script>');</script>
 <script>
 /* ─────────────────────────────────────────────────────────────
    CLOUD SAVE CONFIG
