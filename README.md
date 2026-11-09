@@ -18,6 +18,8 @@ button.
 
 ## Site links
 
+**Quick links:** [Website](https://nemonu.org) · [Training portal](https://nemonu.org/training.html) · [Skills tester](https://nemonu.org/assessment) · [Scenario editor](https://nemo-tool.pages.dev/editor/) · [CPR NEMO Exam](https://nemonu.org/cpr/) (password `AHA2026`)
+
 | Page | Address | Who can open it |
 |---|---|---|
 | Homepage | https://nemonu.org | Anyone |
@@ -26,7 +28,7 @@ button.
 | Trauma protocols | https://nemonu.org/trauma-protocols.html | Anyone |
 | Resource vault | https://nemonu.org/resource-vault.html | Anyone (the Drive folders it opens have their own sharing) |
 | CPR NEMO Exam | https://nemonu.org/cpr/ (linked from the training portal) | Password **`AHA2026`**, given out in class. How to change it is at the top of `cpr/index.html`. |
-| Psychomotor skills tester (assessment tool) | https://nemo-tool.pages.dev (short link https://nemonu.org/assessment) | Evaluators on the Cloudflare login list (§6) |
+| **Skills tester (psychomotor scenarios)** | https://nemonu.org/assessment (forwards to https://nemo-tool.pages.dev); also linked at the very bottom of the training page | Evaluators on the Cloudflare login list (§6) |
 | Scenario editor for the skills tester | https://nemo-tool.pages.dev/editor/ | captain.nemo@u.northwestern.edu only (§6) |
 | Live calendar data | https://nemo-calendar.nemo-9bb.workers.dev/events.json | Anyone (the homepage reads it; §10) |
 | 2027 course schedule (PDF) | https://nemonu.org/assets/NEMO_Schedule_2027.pdf | Anyone |
@@ -275,7 +277,7 @@ earlier version, and you can restore it. Nothing is ever permanently lost.
 
 ---
 
-## 6. The psychomotor assessment tool (Cloudflare, login required)
+## 6. The skills tester / psychomotor assessment tool (Cloudflare, login required)
 
 The evaluator tool used during skills exams lives in the folder
 **`assessment-tool/`**. Don't rename this folder without also changing the
