@@ -2,13 +2,14 @@
 //
 // Cloudflare Pages Function. /admin/ is behind its own Cloudflare Access login
 // ("NEMO Access Manager", admins only), and this route is under it. It reads
-// and edits the email lists of the three Cloudflare Access logins below, using
+// and edits the email lists of the Cloudflare Access logins below, using
 // the CF_API_TOKEN secret set on the nemo-tool Pages project (a Cloudflare API
 // token with Account → Access: Apps and Policies → Edit).
 const ACCOUNT = '9bba0bcc793440dba234e40589d2d93b';
 const LISTS = {
   evaluators: { label: 'Skills tester', app: '480b4761-a553-4cba-b506-fd30d078bc21', policy: '20b45085-3c69-43fc-b097-e35b1a2148e2' },
   editors:    { label: 'Scenario editor', app: '7e31bd3e-0040-4345-a068-89b5312aad2c', policy: 'ca46981b-2dd4-4b48-a678-a49b5dd9b2f7' },
+  cpr:        { label: 'CPR class page', app: '64873cae-91d1-4430-b537-05244ac53bb0', policy: 'c701f21b-7a4d-4680-b950-0730d264156d' },
   admins:     { label: 'Access manager', app: '3011022e-128e-4890-921c-fc6d08b5a961', policy: 'a871f3ad-86b8-48b8-965c-4c8a6bb6fd7a' },
 };
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

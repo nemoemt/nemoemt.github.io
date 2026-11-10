@@ -7,3 +7,4 @@
 exclude:
   - assessment-tool
   - functions   # Cloudflare Pages Functions for the assessment tool, not part of nemonu.org
+  - cpr-intake  # source of the nemo-cpr-intake Cloudflare Worker

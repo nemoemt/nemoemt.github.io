@@ -12,8 +12,8 @@
 <!--
   NEMO Access Manager
   ===================
-  Add or remove who can sign in to the skills tester, the scenario editor and
-  this page. Changes go straight to the Cloudflare Access logins through
+  Add or remove who can sign in to the skills tester, the scenario editor, the
+  CPR class page and this page. Changes go straight to the Cloudflare Access logins through
   functions/admin/api/access.js. /admin/ has its own Cloudflare Access login
   ("NEMO Access Manager"); see README §6.
 -->
@@ -37,7 +37,7 @@
 
   main { max-width: 980px; margin: 0 auto; padding: 24px 16px 48px; }
   .intro { color: var(--muted); margin: 0 0 20px; max-width: 680px; }
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
   @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
 
   .card { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; }
@@ -72,6 +72,7 @@
   <span class="spacer"></span>
   <a href="../" target="_blank" rel="noopener">Skills tester ↗</a>
   <a href="../editor/" target="_blank" rel="noopener">Scenario editor ↗</a>
+  <a href="../cpr-class/" target="_blank" rel="noopener">CPR class ↗</a>
 </div>
 
 <main>
@@ -87,6 +88,7 @@
   const CARDS = [
     { list: 'evaluators', title: 'Skills tester', what: 'Evaluators who run psychomotor scenarios in the <a href="../" target="_blank" rel="noopener">skills tester</a>.' },
     { list: 'editors', title: 'Scenario editor', what: 'People who can change scenarios in the <a href="../editor/" target="_blank" rel="noopener">editor</a> and click Publish.' },
+    { list: 'cpr', title: 'CPR instructors', what: 'People who can check off CPR skills and download class paperwork on the <a href="../cpr-class/" target="_blank" rel="noopener">CPR class page</a>.' },
     { list: 'admins', title: 'Access manager', what: 'People who can use this page to change these lists.' },
   ];
   let state = null;

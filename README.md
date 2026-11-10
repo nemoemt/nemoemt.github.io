@@ -18,7 +18,7 @@ button.
 
 ## Site links
 
-**Quick links:** [Website](https://nemonu.org) · [Training portal](https://nemonu.org/training.html) · [Skills tester](https://nemonu.org/assessment) · [Scenario editor](https://nemo-tool.pages.dev/editor/) · [Access Manager](https://nemo-tool.pages.dev/admin/) · [CPR NEMO Exam](https://nemonu.org/cpr/) (password `AHA2026`)
+**Quick links:** [Website](https://nemonu.org) · [Training portal](https://nemonu.org/training.html) · [Skills tester](https://nemonu.org/assessment) · [Scenario editor](https://nemo-tool.pages.dev/editor/) · [Access Manager](https://nemo-tool.pages.dev/admin/) · [CPR NEMO Exam](https://nemonu.org/cpr/) (password `AHA2026`) · [CPR class page](https://nemo-tool.pages.dev/cpr-class/)
 
 | Page | Address | Who can open it |
 |---|---|---|
@@ -31,6 +31,7 @@ button.
 | **Skills tester (psychomotor scenarios)** | https://nemonu.org/assessment (forwards to https://nemo-tool.pages.dev); also linked at the very bottom of the training page | Evaluators on the Cloudflare login list (§6) |
 | Scenario editor for the skills tester | https://nemo-tool.pages.dev/editor/ | People on the Scenario editor list (§6) |
 | **Access Manager** (who can use the tester and editor) | https://nemo-tool.pages.dev/admin/ | Admins (§6) |
+| **CPR class page** (skills checkoffs, AHA paperwork) | https://nemo-tool.pages.dev/cpr-class/ | People on the CPR instructors list (§12) |
 | Live calendar data | https://nemo-calendar.nemo-9bb.workers.dev/events.json | Anyone (the homepage reads it; §10) |
 | 2027 course schedule (PDF) | https://nemonu.org/assets/NEMO_Schedule_2027.pdf | Anyone |
 
@@ -475,6 +476,64 @@ whether you need to touch it. Search `index.html` for the text in the
 | CPR practice exam version "Oct 22, 2025" and "© 2025 American Heart Association" | `cpr/index.html` | `Oct 22, 2025` | Only if the exam questions are replaced with a newer AHA version |
 | Domain expiration (2028) | Squarespace, and the Quick reference table above | n/a | When renewed (§3) |
 | "Est. 2006" | every page | `EST. 2006` | Never; it's the founding year |
+
+## 12. CPR classes: AHA paperwork (roster, skills sheets, eCards)
+
+Every BLS class needs four AHA documents: the **course roster**, an **Adult
+CPR & AED** and an **Infant CPR** skills checklist for each student, and the
+**eCard upload sheet** (Excel). The site fills all four for you.
+
+**Before class:** make sure every instructor is on the **CPR instructors** list
+in the [Access Manager](https://nemo-tool.pages.dev/admin/).
+
+**Students (during class):** they take the
+[CPR NEMO Exam](https://nemonu.org/cpr/) (password `AHA2026`) and, before
+they can submit, fill in first/last name, name for their card, email, phone,
+mailing address and the class date. That goes straight to the CPR class page
+with their score. (They still get their answer sheet PDF, which is also
+emailed to NEMO as before.)
+
+**Instructors (skills checkoffs):**
+1. Open **https://nemo-tool.pages.dev/cpr-class/** (phone or laptop) and sign
+   in with the emailed code.
+2. The first time, enter your name, initials and AHA instructor number (saved
+   on that device; they're printed on every sheet you sign off).
+3. Pick the class date. Tap a student, tick each skill on the Adult and
+   Infant checklists (or **Check all**), and **Save**. All boxes ticked = PASS;
+   anything missed = NR (needs remediation). Add a remediation note/date in
+   the student's roster info if needed.
+4. Walk-ins who didn't take the online exam: **+ Add a student by hand**
+   (enter their written exam score out of 25).
+5. Fill in **Course info for the roster** (times, hours, student-manikin
+   ratio, card issue date, assisting instructors) and save.
+
+**After class (lead instructor):** on the same page click **Download class
+packet (PDF)**: one PDF with the filled roster (10 students per page) and
+every student's Adult and Infant sheets. E-sign the roster's "Signature of
+Lead Instructor" line (e.g. in Adobe Acrobat → Fill & Sign) and save it with
+your AHA records. Then **Download eCard upload sheet (Excel)** and upload it
+to the AHA eCard system. A student counts as **Complete** only if they scored
+at least 21/25 on the exam and passed both skills sheets; only Complete
+students go on the eCard sheet.
+
+**Behind the scenes:**
+- Student records are in Cloudflare KV namespace **nemo-cpr** (binding
+  `CPR_KV` on the nemo-tool project) and expire after about 13 months; the
+  downloaded packet is the permanent copy. Nothing about students is stored
+  in this public repository.
+- The exam sends info to the Worker **nemo-cpr-intake**
+  (`cpr-intake/worker.js`), which can only add records. Reading them requires
+  the CPR class page login. Server code: `functions/cpr-class/api/[[path]].js`;
+  PDF filling: `assessment-tool/cpr-class/packet.js`.
+- The blank AHA forms are stored in that KV namespace as `template:adult`,
+  `template:infant` and `template:roster` (unlocked copies of the official
+  fillable PDFs). If AHA releases new forms, those three entries must be
+  replaced, and the checkbox order in `packet.js` checked against the new
+  form.
+- The lead instructor details printed on the roster (Dylan Stone, ID, card
+  expiration, Bayside training center) are part of the stored roster form.
+  When the lead instructor changes, the roster template needs re-filling and
+  re-uploading.
 
 ---
 

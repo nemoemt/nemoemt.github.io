@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>NEMO CPR Class</title>
+<link rel="icon" type="image/png" href="../nemo_logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!--
+  NEMO CPR Class — instructor page for AHA BLS classes.
+  ======================================================
+  Students fill in their roster info when they submit the CPR NEMO Exam
+  (nemonu.org/cpr/). Here instructors check off each student's Adult CPR & AED
+  and Infant CPR skills, then download the class packet: the filled AHA
+  roster + every student's two skills sheets (one PDF, ready to e-sign) and
+  the eCard upload sheet (Excel). Data: functions/cpr-class/api/[[path]].js.
+  PDF filling: packet.js. Login: "NEMO CPR Instructors" (Access Manager).
+-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="packet.js"></script>
+<style>
+  :root {
+    --purple: #4E2A84; --ink: #1A0E33; --cream: #F5EFE3; --paper: #FFFDF8;
+    --line: #DDD3C2; --muted: #6B6080; --accent: #E8A33D; --danger: #A4262C;
+    --ok: #2E7D4F; --ok-bg: #E3F1E8; --bad-bg: #F8E3E3; --warn-bg: #FCEFD3;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--cream); color: var(--ink); font: 15px/1.5 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  [hidden] { display: none !important; }
+
+  .topbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 16px; background: var(--purple); color: white; position: sticky; top: 0; z-index: 10; }
+  .topbar h1 { font-size: 17px; margin: 0; font-weight: 800; }
+  .topbar .spacer { flex: 1; }
+  .topbar .me { font-size: 13px; opacity: 0.9; }
+  .topbar button { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.5); border-radius: 6px; padding: 4px 10px; font-size: 13px; }
+
+  main { max-width: 900px; margin: 0 auto; padding: 16px 16px 64px; }
+  .card { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+  .card h2 { margin: 0 0 10px; font-size: 16px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  label.f { display: flex; flex-direction: column; gap: 3px; font-size: 12px; font-weight: 600; color: var(--muted); flex: 1; min-width: 140px; }
+  input, select, textarea { padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: white; font-size: 15px; font-weight: 400; color: var(--ink); width: 100%; }
+  .btn { border: 1px solid var(--line); background: white; border-radius: 6px; padding: 8px 14px; font-weight: 600; }
+  .btn-primary { background: var(--purple); color: white; border-color: var(--purple); }
+  .btn-gold { background: var(--accent); border-color: var(--accent); color: var(--ink); }
+  .btn-danger { color: var(--danger); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+
+  .msg { padding: 10px 14px; border-radius: 8px; font-size: 14px; margin-bottom: 14px; }
+  .msg.ok { background: var(--ok-bg); color: var(--ok); }
+  .msg.err { background: var(--bad-bg); color: var(--danger); }
+
+  .summary { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 12px; font-size: 13px; }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #EEE8F6; color: var(--purple); white-space: nowrap; }
+  .pill.ok { background: var(--ok-bg); color: var(--ok); }
+  .pill.bad { background: var(--bad-bg); color: var(--danger); }
+  .pill.todo { background: var(--warn-bg); color: #8A5A00; }
+
+  .student { border: 1px solid var(--line); border-radius: 10px; background: white; margin-bottom: 10px; }
+  .student > .head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 12px 14px; cursor: pointer; }
+  .student > .head .name { font-weight: 700; flex: 1; min-width: 160px; }
+  .student > .head .name small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
+  .student .body { border-top: 1px solid var(--line); padding: 14px; }
+  .sheets { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px) { .sheets { grid-template-columns: 1fr; } }
+  .sheet h3 { margin: 0 0 6px; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+  .item { display: flex; gap: 10px; align-items: flex-start; padding: 7px 4px; border-top: 1px solid #F0EAE0; cursor: pointer; user-select: none; }
+  .item input { width: 20px; height: 20px; flex: none; margin-top: 1px; accent-color: var(--purple); }
+  .sheet .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+  .sheet .meta { font-size: 12px; color: var(--muted); }
+
+  table.assist { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.assist td { padding: 4px 4px; border-top: 1px solid var(--line); vertical-align: middle; }
+  table.assist input { padding: 5px 8px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>NEMO CPR Class</h1>
+  <span class="me" id="meLabel"></span>
+  <span class="spacer"></span>
+  <button type="button" id="meBtn">My instructor info</button>
+</div>
+
+<main>
+  <div id="msg" class="msg" hidden></div>
+
+  <!-- My instructor info: stamped on each skills sheet I check off -->
+  <section class="card" id="meCard" hidden>
+    <h2>My instructor info</h2>
+    <p class="hint" style="margin:0 0 10px">Saved on this device and printed on every skills sheet you check off.</p>
+    <div class="row">
+      <label class="f">Your name<input id="meName" autocomplete="name"></label>
+      <label class="f" style="max-width:120px">Initials<input id="meInitials" maxlength="6"></label>
+      <label class="f">AHA instructor number<input id="meNumber" inputmode="numeric"></label>
+      <button class="btn btn-primary" type="button" id="meSave">Save</button>
+    </div>
+  </section>
+
+  <!-- Pick a class -->
+  <section class="card">
+    <h2>Class</h2>
+    <div class="row">
+      <label class="f">Class date<input type="date" id="classDate"></label>
+      <label class="f">Or pick a recent class<select id="classList"><option value="">Recent classes…</option></select></label>
+    </div>
+    <p class="hint">Students appear here when they submit the CPR NEMO Exam with this class date. Add anyone else by hand below.</p>
+  </section>
+
+  <div id="classArea" hidden>
+    <section class="card">
+      <h2 id="classTitle">Students</h2>
+      <div class="summary" id="summary"></div>
+      <div id="students"></div>
+      <details style="margin-top:8px">
+        <summary class="btn" style="display:inline-block">+ Add a student by hand</summary>
+        <div id="addForm" style="margin-top:12px"></div>
+      </details>
+    </section>
+
+    <section class="card">
+      <h2>Course info for the roster</h2>
+      <div class="row">
+        <label class="f">Start time<input id="ciStart" placeholder="6:00 PM"></label>
+        <label class="f">End time<input id="ciEnd" placeholder="10:00 PM"></label>
+        <label class="f" style="max-width:120px">Total hours<input id="ciHours" placeholder="4"></label>
+        <label class="f" style="max-width:150px">Student-manikin ratio<input id="ciRatio" placeholder="3:1"></label>
+        <label class="f">Issue date of cards<input type="date" id="ciIssue"></label>
+      </div>
+      <h3 style="font-size:14px;margin:16px 0 6px">Assisting instructors</h3>
+      <table class="assist"><tbody id="assistRows"></tbody></table>
+      <p class="hint">Tick who helped teach this class. Instructors you add are saved for future classes.</p>
+      <div class="row" style="margin-top:10px"><button class="btn btn-primary" type="button" id="ciSave">Save course info</button></div>
+    </section>
+
+    <section class="card">
+      <h2>Paperwork</h2>
+      <p class="hint" style="margin:0 0 10px">One PDF with the filled course roster and every student's Adult and Infant skills sheets. Open it, e-sign the roster's "Signature of Lead Instructor" line (and initial anywhere needed), and save it. The Excel file is the AHA eCard upload sheet, with students marked Complete only.</p>
+      <div class="row">
+        <button class="btn btn-gold" type="button" id="packetBtn">Download class packet (PDF)</button>
+        <button class="btn" type="button" id="xlsBtn">Download eCard upload sheet (Excel)</button>
+      </div>
+      <p class="hint" id="packetNote"></p>
+    </section>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  const P = window.NemoPacket;
+  const $ = (id) => document.getElementById(id);
+  const ME_KEY = 'nemo-cpr-instructor-v1';
+  let me = {};
+  let cls = null;            // { date, info, students }
+  let directory = [];        // saved assisting instructors
+  let openKey = null;        // student panel currently open
+
+  // ── helpers ────────────────────────────────────────────────────
+  function el(tag, props, ...kids) {
+    const n = document.createElement(tag);
+    if (props) for (const [k, v] of Object.entries(props)) {
+      if (k === 'class') n.className = v;
+      else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+      else if (k in n) n[k] = v; else n.setAttribute(k, v);
+    }
+    kids.flat().forEach((c) => { if (c != null && c !== false) n.append(c); });
+    return n;
+  }
+  function show(text, ok) { const m = $('msg'); m.textContent = text || ''; m.className = 'msg ' + (ok ? 'ok' : 'err'); m.hidden = !text; if (text && !ok) window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  async function api(path, opts) {
+    const res = await fetch('api/' + path, { credentials: 'same-origin', cache: 'no-store', ...(opts || {}),
+      headers: opts && opts.body ? { 'Content-Type': 'application/json' } : undefined });
+    if (path.startsWith('template/')) { if (!res.ok) throw new Error('Could not load the ' + path.split('/')[1] + ' form.'); return res.arrayBuffer(); }
+    let body = null; try { body = await res.json(); } catch (e) {}
+    if (!res.ok) throw new Error((body && body.error) || ('Error ' + res.status));
+    return body;
+  }
+  const todayIso = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+  const fullName = (s) => s.cardName || ((s.firstName || '') + ' ' + (s.lastName || '')).trim();
+
+  // ── my instructor info ─────────────────────────────────────────
+  function loadMe() { try { me = JSON.parse(localStorage.getItem(ME_KEY) || '{}'); } catch (e) { me = {}; } renderMe(); }
+  function renderMe() {
+    $('meName').value = me.name || ''; $('meInitials').value = me.initials || ''; $('meNumber').value = me.number || '';
+    $('meLabel').textContent = me.initials ? 'Checking off as ' + (me.name || me.initials) : '';
+    if (!me.initials || !me.number) $('meCard').hidden = false;
+  }
+  $('meBtn').onclick = () => { $('meCard').hidden = !$('meCard').hidden; };
+  $('meSave').onclick = () => {
+    me = { name: $('meName').value.trim(), initials: $('meInitials').value.trim().toUpperCase(), number: $('meNumber').value.trim() };
+    if (!me.initials || !me.number) { show('Add your initials and AHA instructor number; they go on every skills sheet you sign off.'); return; }
+    try { localStorage.setItem(ME_KEY, JSON.stringify(me)); } catch (e) {}
+    $('meCard').hidden = true; renderMe(); show('Saved your instructor info on this device.', true);
+  };
+
+  // ── classes ────────────────────────────────────────────────────
+  async function loadClassList() {
+    try {
+      const list = await api('classes');
+      const sel = $('classList');
+      sel.replaceChildren(el('option', { value: '' }, list.length ? 'Recent classes…' : 'No classes yet'));
+      list.forEach((c) => sel.append(el('option', { value: c.date }, P.usDate(c.date) + ' · ' + c.students + (c.students === 1 ? ' student' : ' students'))));
+    } catch (e) { show(e.message); }
+  }
+  $('classList').onchange = () => { if ($('classList').value) { $('classDate').value = $('classList').value; openClass(); } };
+  $('classDate').onchange = openClass;
+
+  async function openClass() {
+    const date = $('classDate').value;
+    if (!date) return;
+    show('');
+    try {
+      cls = await api('class?date=' + date);
+      try { localStorage.setItem('nemo-cpr-last-class', date); } catch (e) {}
+      $('classArea').hidden = false;
+      renderStudents(); renderInfo(); renderAddForm();
+    } catch (e) { show(e.message); }
+  }
+
+  // ── students ───────────────────────────────────────────────────
+  function sheetPill(s, label) {
+    if (!s || !s.result) return el('span', { class: 'pill todo' }, label + ': to do');
+    return el('span', { class: 'pill ' + (s.result === 'pass' ? 'ok' : 'bad') }, label + ': ' + (s.result === 'pass' ? 'PASS' : 'NR'));
+  }
+  function examPill(st) {
+    if (st.score == null) return el('span', { class: 'pill todo' }, 'Exam: none');
+    return el('span', { class: 'pill ' + (P.examPassed(st) ? 'ok' : 'bad') }, 'Exam ' + st.score + '/25');
+  }
+
+  function renderStudents() {
+    const box = $('students');
+    box.replaceChildren();
+    const sts = cls.students;
+    $('classTitle').textContent = 'Students · ' + P.usDate(cls.date);
+    const done = sts.filter(P.isComplete).length;
+    const todo = sts.filter((s) => !(s.adult && s.adult.result) || !(s.infant && s.infant.result)).length;
+    $('summary').replaceChildren(
+      el('span', { class: 'pill' }, sts.length + ' students'),
+      el('span', { class: 'pill ok' }, done + ' complete'),
+      todo ? el('span', { class: 'pill todo' }, todo + ' still need checkoffs') : null);
+    if (!sts.length) box.append(el('p', { class: 'hint' }, 'Nobody yet. Students show up when they submit the exam with this class date, or add them by hand below.'));
+    sts.forEach((st) => box.append(studentCard(st)));
+  }
+
+  function studentCard(st) {
+    const card = el('div', { class: 'student' });
+    const head = el('div', { class: 'head', onclick: () => { openKey = openKey === st.key ? null : st.key; renderStudents(); } },
+      el('div', { class: 'name' }, fullName(st), el('small', null, st.email)),
+      examPill(st), sheetPill(st.adult, 'Adult'), sheetPill(st.infant, 'Infant'),
+      el('span', { class: 'pill ' + (P.isComplete(st) ? 'ok' : '') }, P.isComplete(st) ? 'Complete' : 'Incomplete'));
+    card.append(head);
+    if (openKey === st.key) {
+      const body = el('div', { class: 'body' });
+      body.append(el('div', { class: 'sheets' }, sheetEditor(st, 'adult'), sheetEditor(st, 'infant')));
+      body.append(studentEditor(st));
+      card.append(body);
+    }
+    return card;
+  }
+
+  function sheetEditor(st, kind) {
+    const items = kind === 'adult' ? P.ADULT : P.INFANT;
+    const saved = st[kind] || {};
+    const checks = items.map((_, i) => !!(saved.checks && saved.checks[i]));
+    const boxes = items.map((label, i) => {
+      const cb = el('input', { type: 'checkbox', checked: checks[i], onchange: () => { checks[i] = cb.checked; status(); } });
+      return el('label', { class: 'item' }, cb, el('span', null, label));
+    });
+    const result = el('span', { class: 'pill' });
+    const status = () => {
+      const all = checks.every(Boolean);
+      result.className = 'pill ' + (all ? 'ok' : 'bad');
+      result.textContent = all ? 'PASS' : 'NR (' + checks.filter((c) => !c).length + ' missed)';
+    };
+    status();
+    const save = async (btn) => {
+      if (!me.initials || !me.number) { $('meCard').hidden = false; show('Add your initials and instructor number first (top of the page).'); return; }
+      btn.disabled = true;
+      try {
+        const all = checks.every(Boolean);
+        const rec = await api('skills', { method: 'PUT', body: JSON.stringify({ key: st.key, kind,
+          skills: { checks, result: all ? 'pass' : 'nr', initials: me.initials, instructorNumber: me.number, date: cls.date } }) });
+        Object.assign(st, rec);
+        renderStudents();
+        show(fullName(st) + ' · ' + (kind === 'adult' ? 'Adult' : 'Infant') + ' saved as ' + (all ? 'PASS' : 'NR (needs remediation)') + '.', true);
+      } catch (e) { btn.disabled = false; show(e.message); }
+    };
+    const meta = saved.result ? 'Last saved by ' + (saved.initials || '?') + (saved.at ? ' · ' + new Date(saved.at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '') : 'Not checked off yet';
+    const saveBtn = el('button', { class: 'btn btn-primary', type: 'button', onclick: () => save(saveBtn) }, 'Save');
+    return el('div', { class: 'sheet' },
+      el('h3', null, kind === 'adult' ? 'Adult CPR & AED' : 'Infant CPR', result),
+      boxes,
+      el('div', { class: 'actions' },
+        el('button', { class: 'btn', type: 'button', onclick: () => { boxes.forEach((b, i) => { b.querySelector('input').checked = true; checks[i] = true; }); status(); } }, 'Check all'),
+        saveBtn, el('span', { class: 'meta' }, meta)));
+  }
+
+  function fields(st) {
+    const f = (id, label, val, attrs) => el('label', { class: 'f' }, label, el('input', { name: id, value: val || '', ...(attrs || {}) }));
+    return [
+      el('div', { class: 'row' },
+        f('firstName', 'First name', st.firstName), f('lastName', 'Last name', st.lastName),
+        f('cardName', 'Name as printed on card', st.cardName)),
+      el('div', { class: 'row', style: 'margin-top:8px' },
+        f('email', 'Email', st.email, { type: 'email' }), f('phone', 'Phone', st.phone, { type: 'tel' }),
+        f('score', 'Exam score (out of 25)', st.score == null ? '' : st.score, { inputmode: 'numeric' })),
+      el('div', { class: 'row', style: 'margin-top:8px' },
+        f('address', 'Mailing address', st.address), f('remediation', 'Remediation / date (if applicable)', st.remediation)),
+    ];
+  }
+  function readForm(form) {
+    const o = {}; form.querySelectorAll('input[name]').forEach((i) => { o[i.name] = i.value.trim(); }); return o;
+  }
+
+  function studentEditor(st) {
+    const form = el('div', { style: 'margin-top:16px; padding-top:12px; border-top:1px dashed var(--line)' },
+      el('h3', { style: 'font-size:14px; margin:0 0 8px' }, 'Roster info'), fields(st));
+    const saveBtn = el('button', { class: 'btn', type: 'button', onclick: async () => {
+      saveBtn.disabled = true;
+      try {
+        const rec = await api('student', { method: 'PUT', body: JSON.stringify({ ...readForm(form), key: st.key, date: cls.date }) });
+        openKey = rec.key; await openClass(); show('Saved ' + fullName(rec) + '.', true);
+      } catch (e) { saveBtn.disabled = false; show(e.message); }
+    } }, 'Save roster info');
+    const delBtn = el('button', { class: 'btn btn-danger', type: 'button', onclick: async () => {
+      if (!confirm('Remove ' + fullName(st) + ' from this class?')) return;
+      try { await api('student?key=' + encodeURIComponent(st.key), { method: 'DELETE' }); openKey = null; await openClass(); show('Removed.', true); }
+      catch (e) { show(e.message); }
+    } }, 'Remove from class');
+    form.append(el('div', { class: 'row', style: 'margin-top:10px' }, saveBtn, delBtn));
+    return form;
+  }
+
+  function renderAddForm() {
+    const form = el('div', null, fields({}));
+    const btn = el('button', { class: 'btn btn-primary', type: 'button', onclick: async () => {
+      btn.disabled = true;
+      try {
+        const rec = await api('student', { method: 'PUT', body: JSON.stringify({ ...readForm(form), date: cls.date }) });
+        openKey = rec.key; await openClass(); loadClassList(); show('Added ' + fullName(rec) + '.', true);
+      } catch (e) { btn.disabled = false; show(e.message); }
+    } }, 'Add student');
+    form.append(el('div', { class: 'row', style: 'margin-top:10px' }, btn));
+    $('addForm').replaceChildren(form);
+  }
+
+  // ── course info + assisting instructors ────────────────────────
+  function renderInfo() {
+    const i = cls.info || {};
+    $('ciStart').value = i.startTime || '6:00 PM';
+    $('ciEnd').value = i.endTime || '10:00 PM';
+    $('ciHours').value = i.hours || '4';
+    $('ciRatio').value = i.ratio || '';
+    $('ciIssue').value = i.issueDate || cls.date;
+    const chosen = new Set((i.assistants || []).map((a) => a.name));
+    // Show saved instructors plus any on this class that aren't saved yet.
+    const all = directory.slice();
+    (i.assistants || []).forEach((a) => { if (!all.some((d) => d.name === a.name)) all.push(a); });
+    const tb = $('assistRows'); tb.replaceChildren();
+    all.forEach((a) => tb.append(assistRow(a, chosen.has(a.name))));
+    tb.append(assistRow({}, false, true));
+  }
+  function assistRow(a, on, blank) {
+    const cb = el('input', { type: 'checkbox', checked: on, style: 'width:20px;height:20px' });
+    const name = el('input', { value: a.name || '', placeholder: blank ? 'Add instructor name' : '' });
+    const id = el('input', { value: a.id || '', placeholder: 'Instructor ID#' });
+    const exp = el('input', { value: a.exp || '', placeholder: 'Card exp. (e.g. 5/2027)' });
+    if (blank) name.addEventListener('input', () => { if (name.value.trim()) cb.checked = true; });
+    return el('tr', { class: 'assist-row' }, el('td', { style: 'width:32px' }, cb), el('td', null, name), el('td', null, id), el('td', null, exp));
+  }
+  $('ciSave').onclick = async () => {
+    const rows = [...document.querySelectorAll('#assistRows tr')].map((tr) => {
+      const [cb, name, id, exp] = tr.querySelectorAll('input');
+      return { on: cb.checked, name: name.value.trim(), id: id.value.trim(), exp: exp.value.trim() };
+    }).filter((r) => r.name);
+    const info = { startTime: $('ciStart').value.trim(), endTime: $('ciEnd').value.trim(), hours: $('ciHours').value.trim(),
+      ratio: $('ciRatio').value.trim(), issueDate: $('ciIssue').value, assistants: rows.filter((r) => r.on) };
+    if (info.assistants.length > 8) { show('The roster has room for 8 assisting instructors.'); return; }
+    try {
+      directory = await api('instructors', { method: 'PUT', body: JSON.stringify(rows.map(({ name, id, exp }) => ({ name, id, exp }))) });
+      const res = await api('classinfo', { method: 'PUT', body: JSON.stringify({ date: cls.date, info }) });
+      cls.info = res.info; renderInfo(); show('Course info saved.', true);
+    } catch (e) { show(e.message); }
+  };
+
+  // ── paperwork ──────────────────────────────────────────────────
+  function download(bytes, name, type) {
+    const url = URL.createObjectURL(new Blob([bytes], { type }));
+    const a = el('a', { href: url, download: name }); document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  }
+  function infoForPacket() {
+    const i = cls.info || {};
+    return { date: cls.date, startTime: i.startTime || '6:00 PM', endTime: i.endTime || '10:00 PM', hours: i.hours || '4',
+      ratio: i.ratio || '', issueDate: i.issueDate || cls.date, assistants: i.assistants || [] };
+  }
+  function warnings() {
+    const w = [];
+    const todo = cls.students.filter((s) => !(s.adult && s.adult.result) || !(s.infant && s.infant.result)).map(fullName);
+    const noExam = cls.students.filter((s) => s.score == null).map(fullName);
+    if (todo.length) w.push('Not fully checked off: ' + todo.join(', ') + '.');
+    if (noExam.length) w.push('No exam score: ' + noExam.join(', ') + '.');
+    if (!cls.info) w.push('Course info not saved yet (defaults are used).');
+    return w;
+  }
+  $('packetBtn').onclick = async () => {
+    if (!cls.students.length) { show('No students in this class yet.'); return; }
+    const w = warnings();
+    if (w.length && !confirm(w.join('\n') + '\n\nThose students will be marked Incomplete. Download anyway?')) return;
+    const btn = $('packetBtn'); btn.disabled = true; btn.textContent = 'Building packet…';
+    try {
+      const [adult, infant, roster] = await Promise.all(['adult', 'infant', 'roster'].map((n) => api('template/' + n)));
+      const bytes = await P.buildPacket(window.PDFLib, { adult, infant, roster }, infoForPacket(), cls.students);
+      download(bytes, 'BLS packet ' + cls.date + '.pdf', 'application/pdf');
+      $('packetNote').textContent = 'Downloaded ' + (1 + Math.ceil(cls.students.length / 10) + cls.students.length * 3) + ' pages for ' + cls.students.length + ' students.';
+    } catch (e) { show('Could not build the packet: ' + e.message); }
+    btn.disabled = false; btn.textContent = 'Download class packet (PDF)';
+  };
+  $('xlsBtn').onclick = () => {
+    const rows = P.templateRows(infoForPacket(), cls.students);
+    if (rows.length === 1 && !confirm('No students are marked Complete yet, so the sheet will be empty. Download anyway?')) return;
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Sheet1');
+    XLSX.writeFile(wb, 'BLS eCards ' + cls.date + '.xlsx');
+  };
+
+  // ── start ──────────────────────────────────────────────────────
+  loadMe();
+  api('instructors').then((d) => { directory = d || []; if (cls) renderInfo(); }).catch(() => {});
+  loadClassList();
+  let last = null; try { last = localStorage.getItem('nemo-cpr-last-class'); } catch (e) {}
+  $('classDate').value = last || todayIso();
+  openClass();
+})();
+</script>
+</body>
+</html>
