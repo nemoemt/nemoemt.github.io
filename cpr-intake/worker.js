@@ -1,20 +1,24 @@
 // Cloudflare Worker "nemo-cpr-intake" (dash.cloudflare.com -> Workers & Pages).
 //
-// The CPR NEMO Exam (nemonu.org/cpr/) sends each student's course paperwork
-// info here when they submit the test: name for their card, email, phone,
-// mailing address, class date and score. It is stored in the "nemo-cpr" KV
-// namespace (binding CPR_KV), where the CPR instructor page
-// (nemo-tool.pages.dev/cpr-class/, login required) reads it to fill out the
-// AHA roster, skills sheets and eCard upload template.
+// The CPR NEMO Exam (nemonu.org/cpr/) sends each student's answers and course
+// paperwork info here when they submit the test. This Worker GRADES the exam
+// against the answer key stored privately in the "nemo-cpr" KV namespace
+// (keys answerkey:A and answerkey:B; the key is not in the public page), and
+// stores the student's record with that score: name for their card, email,
+// phone, mailing address, class date, score and attempts. The CPR Testing &
+// Management page (nemo-tool.pages.dev/cpr-class/, login required) reads the
+// records to fill out the AHA roster, skills sheets and eCard upload sheet.
 //
-// This Worker can only ADD records. Nothing here can read them back; that
-// happens only through the login-protected instructor page.
+// It replies with the score and which questions were right or wrong, never
+// the correct answers. It can't read back anyone's records; that happens only
+// through the login-protected management page.
 //
 // To redeploy after editing: dash.cloudflare.com -> Workers & Pages ->
 // nemo-cpr-intake -> Edit code, paste this file, Deploy.
 
 const ALLOWED_ORIGINS = ['https://nemonu.org', 'https://www.nemonu.org', 'https://nemoemt.github.io'];
 const KEEP_DAYS = 400;   // records expire after ~13 months; the class packet is the permanent copy
+const PASS_SCORE = 21;   // 84% of 25
 
 function cors(origin) {
   const ok = ALLOWED_ORIGINS.includes(origin);
@@ -40,11 +44,11 @@ export default {
     const origin = request.headers.get('Origin') || '';
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) });
-    if (url.pathname !== '/submit' || request.method !== 'POST') return reply(404, { error: 'Not found' }, origin);
+    if (url.pathname !== '/grade' || request.method !== 'POST') return reply(404, { error: 'Not found' }, origin);
     if (!ALLOWED_ORIGINS.includes(origin)) return reply(403, { error: 'Not allowed' }, origin);
 
     const text = await request.text();
-    if (text.length > 8000) return reply(413, { error: 'Too large' }, origin);
+    if (text.length > 10000) return reply(413, { error: 'Too large' }, origin);
     let b;
     try { b = JSON.parse(text); } catch (e) { return reply(400, { error: 'Bad request' }, origin); }
 
@@ -56,9 +60,7 @@ export default {
       email: clean(b.email, 120).toLowerCase(),
       phone: clean(b.phone, 40),
       address: clean(b.address, 200),
-      examVersion: clean(b.examVersion, 2),
-      score: Number.isFinite(+b.score) ? +b.score : null,
-      total: Number.isFinite(+b.total) ? +b.total : null,
+      examVersion: b.examVersion === 'B' ? 'B' : 'A',
       submittedAt: new Date().toISOString(),
       source: 'exam',
     };
@@ -67,11 +69,26 @@ export default {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rec.email)) return reply(400, { error: 'Missing email' }, origin);
     if (!rec.cardName) rec.cardName = rec.firstName + ' ' + rec.lastName;
 
-    // One record per student per class: re-submitting replaces it (keyed by email).
+    // Grade against the private answer key.
+    const answerKey = await env.CPR_KV.get('answerkey:' + rec.examVersion, 'json');
+    if (!answerKey) return reply(500, { error: 'The exam answer key is missing. Tell your instructor.' }, origin);
+    const answers = Array.isArray(b.answers) ? b.answers : [];
+    if (answers.length !== answerKey.length || !answers.every((a) => Number.isInteger(a) && a >= 0 && a <= 3)) {
+      return reply(400, { error: 'Answer every question before submitting.' }, origin);
+    }
+    const results = answerKey.map((k, i) => answers[i] === k.correct);
+    rec.score = results.filter(Boolean).length;
+    rec.total = answerKey.length;
+    rec.answers = answers;
+
+    // One record per student per class (keyed by email). A retake replaces the
+    // score, but keeps any skills checkoffs and logs every attempt so
+    // instructors can see retakes.
     const key = 'stu:' + rec.classDate + ':' + rec.email;
     const prev = await env.CPR_KV.get(key, 'json');
-    if (prev) { rec.adult = prev.adult; rec.infant = prev.infant; rec.remediation = prev.remediation; }   // keep checkoffs already done
+    if (prev) { rec.adult = prev.adult; rec.infant = prev.infant; rec.remediation = prev.remediation; }
+    rec.attempts = ((prev && prev.attempts) || []).concat({ version: rec.examVersion, score: rec.score, at: rec.submittedAt }).slice(-10);
     await env.CPR_KV.put(key, JSON.stringify(rec), { expirationTtl: KEEP_DAYS * 86400 });
-    return reply(200, { ok: true }, origin);
+    return reply(200, { ok: true, score: rec.score, total: rec.total, passed: rec.score >= PASS_SCORE, results, attempt: rec.attempts.length }, origin);
   },
 };

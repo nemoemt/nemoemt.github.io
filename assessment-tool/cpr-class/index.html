@@ -236,7 +236,10 @@
   }
   function examPill(st) {
     if (st.score == null) return el('span', { class: 'pill todo' }, 'Exam: none');
-    return el('span', { class: 'pill ' + (P.examPassed(st) ? 'ok' : 'bad') }, 'Exam ' + st.score + '/25');
+    const tries = Array.isArray(st.attempts) ? st.attempts.length : 0;
+    return el('span', { class: 'pill ' + (P.examPassed(st) ? 'ok' : 'bad'),
+      title: tries > 1 ? 'Attempts: ' + st.attempts.map((t) => t.score + '/25 (' + t.version + ')').join(', ') : '' },
+      'Exam ' + st.score + '/25' + (tries > 1 ? ' · ' + tries + ' tries' : ''));
   }
 
   function renderStudents() {

@@ -524,8 +524,18 @@ students go on the eCard sheet.
   `CPR_KV` on the nemo-tool project) and expire after about 13 months; the
   downloaded packet is the permanent copy. Nothing about students is stored
   in this public repository.
-- The exam sends info to the Worker **nemo-cpr-intake**
-  (`cpr-intake/worker.js`), which can only add records. Reading them requires
+- **The exam is graded on the server.** The answer key (correct answers,
+  explanations and manual page citations) is stored privately in the nemo-cpr
+  KV namespace as `answerkey:A` and `answerkey:B`, not in the public exam
+  page. On Submit, the page sends the student's answers and roster info to
+  the Worker **nemo-cpr-intake** (`cpr-intake/worker.js`). The Worker grades
+  them, saves the record with that score, and replies with the score and
+  which questions were right or wrong, never the correct answers. Retakes are
+  logged; the management page shows e.g. "Exam 22/25 · 2 tries". To change
+  a question, edit it in `cpr/index.html` **and** update that question's
+  entry in the answer key in Cloudflare (dash → Storage & databases → KV →
+  nemo-cpr → `answerkey:A`/`B`, a list in question order where `correct` is
+  0 = A, 1 = B, 2 = C, 3 = D). The Worker can only add records. Reading them requires
   the CPR class page login. Server code: `functions/cpr-class/api/[[path]].js`;
   PDF filling: `assessment-tool/cpr-class/packet.js`.
 - The blank AHA forms are stored in that KV namespace as `template:adult`,

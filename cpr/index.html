@@ -872,7 +872,9 @@
 
 <script>
 // ============================================================
-// Exam data — questions, options, correct answer, rationale
+// Exam data — questions and options only. The answer key is NOT in this page:
+// it's stored privately in Cloudflare and the nemo-cpr-intake Worker grades
+// each submission (cpr-intake/worker.js, README §12).
 // Scenarios are attached to the question they precede
 // ============================================================
 // ============================================================
@@ -891,10 +893,7 @@ const EXAM_A = [
       "15 compressions to 2 ventilations",
       "20 compressions to 2 ventilations",
       "30 compressions to 2 ventilations"
-    ],
-    correct: 3,
-    rationale: "The compression-to-ventilation ratio for single rescuers is the same in adults, children, and infants: 30:2.",
-    cite: "BLS Provider Manual, Part 6, p. 59"
+    ]
   },
   {
     q: "What should you do if you need to use an AED on someone who is submerged in water?",
@@ -903,10 +902,7 @@ const EXAM_A = [
       "Do not pull the person out of the water, and wipe their chest",
       "Pull the person out of the water, and wipe their chest",
       "Do not move the person, and do not use the AED"
-    ],
-    correct: 2,
-    rationale: "Water and other liquids conduct electricity. Pull the person out of the water, then quickly wipe the chest before attaching AED pads.",
-    cite: "BLS Provider Manual, Part 4, p. 42"
+    ]
   },
   {
     scenario: "A 9-year-old child suddenly collapsed. After confirming that the scene is safe, you determine that the child is in cardiac arrest, you shout for nearby help, and you activate the emergency response system by using your mobile device. You immediately begin performing high-quality CPR.",
@@ -916,10 +912,7 @@ const EXAM_A = [
       "Tell the second rescuer to take over compressions",
       "Tell the second rescuer to go get the AED",
       "Tell the second rescuer to deliver breaths"
-    ],
-    correct: 2,
-    rationale: "Early defibrillation increases the chance of survival from cardiac arrest caused by an arrhythmia. The shock resets the heart's electrical system so a normal rhythm can return.",
-    cite: "BLS Provider Manual, Part 4, p. 35–36"
+    ]
   },
   {
     q: "The second rescuer returned with the AED. One shock was delivered, and the AED prompted you to immediately resume CPR. What is the compression-to-ventilation ratio for child 2-rescuer CPR?",
@@ -928,10 +921,7 @@ const EXAM_A = [
       "15 compressions to 2 ventilations",
       "20 compressions to 2 ventilations",
       "30 compressions to 2 ventilations"
-    ],
-    correct: 1,
-    rationale: "Pediatric arrests are commonly respiratory in origin, so ventilations matter more. With 2 rescuers, use 15:2 for children and infants.",
-    cite: "BLS Provider Manual, Part 6, pp. 62, 64"
+    ]
   },
   {
     q: "You witness someone suddenly collapse. The person is unresponsive, you hear agonal gasps, and there is no pulse. You call 911. What should you do next?",
@@ -940,10 +930,7 @@ const EXAM_A = [
       "Go get the AED; the gasps are considered normal breathing",
       "Monitor the person; the gasps are considered normal breathing",
       "Give breaths only; the gasps are not considered normal breathing"
-    ],
-    correct: 0,
-    rationale: "Gasping is not normal breathing — it's a sign of cardiac arrest. Begin high-quality CPR.",
-    cite: "BLS Provider Manual, Part 3, p. 16"
+    ]
   },
   {
     q: "Defibrillation is a link in the Chain of Survival. Why is early defibrillation important to survival?",
@@ -952,10 +939,7 @@ const EXAM_A = [
       "It identifies the person's heart rate",
       "It prevents cardiac arrest from reoccurring",
       "It may restore a regular heart rhythm"
-    ],
-    correct: 3,
-    rationale: "The AED's shock stops the abnormal rhythm and resets the heart's electrical system so a normal (organized) rhythm can return.",
-    cite: "BLS Provider Manual, Part 4, p. 35"
+    ]
   },
   {
     scenario: "A 53-year-old woman collapses at a sporting event. She is unresponsive, so you shout for help. She is not breathing and does not have a pulse. You start CPR, and emergency responders arrive with an AED.",
@@ -965,10 +949,7 @@ const EXAM_A = [
       "Apply the pads to the patient's bare chest",
       "Turn on the AED and follow the prompts",
       "Turn on the AED and shout, \"Clear!\""
-    ],
-    correct: 2,
-    rationale: "Open and power on the AED, then follow its voice or screen prompts throughout the resuscitation attempt.",
-    cite: "BLS Provider Manual, Part 4, p. 37"
+    ]
   },
   {
     q: "After the AED pads are attached to the patient, the AED detects a shockable rhythm. You hear the AED prompt that a shock is advised. What should you do next?",
@@ -977,10 +958,7 @@ const EXAM_A = [
       "Clear the patient by shouting, \"Clear!\"",
       "Resume CPR",
       "Press the Shock button"
-    ],
-    correct: 1,
-    rationale: "Before delivering the shock, clear the person — make sure no one is touching them and loudly state a clear message such as \"Everybody clear!\"",
-    cite: "BLS Provider Manual, Part 4, p. 37"
+    ]
   },
   {
     q: "\"The team functions well when all team members know their positions, functions, and tasks during a resuscitation attempt.\" Match this statement with the most appropriate element of team dynamics listed.",
@@ -989,10 +967,7 @@ const EXAM_A = [
       "Constructive intervention",
       "Knowing your limitations",
       "Mutual respect"
-    ],
-    correct: 0,
-    rationale: "When team members know their jobs and responsibilities, the team functions more smoothly. Roles should be defined early and delegated by skill level.",
-    cite: "BLS Provider Manual, Part 5, p. 46"
+    ]
   },
   {
     q: "\"Members of the team know their boundaries and ask for help before the resuscitation attempt worsens.\" Match this statement with the most appropriate element of team dynamics listed.",
@@ -1001,10 +976,7 @@ const EXAM_A = [
       "Constructive intervention",
       "Knowledge sharing",
       "Knowing your limitations"
-    ],
-    correct: 3,
-    rationale: "All team members should know their limitations and ask for help early — before a situation gets worse.",
-    cite: "BLS Provider Manual, Part 5, p. 47"
+    ]
   },
   {
     q: "A person with a foreign-body airway obstruction becomes unresponsive. What should you do first?",
@@ -1013,10 +985,7 @@ const EXAM_A = [
       "Perform abdominal thrusts",
       "Roll the person over and perform back blows",
       "Perform blind finger sweeps"
-    ],
-    correct: 0,
-    rationale: "If the person becomes unresponsive, give CPR until advanced care arrives. Start with compressions.",
-    cite: "BLS Provider Manual, Part 11, p. 102"
+    ]
   },
   {
     q: "When performing high-quality CPR on an adult, what action should you ensure is being accomplished?",
@@ -1025,10 +994,7 @@ const EXAM_A = [
       "Maintaining a compression rate of 90 to 120/min",
       "Placing hands on the upper third of the sternum",
       "Compressing to a depth of at least 2 inches"
-    ],
-    correct: 3,
-    rationale: "Compress the adult chest at least 2 inches (5 cm).",
-    cite: "BLS Provider Manual, Part 3, p. 18"
+    ]
   },
   {
     q: "Which action is most likely to positively impact the survival of a person with sudden cardiac arrest?",
@@ -1037,10 +1003,7 @@ const EXAM_A = [
       "Checking the pulse frequently",
       "Providing rescue breaths",
       "Ensuring scene safety"
-    ],
-    correct: 0,
-    rationale: "High-quality CPR improves a person's chances of survival.",
-    cite: "BLS Provider Manual, Part 1, p. 3"
+    ]
   },
   {
     q: "You and another rescuer just switched roles, and you notice that your partner's chest compression rate is inconsistent. What could you say to ensure that your partner performs high-quality CPR?",
@@ -1049,10 +1012,7 @@ const EXAM_A = [
       "\"Remember to compress at a rate of at least 120 per minute.\"",
       "\"Remember to compress at a rate of 100 to 120 per minute.\"",
       "\"Remember to compress at a rate of 80 to 120 per minute.\""
-    ],
-    correct: 2,
-    rationale: "The correct compression rate is 100 to 120/min. Anyone on the team should speak up to prevent a mistake — that's constructive intervention.",
-    cite: "BLS Provider Manual, Part 5, p. 47"
+    ]
   },
   {
     q: "Which of the following actions represents the Recognition and Emergency Activation link in the Chain of Survival?",
@@ -1061,10 +1021,7 @@ const EXAM_A = [
       "Assessing the underlying causes of cardiac arrest",
       "Providing chest compressions and breaths",
       "Identifying the signs of cardiac arrest and calling 911"
-    ],
-    correct: 3,
-    rationale: "Recognition and Emergency Activation means identifying cardiac arrest and activating the emergency response system (calling 911 or local emergency number).",
-    cite: "BLS Provider Manual, Part 2, pp. 6–7"
+    ]
   },
   {
     q: "What special circumstance should a rescuer consider when they are using an AED?",
@@ -1073,10 +1030,7 @@ const EXAM_A = [
       "You may need to remove chest hair before applying AED pads",
       "You should not use an AED on someone with an implanted pacemaker",
       "You may need to use the AED while a person is submerged in water"
-    ],
-    correct: 1,
-    rationale: "AED pads may stick to chest hair instead of skin, preventing rhythm analysis. Use a razor (often in the AED case) or use a first set of pads to strip the hair before applying the second set.",
-    cite: "BLS Provider Manual, Part 4, p. 42"
+    ]
   },
   {
     q: "Which person requires high-quality CPR?",
@@ -1085,10 +1039,7 @@ const EXAM_A = [
       "Someone who doesn't have a pulse and is not breathing normally",
       "Someone who has a pulse and is breathing normally",
       "Someone who is choking but is able to talk to you"
-    ],
-    correct: 1,
-    rationale: "Assess breathing and pulse simultaneously. If there's no pulse and the person isn't breathing (or is only gasping), begin high-quality CPR.",
-    cite: "BLS Provider Manual, Part 3, p. 16"
+    ]
   },
   {
     q: "What is the correct depth of chest compressions for high-quality CPR on a child?",
@@ -1097,10 +1048,7 @@ const EXAM_A = [
       "At least one fourth the depth of the chest, approximately 1½ inches (4 cm)",
       "At least one half the depth of the chest, approximately 3 inches (8 cm)",
       "At least two thirds the depth of the chest, approximately 4 inches (10 cm)"
-    ],
-    correct: 0,
-    rationale: "For a child, compress at least one third the AP diameter of the chest — about 2 inches (5 cm).",
-    cite: "BLS Provider Manual, Part 6, p. 59"
+    ]
   },
   {
     q: "Why is allowing complete chest recoil important when you are performing high-quality CPR?",
@@ -1109,10 +1057,7 @@ const EXAM_A = [
       "It will reduce the risk of rib fractures",
       "The heart will adequately refill between compressions",
       "There will be a reduction of rescuer fatigue"
-    ],
-    correct: 2,
-    rationale: "Chest recoil allows blood to flow back into the heart. Incomplete recoil reduces filling between compressions and reduces the blood flow CPR creates.",
-    cite: "BLS Provider Manual, Part 3, p. 18"
+    ]
   },
   {
     q: "When you are performing CPR on an unresponsive person who you know is choking, what modification should you incorporate?",
@@ -1121,10 +1066,7 @@ const EXAM_A = [
       "You do not give breaths to an unresponsive choking person",
       "Each time you open the airway, you should look for the obstructing object",
       "There are no modifications to CPR for an unresponsive choking person"
-    ],
-    correct: 2,
-    rationale: "Each time you open the airway, check for a visible object before giving breaths. Removing a visible object may eventually allow effective ventilation.",
-    cite: "BLS Provider Manual, Part 11, pp. 103, 111"
+    ]
   },
   {
     scenario: "An 8-month-old infant is eating and suddenly begins to cough. After a moment, the infant is unable to make any noise but is responsive. You pick up the infant and shout for help.",
@@ -1134,10 +1076,7 @@ const EXAM_A = [
       "Alternate giving sets of 5 back blows and 5 chest thrusts",
       "Encourage the infant to cough, and look in the mouth for the object",
       "Monitor the infant until emergency responders arrive"
-    ],
-    correct: 1,
-    rationale: "Start repeated cycles of 5 back blows (slaps) followed by 5 chest thrusts until the object is expelled or the infant becomes unresponsive.",
-    cite: "BLS Provider Manual, Part 11, p. 108"
+    ]
   },
   {
     q: "The infant becomes unresponsive. What should you do next?",
@@ -1146,10 +1085,7 @@ const EXAM_A = [
       "Alternate giving sets of 5 back blows and 5 chest thrusts and looking for the obstructing object",
       "Attempt a blind finger sweep to remove the obstructing object",
       "Leave the infant in a safe place and go get the AED"
-    ],
-    correct: 0,
-    rationale: "If the infant becomes unresponsive, start CPR immediately with chest compressions. No pulse check. Each time you open the airway, look for the object — remove it only if visible and easily reachable. Never blind sweep.",
-    cite: "BLS Provider Manual, Part 11, p. 110"
+    ]
   },
   {
     scenario: "A 67-year-old man is found unresponsive, not breathing, and without a pulse in his hospital bed. You activate the emergency response system and send someone to get the AED. You begin chest compressions, and a second rescuer prepares to give ventilations with a bag-mask device.",
@@ -1159,10 +1095,7 @@ const EXAM_A = [
       "At 5-minute intervals",
       "About every 2 minutes",
       "Never"
-    ],
-    correct: 2,
-    rationale: "To reduce rescuer fatigue, switch compressors about every 5 cycles (or every 2 minutes), or sooner if needed.",
-    cite: "BLS Provider Manual, Part 3, p. 34"
+    ]
   },
   {
     q: "You switched roles, and you notice that the second rescuer is not allowing for complete chest recoil while giving compressions. What is your next course of action?",
@@ -1171,10 +1104,7 @@ const EXAM_A = [
       "Tell them that the compressions are wrong",
       "Stand back and await direction from the second rescuer",
       "Remind them to allow for complete chest recoil"
-    ],
-    correct: 3,
-    rationale: "Constructive intervention means tactfully pointing out an incorrect action — in this case, reminding the rescuer to allow full chest recoil.",
-    cite: "BLS Provider Manual, Part 5, p. 47"
+    ]
   },
   {
     q: "How can rescuers ensure that they are providing effective ventilations when using a bag-mask device?",
@@ -1183,10 +1113,7 @@ const EXAM_A = [
       "By always having oxygen attached to the bag",
       "By allowing air to release around the mask",
       "By delivering ventilations quickly and forcefully"
-    ],
-    correct: 0,
-    rationale: "Squeeze the bag while watching for visible chest rise. Each ventilation should take 1 second, with or without supplemental oxygen.",
-    cite: "BLS Provider Manual, Part 3, p. 29"
+    ]
   }
 ];
 const EXAM_B = [
@@ -1197,10 +1124,7 @@ const EXAM_B = [
       "Maintaining a compression rate of 90 to 120/min",
       "Placing hands on the upper third of the sternum",
       "Compressing to a depth of at least 2 inches"
-    ],
-    correct: 3,
-    rationale: "Compress the adult chest at least 2 inches (5 cm).",
-    cite: "BLS Provider Manual, Part 3, p. 18"
+    ]
   },
   {
     scenario: "An 8-month-old infant is eating and suddenly begins to cough. After a moment, the infant is unable to make any noise but is responsive. You pick up the infant and shout for help.",
@@ -1210,10 +1134,7 @@ const EXAM_B = [
       "Alternate giving sets of 5 back blows and 5 chest thrusts",
       "Encourage the infant to cough, and look in the mouth for the object",
       "Monitor the infant until emergency responders arrive"
-    ],
-    correct: 1,
-    rationale: "Start repeated cycles of 5 back blows (slaps) followed by 5 chest thrusts until the object is expelled or the infant becomes unresponsive.",
-    cite: "BLS Provider Manual, Part 11, p. 108"
+    ]
   },
   {
     q: "The infant becomes unresponsive. What should you do next?",
@@ -1222,10 +1143,7 @@ const EXAM_B = [
       "Alternate giving sets of 5 back blows and 5 chest thrusts and looking for the obstructing object",
       "Attempt a blind finger sweep to remove the obstructing object",
       "Leave the infant in a safe place and go get the AED"
-    ],
-    correct: 0,
-    rationale: "If the infant becomes unresponsive, start CPR immediately with chest compressions. No pulse check. Each time you open the airway, look for the object — remove it only if visible and easily reachable. Never blind sweep.",
-    cite: "BLS Provider Manual, Part 11, p. 110"
+    ]
   },
   {
     q: "What should you do if you need to use an AED on someone who is submerged in water?",
@@ -1234,10 +1152,7 @@ const EXAM_B = [
       "Do not pull the person out of the water, and wipe their chest",
       "Pull the person out of the water, and wipe their chest",
       "Do not move the person, and do not use the AED"
-    ],
-    correct: 2,
-    rationale: "Water and other liquids conduct electricity. Pull the person out of the water, then quickly wipe the chest before attaching AED pads.",
-    cite: "BLS Provider Manual, Part 4, p. 42"
+    ]
   },
   {
     q: "Which person requires high-quality CPR?",
@@ -1246,10 +1161,7 @@ const EXAM_B = [
       "Someone who doesn't have a pulse and is not breathing normally",
       "Someone who has a pulse and is breathing normally",
       "Someone who is choking but is able to talk to you"
-    ],
-    correct: 1,
-    rationale: "Assess breathing and pulse simultaneously. If there's no pulse and the person isn't breathing (or is only gasping), begin high-quality CPR.",
-    cite: "BLS Provider Manual, Part 3, p. 16"
+    ]
   },
   {
     q: "Defibrillation is a link in the Chain of Survival. Why is early defibrillation important to survival?",
@@ -1258,10 +1170,7 @@ const EXAM_B = [
       "It identifies the person's heart rate",
       "It prevents cardiac arrest from reoccurring",
       "It may restore a regular heart rhythm"
-    ],
-    correct: 3,
-    rationale: "The AED's shock stops the abnormal rhythm and resets the heart's electrical system so a normal (organized) rhythm can return.",
-    cite: "BLS Provider Manual, Part 4, p. 35"
+    ]
   },
   {
     scenario: "A 67-year-old man is found unresponsive, not breathing, and without a pulse in his hospital bed. You activate the emergency response system and send someone to get the AED. You begin chest compressions, and a second rescuer prepares to give ventilations with a bag-mask device.",
@@ -1271,10 +1180,7 @@ const EXAM_B = [
       "At 5-minute intervals",
       "About every 2 minutes",
       "Never"
-    ],
-    correct: 2,
-    rationale: "To reduce rescuer fatigue, switch compressors about every 5 cycles (or every 2 minutes), or sooner if needed.",
-    cite: "BLS Provider Manual, Part 3, p. 34"
+    ]
   },
   {
     q: "You switched roles, and you notice that the second rescuer is not allowing for complete chest recoil while giving compressions. What is your next course of action?",
@@ -1283,10 +1189,7 @@ const EXAM_B = [
       "Tell them that the compressions are wrong",
       "Stand back and await direction from the second rescuer",
       "Remind them to allow for complete chest recoil"
-    ],
-    correct: 3,
-    rationale: "Constructive intervention means tactfully pointing out an incorrect action — in this case, reminding the rescuer to allow full chest recoil.",
-    cite: "BLS Provider Manual, Part 5, p. 47"
+    ]
   },
   {
     q: "What is the correct depth of chest compressions for high-quality CPR on a child?",
@@ -1295,10 +1198,7 @@ const EXAM_B = [
       "At least one fourth the depth of the chest, approximately 1½ inches (4 cm)",
       "At least one half the depth of the chest, approximately 3 inches (8 cm)",
       "At least two thirds the depth of the chest, approximately 4 inches (10 cm)"
-    ],
-    correct: 0,
-    rationale: "For a child, compress at least one third the AP diameter of the chest — about 2 inches (5 cm).",
-    cite: "BLS Provider Manual, Part 6, p. 59"
+    ]
   },
   {
     scenario: "A 53-year-old woman collapses at a sporting event. She is unresponsive, so you shout for help. She is not breathing and does not have a pulse. You start CPR, and emergency responders arrive with an AED.",
@@ -1308,10 +1208,7 @@ const EXAM_B = [
       "Apply the pads to the patient's bare chest",
       "Turn on the AED and follow the prompts",
       "Turn on the AED and shout, \"Clear!\""
-    ],
-    correct: 2,
-    rationale: "Open and power on the AED, then follow its voice or screen prompts throughout the resuscitation attempt.",
-    cite: "BLS Provider Manual, Part 4, p. 37"
+    ]
   },
   {
     q: "After the AED pads are attached to the patient, the AED detects a shockable rhythm. You hear the AED prompt that a shock is advised. What should you do next?",
@@ -1320,10 +1217,7 @@ const EXAM_B = [
       "Clear the patient by shouting, \"Clear!\"",
       "Resume CPR",
       "Press the Shock button"
-    ],
-    correct: 1,
-    rationale: "Before delivering the shock, clear the person — make sure no one is touching them and loudly state a clear message such as \"Everybody clear!\"",
-    cite: "BLS Provider Manual, Part 4, p. 37"
+    ]
   },
   {
     q: "What compression-to-ventilation ratio should be used for infant 1-rescuer CPR?",
@@ -1332,10 +1226,7 @@ const EXAM_B = [
       "15 compressions to 2 ventilations",
       "20 compressions to 2 ventilations",
       "30 compressions to 2 ventilations"
-    ],
-    correct: 3,
-    rationale: "The compression-to-ventilation ratio for single rescuers is the same in adults, children, and infants: 30:2.",
-    cite: "BLS Provider Manual, Part 6, p. 59"
+    ]
   },
   {
     scenario: "A 9-year-old child suddenly collapsed. After confirming that the scene is safe, you determine that the child is in cardiac arrest, you shout for nearby help, and you activate the emergency response system by using your mobile device. You immediately begin performing high-quality CPR.",
@@ -1345,10 +1236,7 @@ const EXAM_B = [
       "Tell the second rescuer to take over compressions",
       "Tell the second rescuer to go get the AED",
       "Tell the second rescuer to deliver breaths"
-    ],
-    correct: 2,
-    rationale: "Early defibrillation increases the chance of survival from cardiac arrest caused by an arrhythmia. The shock resets the heart's electrical system so a normal rhythm can return.",
-    cite: "BLS Provider Manual, Part 4, p. 35–36"
+    ]
   },
   {
     q: "The second rescuer returned with the AED. One shock was delivered, and the AED prompted you to immediately resume CPR. What is the compression-to-ventilation ratio for child 2-rescuer CPR?",
@@ -1357,10 +1245,7 @@ const EXAM_B = [
       "15 compressions to 2 ventilations",
       "20 compressions to 2 ventilations",
       "30 compressions to 2 ventilations"
-    ],
-    correct: 1,
-    rationale: "Pediatric arrests are commonly respiratory in origin, so ventilations matter more. With 2 rescuers, use 15:2 for children and infants.",
-    cite: "BLS Provider Manual, Part 6, pp. 62, 64"
+    ]
   },
   {
     q: "\"The team functions well when all team members know their positions, functions, and tasks during a resuscitation attempt.\" Match this statement with the most appropriate element of team dynamics listed.",
@@ -1369,10 +1254,7 @@ const EXAM_B = [
       "Constructive intervention",
       "Knowing your limitations",
       "Mutual respect"
-    ],
-    correct: 0,
-    rationale: "When team members know their jobs and responsibilities, the team functions more smoothly. Roles should be defined early and delegated by skill level.",
-    cite: "BLS Provider Manual, Part 5, p. 46"
+    ]
   },
   {
     q: "How can rescuers ensure that they are providing effective ventilations when using a bag-mask device?",
@@ -1381,10 +1263,7 @@ const EXAM_B = [
       "By always having oxygen attached to the bag",
       "By allowing air to release around the mask",
       "By delivering ventilations quickly and forcefully"
-    ],
-    correct: 0,
-    rationale: "Squeeze the bag while watching for visible chest rise. Each ventilation should take 1 second, with or without supplemental oxygen.",
-    cite: "BLS Provider Manual, Part 3, p. 29"
+    ]
   },
   {
     q: "When you are performing CPR on an unresponsive person who you know is choking, what modification should you incorporate?",
@@ -1393,10 +1272,7 @@ const EXAM_B = [
       "You do not give breaths to an unresponsive choking person",
       "Each time you open the airway, you should look for the obstructing object",
       "There are no modifications to CPR for an unresponsive choking person"
-    ],
-    correct: 2,
-    rationale: "Each time you open the airway, check for a visible object before giving breaths. Removing a visible object may eventually allow effective ventilation.",
-    cite: "BLS Provider Manual, Part 11, pp. 103, 111"
+    ]
   },
   {
     q: "Why is allowing complete chest recoil important when you are performing high-quality CPR?",
@@ -1405,10 +1281,7 @@ const EXAM_B = [
       "It will reduce the risk of rib fractures",
       "The heart will adequately refill between compressions",
       "There will be a reduction of rescuer fatigue"
-    ],
-    correct: 2,
-    rationale: "Chest recoil allows blood to flow back into the heart. Incomplete recoil reduces filling between compressions and reduces the blood flow CPR creates.",
-    cite: "BLS Provider Manual, Part 3, p. 18"
+    ]
   },
   {
     q: "\"Members of the team know their boundaries and ask for help before the resuscitation attempt worsens.\" Match this statement with the most appropriate element of team dynamics listed.",
@@ -1417,10 +1290,7 @@ const EXAM_B = [
       "Constructive intervention",
       "Knowledge sharing",
       "Knowing your limitations"
-    ],
-    correct: 3,
-    rationale: "All team members should know their limitations and ask for help early — before a situation gets worse.",
-    cite: "BLS Provider Manual, Part 5, p. 47"
+    ]
   },
   {
     q: "What special circumstance should a rescuer consider when they are using an AED?",
@@ -1429,10 +1299,7 @@ const EXAM_B = [
       "You may need to remove chest hair before applying AED pads",
       "You should not use an AED on someone with an implanted pacemaker",
       "You may need to use the AED while a person is submerged in water"
-    ],
-    correct: 1,
-    rationale: "AED pads may stick to chest hair instead of skin, preventing rhythm analysis. Use a razor (often in the AED case) or use a first set of pads to strip the hair before applying the second set.",
-    cite: "BLS Provider Manual, Part 4, p. 42"
+    ]
   },
   {
     q: "Which action is most likely to positively impact the survival of a person with sudden cardiac arrest?",
@@ -1441,10 +1308,7 @@ const EXAM_B = [
       "Checking the pulse frequently",
       "Providing rescue breaths",
       "Ensuring scene safety"
-    ],
-    correct: 0,
-    rationale: "High-quality CPR improves a person's chances of survival.",
-    cite: "BLS Provider Manual, Part 1, p. 3"
+    ]
   },
   {
     q: "A person with a foreign-body airway obstruction becomes unresponsive. What should you do first?",
@@ -1453,10 +1317,7 @@ const EXAM_B = [
       "Perform abdominal thrusts",
       "Roll the person over and perform back blows",
       "Perform blind finger sweeps"
-    ],
-    correct: 0,
-    rationale: "If the person becomes unresponsive, give CPR until advanced care arrives. Start with compressions.",
-    cite: "BLS Provider Manual, Part 11, p. 102"
+    ]
   },
   {
     q: "You and another rescuer just switched roles, and you notice that your partner's chest compression rate is inconsistent. What could you say to ensure that your partner performs high-quality CPR?",
@@ -1465,10 +1326,7 @@ const EXAM_B = [
       "\"Remember to compress at a rate of at least 120 per minute.\"",
       "\"Remember to compress at a rate of 100 to 120 per minute.\"",
       "\"Remember to compress at a rate of 80 to 120 per minute.\""
-    ],
-    correct: 2,
-    rationale: "The correct compression rate is 100 to 120/min. Anyone on the team should speak up to prevent a mistake — that's constructive intervention.",
-    cite: "BLS Provider Manual, Part 5, p. 47"
+    ]
   },
   {
     q: "You witness someone suddenly collapse. The person is unresponsive, you hear agonal gasps, and there is no pulse. You call 911. What should you do next?",
@@ -1477,10 +1335,7 @@ const EXAM_B = [
       "Go get the AED; the gasps are considered normal breathing",
       "Monitor the person; the gasps are considered normal breathing",
       "Give breaths only; the gasps are not considered normal breathing"
-    ],
-    correct: 0,
-    rationale: "Gasping is not normal breathing — it's a sign of cardiac arrest. Begin high-quality CPR.",
-    cite: "BLS Provider Manual, Part 3, p. 16"
+    ]
   },
   {
     q: "Which of the following actions represents the Recognition and Emergency Activation link in the Chain of Survival?",
@@ -1489,10 +1344,7 @@ const EXAM_B = [
       "Assessing the underlying causes of cardiac arrest",
       "Providing chest compressions and breaths",
       "Identifying the signs of cardiac arrest and calling 911"
-    ],
-    correct: 3,
-    rationale: "Recognition and Emergency Activation means identifying cardiac arrest and activating the emergency response system (calling 911 or local emergency number).",
-    cite: "BLS Provider Manual, Part 2, pp. 6–7"
+    ]
   }
 ];
 
@@ -1568,11 +1420,6 @@ function renderQuiz() {
     </div>
     <p class="q-text">${item.q}</p>
     <ul class="options" id="opts-${qIdx}"></ul>
-    <div class="rationale" id="rat-${qIdx}">
-      <span class="label">Rationale</span>
-      <span>${item.rationale}</span>
-      <cite>${item.cite}</cite>
-    </div>
   `;
 
   quizEl.appendChild(card);
@@ -1696,50 +1543,51 @@ document.getElementById('submitBtn').addEventListener('click', () => {
     return;
   }
 
-  submitted = true;
-  let correctCount = 0;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Grading…';
+  const msgEl = document.getElementById('validationMsg');
+  msgEl.textContent = '';
 
-  exam.forEach((item, qIdx) => {
-    const opts = document.querySelectorAll(`#opts-${qIdx} .option`);
-    const userPick = userAnswers[qIdx];
-    const correctIdx = item.correct;
-    const isCorrect = userPick === correctIdx;
-    if (isCorrect) correctCount++;
+  gradeOnServer().then((res) => {
+    submitted = true;
+    gradeResults = res.results;
+    finalScore = res.score;
 
-    opts.forEach((el, i) => {
-      el.classList.add('locked');
-      el.classList.remove('selected');
-      if (i === correctIdx) el.classList.add('correct');
-      if (i === userPick && !isCorrect) el.classList.add('incorrect');
+    exam.forEach((item, qIdx) => {
+      const ok = !!res.results[qIdx];
+      document.querySelectorAll(`#opts-${qIdx} .option`).forEach((el, i) => {
+        el.classList.add('locked');
+        el.classList.remove('selected');
+        if (i === userAnswers[qIdx]) el.classList.add(ok ? 'correct' : 'incorrect');
+      });
+      const statusEl = document.getElementById(`status-${qIdx}`);
+      statusEl.classList.add('show', ok ? 'correct' : 'incorrect');
+      statusEl.textContent = ok ? '✓ Correct' : '✗ Incorrect';
     });
 
-    document.getElementById(`rat-${qIdx}`).classList.add('show');
+    // results panel
+    const resultsEl = document.getElementById('results');
+    resultsEl.classList.add('show');
+    btn.style.display = 'none';
+    const rs = document.getElementById('rosterStatus');
+    rs.textContent = 'Score: ' + res.score + ' / ' + res.total + ' · ' + (res.passed ? 'PASS' : 'Below the passing score of 21 / 25 — see your instructor.')
+      + ' Your score and roster/eCard info were sent to your instructors.';
+    rs.className = 'upload-status ' + (res.passed ? 'ok' : 'warn');
 
-    const statusEl = document.getElementById(`status-${qIdx}`);
-    statusEl.classList.add('show');
-    statusEl.classList.add(isCorrect ? 'correct' : 'incorrect');
-    statusEl.textContent = isCorrect ? '✓ Correct' : '✗ Incorrect';
+    // Build the answer sheet once, download it to the student, and send to Drive.
+    const sheet = buildAnswerSheet();
+    if (sheet) {
+      downloadBlob(sheet.blob, sheet.filename);
+      uploadToDrive(sheet);
+    }
+    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }).catch((err) => {
+    console.error('Grading failed:', err);
+    btn.disabled = false;
+    btn.textContent = 'Submit Test';
+    msgEl.textContent = 'Could not submit: ' + err.message + ' Check your internet connection and press Submit again. Your answers are still here.';
   });
-
-  finalScore = correctCount;
-
-  // results panel
-  const resultsEl = document.getElementById('results');
-  resultsEl.classList.add('show');
-
-  document.getElementById('submitBtn').disabled = true;
-  document.getElementById('submitBtn').style.display = 'none';
-
-  // Build the answer sheet once, download it to the student, and send to Drive.
-  const sheet = buildAnswerSheet();
-  if (sheet) {
-    downloadBlob(sheet.blob, sheet.filename);
-    uploadToDrive(sheet);
-  }
-  sendRosterInfo(correctCount);
-
-  // smooth scroll to results
-  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 
 // ============================================================
@@ -1920,8 +1768,7 @@ function buildAnswerSheet() {
 
   exam.forEach((item, qIdx) => {
     const userPick = userAnswers[qIdx];
-    const correctIdx = item.correct;
-    const isCorrect = userPick === correctIdx;
+    const isCorrect = !!(gradeResults && gradeResults[qIdx]);
 
     // Alternating gray row background (like the AHA original)
     if (qIdx % 2 === 1) {
@@ -1950,13 +1797,6 @@ function buildAnswerSheet() {
         }
         doc.circle(cx, cy - 3, bubbleR, 'F');
         doc.setTextColor(255, 255, 255);   // white letter on colored fill
-        doc.setFont('helvetica', 'bold');
-      } else if (i === correctIdx && userPick !== null && !isCorrect) {
-        // Green ring around correct answer when user got it wrong
-        doc.setDrawColor(31, 111, 67);
-        doc.setLineWidth(1.2);
-        doc.circle(cx, cy - 3, bubbleR, 'S');
-        doc.setTextColor(31, 111, 67);
         doc.setFont('helvetica', 'bold');
       } else {
         doc.setTextColor(0);
@@ -2086,32 +1926,34 @@ function uploadToDrive(sheet) {
   });
 }
 
-// Send the student's roster/eCard info to NEMO's CPR class records (the
-// nemo-cpr-intake Cloudflare Worker, source in cpr-intake/worker.js). Instructors
-// see it on the CPR class page, which fills the AHA roster, skills sheets and
-// eCard upload sheet from it.
-const CPR_INTAKE_URL = 'https://nemo-cpr-intake.nemo-9bb.workers.dev/submit';
-function sendRosterInfo(score) {
-  const statusEl = document.getElementById('rosterStatus');
+// Grade the exam on NEMO's server (the nemo-cpr-intake Cloudflare Worker,
+// source in cpr-intake/worker.js). It holds the answer key, records the score
+// with the student's roster/eCard info for the CPR Testing & Management page,
+// and replies with the score and which questions were right (not the answers).
+const CPR_GRADE_URL = 'https://nemo-cpr-intake.nemo-9bb.workers.dev/grade';
+let gradeResults = null;   // [true/false per question] once graded
+function gradeOnServer() {
   const v = (id) => document.getElementById(id).value.trim();
   const payload = {
     classDate: v('examDate'), firstName: v('firstName'), lastName: v('lastName'),
     cardName: v('cardName') || (v('firstName') + ' ' + v('lastName')),
     email: v('studentEmail'), phone: v('studentPhone'), address: v('studentAddress'),
-    examVersion: v('examVersion'), score: score, total: exam.length,
+    examVersion: v('examVersion'), answers: userAnswers,
   };
-  const send = (tries) => fetch(CPR_INTAKE_URL, {
+  const send = (tries) => fetch(CPR_GRADE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(payload),
-  }).then((r) => { if (!r.ok) throw new Error(r.status); })
-    .catch((err) => { if (tries > 0) return new Promise((ok) => setTimeout(ok, 1500)).then(() => send(tries - 1)); throw err; });
-  send(2).then(() => {
-    if (statusEl) { statusEl.textContent = '✓ Your roster and eCard info was sent to your instructors.'; statusEl.className = 'upload-status ok'; }
+  }).then(async (r) => {
+    let body = {};
+    try { body = await r.json(); } catch (e) {}
+    if (!r.ok || !body.ok) throw new Error(body.error || ('the grading server answered ' + r.status + '.'));
+    return body;
   }).catch((err) => {
-    console.error('Roster info failed:', err);
-    if (statusEl) { statusEl.textContent = 'Your roster info didn\'t go through. Please tell your instructor before you leave.'; statusEl.className = 'upload-status warn'; }
+    if (tries > 0) return new Promise((ok) => setTimeout(ok, 1500)).then(() => send(tries - 1));
+    throw err;
   });
+  return send(2);
 }
 
 // Manual re-view button: rebuild and show the inline modal (and re-download).
