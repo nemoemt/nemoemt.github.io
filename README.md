@@ -508,11 +508,13 @@ emailed to NEMO as before.)
    ratio, card issue date, assisting instructors) and save.
 
 **After class (lead instructor):** on the same page click **Download class
-packet (PDF)**: one PDF with the filled roster (10 students per page) and
-every student's Adult and Infant sheets. E-sign the roster's "Signature of
-Lead Instructor" line (e.g. in Adobe Acrobat → Fill & Sign) and save it with
-your AHA records. Then **Download eCard upload sheet (Excel)** and upload it
-to the AHA eCard system. A student counts as **Complete** only if they scored
+paperwork (ZIP)**. The ZIP has two files:
+- **BLS packet <date>.pdf**: the filled roster (10 students per page) and
+  every student's Adult and Infant sheets. E-sign the roster's "Signature of
+  Lead Instructor" line (e.g. in Adobe Acrobat → Fill & Sign) and save it
+  with your AHA records.
+- **BLS eCards <date>.xlsx**: the eCard upload sheet; upload it to the AHA
+  eCard system. A student counts as **Complete** only if they scored
 at least 21/25 on the exam and passed both skills sheets; only Complete
 students go on the eCard sheet.
 

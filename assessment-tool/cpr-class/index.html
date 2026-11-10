@@ -21,6 +21,7 @@
 -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="packet.js"></script>
 <style>
   :root {
@@ -144,10 +145,9 @@
 
     <section class="card">
       <h2>Paperwork</h2>
-      <p class="hint" style="margin:0 0 10px">One PDF with the filled course roster and every student's Adult and Infant skills sheets. Open it, e-sign the roster's "Signature of Lead Instructor" line (and initial anywhere needed), and save it. The Excel file is the AHA eCard upload sheet, with students marked Complete only.</p>
+      <p class="hint" style="margin:0 0 10px">One ZIP file with both: the <strong>class packet PDF</strong> (filled course roster plus every student's Adult and Infant skills sheets; e-sign the roster's "Signature of Lead Instructor" line and save it) and the <strong>eCard upload sheet</strong> (Excel, students marked Complete only).</p>
       <div class="row">
-        <button class="btn btn-gold" type="button" id="packetBtn">Download class packet (PDF)</button>
-        <button class="btn" type="button" id="xlsBtn">Download eCard upload sheet (Excel)</button>
+        <button class="btn btn-gold" type="button" id="packetBtn">Download class paperwork (ZIP)</button>
       </div>
       <p class="hint" id="packetNote"></p>
     </section>
@@ -416,22 +416,24 @@
   $('packetBtn').onclick = async () => {
     if (!cls.students.length) { show('No students in this class yet.'); return; }
     const w = warnings();
-    if (w.length && !confirm(w.join('\n') + '\n\nThose students will be marked Incomplete. Download anyway?')) return;
-    const btn = $('packetBtn'); btn.disabled = true; btn.textContent = 'Building packet…';
+    if (w.length && !confirm(w.join('\n') + '\n\nThose students will be marked Incomplete (and left off the eCard sheet). Download anyway?')) return;
+    const btn = $('packetBtn'); btn.disabled = true; btn.textContent = 'Building paperwork…';
     try {
+      const info = infoForPacket();
       const [adult, infant, roster] = await Promise.all(['adult', 'infant', 'roster'].map((n) => api('template/' + n)));
-      const bytes = await P.buildPacket(window.PDFLib, { adult, infant, roster }, infoForPacket(), cls.students);
-      download(bytes, 'BLS packet ' + cls.date + '.pdf', 'application/pdf');
-      $('packetNote').textContent = 'Downloaded ' + (1 + Math.ceil(cls.students.length / 10) + cls.students.length * 3) + ' pages for ' + cls.students.length + ' students.';
-    } catch (e) { show('Could not build the packet: ' + e.message); }
-    btn.disabled = false; btn.textContent = 'Download class packet (PDF)';
-  };
-  $('xlsBtn').onclick = () => {
-    const rows = P.templateRows(infoForPacket(), cls.students);
-    if (rows.length === 1 && !confirm('No students are marked Complete yet, so the sheet will be empty. Download anyway?')) return;
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Sheet1');
-    XLSX.writeFile(wb, 'BLS eCards ' + cls.date + '.xlsx');
+      const pdf = await P.buildPacket(window.PDFLib, { adult, infant, roster }, info, cls.students);
+      const rows = P.templateRows(info, cls.students);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Sheet1');
+      const xlsx = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const zip = new JSZip();
+      zip.file('BLS packet ' + cls.date + '.pdf', pdf);
+      zip.file('BLS eCards ' + cls.date + '.xlsx', xlsx);
+      download(await zip.generateAsync({ type: 'uint8array' }), 'BLS class ' + cls.date + '.zip', 'application/zip');
+      $('packetNote').textContent = 'Downloaded: the packet (' + (1 + Math.ceil(cls.students.length / 10) + cls.students.length * 3) + ' pages, '
+        + cls.students.length + ' students) and the eCard sheet (' + (rows.length - 1) + ' complete).';
+    } catch (e) { show('Could not build the paperwork: ' + e.message); }
+    btn.disabled = false; btn.textContent = 'Download class paperwork (ZIP)';
   };
 
   // ── start ──────────────────────────────────────────────────────
