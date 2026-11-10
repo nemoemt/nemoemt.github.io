@@ -18,7 +18,7 @@ button.
 
 ## Site links
 
-**Quick links:** [Website](https://nemonu.org) · [Training portal](https://nemonu.org/training.html) · [Skills tester](https://nemonu.org/assessment) · [Scenario editor](https://nemo-tool.pages.dev/editor/) · [Access Manager](https://nemo-tool.pages.dev/admin/) · [CPR NEMO Exam](https://nemonu.org/cpr/) (password `AHA2026`) · [CPR class page](https://nemo-tool.pages.dev/cpr-class/)
+**Quick links:** [Website](https://nemonu.org) · [Training portal](https://nemonu.org/training.html) · [Skills tester](https://nemonu.org/assessment) · [Scenario editor](https://nemo-tool.pages.dev/editor/) · [Access Manager](https://nemo-tool.pages.dev/admin/) · [CPR NEMO Exam](https://nemonu.org/cpr/) (password `AHA2026`) · [CPR testing & management](https://nemonu.org/cpr-class)
 
 | Page | Address | Who can open it |
 |---|---|---|
@@ -31,7 +31,7 @@ button.
 | **Skills tester (psychomotor scenarios)** | https://nemonu.org/assessment (forwards to https://nemo-tool.pages.dev); also linked at the very bottom of the training page | Evaluators on the Cloudflare login list (§6) |
 | Scenario editor for the skills tester | https://nemo-tool.pages.dev/editor/ | People on the Scenario editor list (§6) |
 | **Access Manager** (who can use the tester and editor) | https://nemo-tool.pages.dev/admin/ | Admins (§6) |
-| **CPR class page** (skills checkoffs, AHA paperwork) | https://nemo-tool.pages.dev/cpr-class/ | People on the CPR instructors list (§12) |
+| **CPR testing & management** (skills checkoffs, AHA paperwork) | https://nemonu.org/cpr-class (forwards to https://nemo-tool.pages.dev/cpr-class/); also linked at the very bottom of the training page | People on the CPR instructors list (§12) |
 | Live calendar data | https://nemo-calendar.nemo-9bb.workers.dev/events.json | Anyone (the homepage reads it; §10) |
 | 2027 course schedule (PDF) | https://nemonu.org/assets/NEMO_Schedule_2027.pdf | Anyone |
 
@@ -473,7 +473,7 @@ whether you need to touch it. Search `index.html` for the text in the
 | News card dates ("— October 2026", "— Winter 2026", "— Spring 2025") | `index.html` | `news-card-date` | Set on each new card (§7) |
 | Mentor meeting and info session dates (currently: mentor blank, info "Thursday, October 1") | `index.html` | `SESSION_VIDEOS` | After each new recording (§8) |
 | Fallback text "Next cohort: Winter 2027" / "Applications open in fall quarter. Capacity is 120 seats." | `index.html` | `applyEyebrow` | Once a year, to match `cohortYear`, so it's right even if the script fails. If the seat count changes, also change `120 seats` in the `BANNER_CONFIG` script further down. |
-| CPR practice exam version "Oct 22, 2025" and "© 2025 American Heart Association" | `cpr/index.html` | `Oct 22, 2025` | Only if the exam questions are replaced with a newer AHA version |
+| CPR NEMO Exam: "© 2025 American Heart Association" (the date at the top now shows the day it's taken, automatically) | `cpr/index.html` | `© 2025 American Heart` | Only if the exam questions are replaced with a newer AHA version |
 | Domain expiration (2028) | Squarespace, and the Quick reference table above | n/a | When renewed (§3) |
 | "Est. 2006" | every page | `EST. 2006` | Never; it's the founding year |
 
@@ -494,7 +494,8 @@ with their score. (They still get their answer sheet PDF, which is also
 emailed to NEMO as before.)
 
 **Instructors (skills checkoffs):**
-1. Open **https://nemo-tool.pages.dev/cpr-class/** (phone or laptop) and sign
+1. Open **CPR Testing & Management** at **https://nemonu.org/cpr-class**
+   (phone or laptop; also linked at the bottom of the training page) and sign
    in with the emailed code.
 2. The first time, enter your name, initials and AHA instructor number (saved
    on that device; they're printed on every sheet you sign off).

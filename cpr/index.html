@@ -729,11 +729,11 @@
 </head>
 <body>
 
-<!-- PASSWORD GATE — keeps the practice exam to NEMO students. The password is
+<!-- PASSWORD GATE — keeps the CPR NEMO Exam to NEMO students. The password is
      shared in class (current: see README "Site links"). To change it, put the
      new password's SHA-256 in GATE_HASH below (any online SHA-256 tool works,
-     or: printf 'NEWPASSWORD' | sha256sum). This is a light lock for a practice
-     quiz, not real security: anyone who reads the page code can get past it. -->
+     or: printf 'NEWPASSWORD' | sha256sum). This is a light lock, not real security:
+     anyone who reads the page code can get past it. -->
 <style>
   #gate { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 16px; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
   #gate form { background: var(--paper); border: 1px solid var(--rule); box-shadow: var(--shadow); padding: 32px 28px; max-width: 360px; width: 100%; }
@@ -786,10 +786,10 @@
   <header class="masthead">
     <div class="eyebrow">
       <span><span class="dot"></span>American Heart Association</span>
-      <span>Oct 22, 2025</span>
+      <span id="todayLabel"></span>
     </div>
     <h1 class="title">Basic Life Support<br><em id="examLabel">Exam A</em></h1>
-    <div class="subtitle">25 questions · Passing score: 84% (21 / 25) · Self-scored practice</div>
+    <div class="subtitle">25 questions · Passing score: 84% (21 / 25)</div>
     <div class="info-block">
       <p class="info-instruction">Fill in everything below before you submit. It goes on the AHA course roster and your BLS eCard, so use your real name and an email you check. Your answer sheet is sent to NEMO automatically.</p>
       <div class="info-grid">
@@ -866,7 +866,7 @@
     </div>
   </div>
 
-  <p class="footer-note">© 2025 American Heart Association · Practice format</p>
+  <p class="footer-note">© 2025 American Heart Association</p>
 
 </div>
 
@@ -1513,6 +1513,8 @@ let submitted = false;
               String(d.getMonth() + 1).padStart(2, '0') + '-' +
               String(d.getDate()).padStart(2, '0');
   document.getElementById('examDate').value = iso;
+  document.getElementById('todayLabel').textContent =
+    d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 })();
 
 // Validate required info fields, return list of empty field IDs
@@ -1793,7 +1795,7 @@ function buildAnswerSheet() {
     alert(
       "PDF library couldn't load (likely a network or CSP block).\n\n" +
       "Workaround: take a screenshot of this results page and email it to nemo@u.northwestern.edu, " +
-      "or open this quiz directly in your browser (not in an embedded preview) and try again."
+      "or open this exam directly in your browser (not in an embedded preview) and try again."
     );
     return null;
   }
