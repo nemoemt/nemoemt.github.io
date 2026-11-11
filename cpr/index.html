@@ -867,12 +867,12 @@
     <p class="results-headline">Your answer sheet is ready.</p>
     <div class="submit-notice">
       <span class="submit-notice-label">What happens now</span>
-      <p>Your answer sheet PDF has downloaded to your device and been sent to NEMO automatically. If the upload didn't go through, you can email your copy to <a id="resultMailLink" href="mailto:nemo@u.northwestern.edu?subject=BLS%20Exam%20A%20Answer%20Sheet">nemo@u.northwestern.edu</a>.</p>
+      <p>Your answer sheet is sent to NEMO automatically; wait for the green "sent" line below before closing this page. You can also view or save your own copy with the button below. If it says the send failed, email your copy to <a id="resultMailLink" href="mailto:nemo@u.northwestern.edu?subject=BLS%20Exam%20A%20Answer%20Sheet">nemo@u.northwestern.edu</a>.</p>
     </div>
     <p class="upload-status" id="uploadStatus"></p>
     <p class="upload-status" id="rosterStatus"></p>
     <div class="results-actions">
-      <button class="download" id="downloadBtn">⬇ View / Re-download Answer Sheet (PDF)</button>
+      <button class="download" id="downloadBtn">⬇ View / Save Answer Sheet (PDF)</button>
     </div>
   </div>
 
@@ -1629,10 +1629,13 @@ document.getElementById('submitBtn').addEventListener('click', () => {
     rs.className = 'upload-status ' + (res.passed ? 'ok' : 'warn');
 
     // Build the answer sheet once, download it to the student, and send to Drive.
+    // Send the answer sheet to NEMO FIRST and only then hand the student their
+    // copy. On iPhone/iPad, "downloading" a PDF opens it in place of this
+    // page, which used to cancel the send; there we never auto-open it and
+    // the student uses the View / Save button instead.
     const sheet = buildAnswerSheet();
     if (sheet) {
-      downloadBlob(sheet.blob, sheet.filename);
-      uploadToDrive(sheet);
+      uploadToDrive(sheet).then(() => { if (!IS_IOS) downloadBlob(sheet.blob, sheet.filename); });
     }
     resultsEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }).catch((err) => {
@@ -1935,17 +1938,23 @@ function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-// Fire-and-forget upload of the PDF to the Google Apps Script Drive endpoint.
-// Uses no-cors + text/plain so the request reliably lands from a static page;
-// the response can't be read, so we optimistically report "sent."
+// iPhone / iPad (iPadOS reports itself as a Mac with a touch screen).
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+// Send the answer sheet PDF to NEMO. It goes through the nemo-cpr-intake
+// Worker (POST /answersheet), which forwards it to the Google Apps Script that
+// emails it, and tells us whether that worked; retried twice. If the Worker
+// can't be reached, fall back to posting to the Apps Script directly.
+// Returns a promise that settles when the send is done (either way).
+const ANSWER_SHEET_URL = 'https://nemo-cpr-intake.nemo-9bb.workers.dev/answersheet';
 function uploadToDrive(sheet) {
   const statusEl = document.getElementById('uploadStatus');
   if (!DRIVE_UPLOAD_URL || DRIVE_UPLOAD_URL.indexOf('PASTE_YOUR') !== -1) {
     if (statusEl) {
-      statusEl.textContent = 'Auto-send not configured — your PDF downloaded locally only.';
+      statusEl.textContent = 'Auto-send not configured. Save your answer sheet with the button below.';
       statusEl.className = 'upload-status warn';
     }
-    return;
+    return Promise.resolve();
   }
   if (statusEl) {
     statusEl.textContent = 'Sending your answer sheet to NEMO…';
@@ -1960,22 +1969,40 @@ function uploadToDrive(sheet) {
     total: sheet.total,
     pdfBase64: sheet.base64
   });
-  fetch(DRIVE_UPLOAD_URL, {
+  const viaWorker = (tries) => fetch(ANSWER_SHEET_URL, {
     method: 'POST',
-    mode: 'no-cors',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: payload
-  }).then(() => {
+    body: payload,
+  }).then(async (r) => {
+    let b = {}; try { b = await r.json(); } catch (e) {}
+    if (!r.ok || !b.ok) throw new Error(b.error || ('HTTP ' + r.status));
+  }).catch((err) => {
+    if (tries > 0) return new Promise((ok) => setTimeout(ok, 2000)).then(() => viaWorker(tries - 1));
+    throw err;
+  });
+  const direct = () => fetch(DRIVE_UPLOAD_URL, {
+    method: 'POST', mode: 'no-cors', keepalive: payload.length < 60000,
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: payload,
+  });
+  const saveHint = IS_IOS ? ' Tap "View / Save Answer Sheet" below for your own copy.' : ' Your copy is downloading.';
+  return viaWorker(2).then(() => {
     if (statusEl) {
-      statusEl.textContent = '✓ Answer sheet sent to NEMO and downloaded to your device.';
+      statusEl.textContent = '✓ Answer sheet sent to NEMO.' + saveHint;
       statusEl.className = 'upload-status ok';
     }
   }).catch((err) => {
-    console.error('Drive upload failed:', err);
-    if (statusEl) {
-      statusEl.textContent = 'Upload may have failed — your PDF downloaded locally. Please email it to nemo@u.northwestern.edu.';
-      statusEl.className = 'upload-status warn';
-    }
+    console.error('Answer sheet send via NEMO server failed, trying direct:', err);
+    return direct().then(() => {
+      if (statusEl) {
+        statusEl.textContent = 'Answer sheet sent to NEMO (unconfirmed).' + saveHint + ' To be safe, also email your copy to nemo@u.northwestern.edu.';
+        statusEl.className = 'upload-status warn';
+      }
+    }).catch(() => {
+      if (statusEl) {
+        statusEl.textContent = "Couldn't send your answer sheet. Save it with the button below and email it to nemo@u.northwestern.edu, or show your instructor.";
+        statusEl.className = 'upload-status warn';
+      }
+    });
   });
 }
 

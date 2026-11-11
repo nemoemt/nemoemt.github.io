@@ -497,9 +497,13 @@ is `SESSIONS_CSV_URL` at the top of `cpr-intake/worker.js`.
 they can submit, fill in first/last name, name for their card, email, phone,
 mailing address, and pick their class from the dropdown (today's class is
 preselected; "Another date…" covers anything not on the schedule). Everyone
-who submits is added to that class automatically, pass or not. That goes straight to the CPR class page
-with their score. (They still get their answer sheet PDF, which is also
-emailed to NEMO as before.)
+who submits is added to that class automatically, pass or not, with their
+score. Their answer sheet PDF is also emailed to NEMO: the exam sends it to
+the nemo-cpr-intake Worker (`/answersheet`), which forwards it to the Google
+Apps Script that sends the email, and the student sees a green "sent" line
+once it's confirmed. Students then save their own copy (on iPhone/iPad with
+the View / Save button, because opening a PDF there leaves the page; that
+used to cancel the email).
 
 **Instructors (skills checkoffs):**
 1. Open **CPR Testing & Management** at **https://nemonu.org/cpr-class**

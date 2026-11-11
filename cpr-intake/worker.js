@@ -25,6 +25,12 @@ const ALLOWED_ORIGINS = ['https://nemonu.org', 'https://www.nemonu.org', 'https:
 // Testing & Management page use. Leave empty to turn the dropdown off.
 const SESSIONS_CSV_URL = '';
 let sessionsCache = null;   // { at, body }
+
+// The Google Apps Script that emails each answer sheet PDF to NEMO (the same
+// one the exam page used to call directly). POST /answersheet forwards the
+// exam's PDF there from the server, so it arrives even if the student's phone
+// leaves the page right away, and the exam gets a real "sent" / "failed".
+const ANSWER_SHEET_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwOfmf2XejSgzmh5jQXrqfbzQ2LczHFmB44Kyu0ZPhk7du-o2mQYSgus4uPZh1B_BjtBw/exec';
 const KEEP_DAYS = 400;   // records expire after ~13 months; the class packet is the permanent copy
 const PASS_SCORE = 21;   // 84% of 25
 
@@ -85,6 +91,25 @@ function toIsoDate(text, now) {
   return year + '-' + String(mon + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
 }
 
+async function forwardAnswerSheet(request, origin) {
+  if (!ALLOWED_ORIGINS.includes(origin)) return reply(403, { error: 'Not allowed' }, origin);
+  const text = await request.text();
+  if (text.length > 6 * 1024 * 1024) return reply(413, { error: 'Answer sheet too large' }, origin);
+  try {
+    const b = JSON.parse(text);
+    if (!b.pdfBase64 || !b.filename) return reply(400, { error: 'Missing answer sheet' }, origin);
+  } catch (e) { return reply(400, { error: 'Bad request' }, origin); }
+  try {
+    // Apps Script answers a POST with a redirect to its result page; fetch follows it.
+    const res = await fetch(ANSWER_SHEET_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: text });
+    const out = (await res.text()).slice(0, 300);
+    if (!res.ok) return reply(502, { error: 'Google script answered ' + res.status, detail: out }, origin);
+    return reply(200, { ok: true, detail: out }, origin);
+  } catch (e) {
+    return reply(502, { error: 'Could not reach the Google script' }, origin);
+  }
+}
+
 async function sessions() {
   const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=120', 'Access-Control-Allow-Origin': '*' };
   if (!SESSIONS_CSV_URL) return new Response(JSON.stringify({ sessions: [] }), { headers });
@@ -121,6 +146,7 @@ export default {
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) });
     if (url.pathname === '/sessions' && request.method === 'GET') return sessions();
+    if (url.pathname === '/answersheet' && request.method === 'POST') return forwardAnswerSheet(request, origin);
     if (url.pathname !== '/grade' || request.method !== 'POST') return reply(404, { error: 'Not found' }, origin);
     if (!ALLOWED_ORIGINS.includes(origin)) return reply(403, { error: 'Not allowed' }, origin);
 
