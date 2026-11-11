@@ -7,8 +7,8 @@
 //   stu:<YYYY-MM-DD>:<email>   one student in one class (written by the exam
 //                              through the nemo-cpr-intake Worker, or added here)
 //   cls:<YYYY-MM-DD>           course info for the roster (times, ratio, assistants)
-//   instructors                saved assisting-instructor list (name, ID, card exp)
-//   profile:<email>            each instructor's own name, initials, ID, card exp
+//   instructors                instructor list: name, initials, ID, card exp, login
+//                              email (the entry with your email is your profile)
 //   template:<adult|infant|roster>   the blank AHA PDF forms
 //
 // Routes:
@@ -18,8 +18,9 @@
 //   DELETE student?key=            -> remove a student
 //   PUT    skills                  -> save a checkoff     {key, kind, checks, result, ...}
 //   PUT    classinfo               -> save course info    {date, info}
-//   GET/PUT instructors            -> saved assisting instructors
-//   GET/PUT me                     -> the signed-in instructor's profile
+//   GET/PUT instructors            -> the instructor list (PUT replaces it)
+//   PUT    instructors/merge       -> add/update names typed for a class
+//   GET/PUT me                     -> the signed-in instructor's own entry
 //   GET    template/<name>         -> blank PDF form
 const KEEP_DAYS = 400;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -138,34 +139,55 @@ export async function onRequest({ env, request, params }) {
       return json(200, { info });
     }
 
+    // One shared instructor list: [{ name, initials, id, exp, email }]. An entry
+    // with a login email is that person's profile ("My profile").
+    const loadList = async () => (await env.CPR_KV.get('instructors', 'json')) || [];
+    const cleanEntry = (a) => ({
+      name: clean(a.name, 80), initials: clean(a.initials, 8).toUpperCase(), id: clean(a.id, 40),
+      exp: clean(a.exp, 20), email: EMAIL.test(clean(a.email, 120)) ? clean(a.email, 120).toLowerCase() : '',
+    });
+    const uniqueNames = (list) => list.filter((a, i, all) => a.name && all.findIndex((b) => b.name.toLowerCase() === a.name.toLowerCase()) === i);
+
     if (path === 'me') {
-      if (m === 'GET') return json(200, { email: who, profile: await env.CPR_KV.get('profile:' + who, 'json') });
-      if (m === 'PUT') {
-        const profile = {
-          name: clean(body.name, 80), initials: clean(body.initials, 8).toUpperCase(),
-          number: clean(body.number, 40), exp: clean(body.exp, 20),
-        };
-        if (!profile.name || !profile.initials || !profile.number) return json(400, { error: 'Name, initials and instructor number are all needed.' });
-        await env.CPR_KV.put('profile:' + who, JSON.stringify(profile));
-        // Also keep them in the assisting-instructor list for the roster.
-        const list = (await env.CPR_KV.get('instructors', 'json')) || [];
-        const i = list.findIndex((a) => a.name.toLowerCase() === profile.name.toLowerCase());
-        const entry = { name: profile.name, id: profile.number, exp: profile.exp, initials: profile.initials };
-        if (i >= 0) list[i] = { ...list[i], ...entry }; else list.push(entry);
-        await env.CPR_KV.put('instructors', JSON.stringify(list));
+      const list = await loadList();
+      if (m === 'GET') {
+        const mine = list.find((a) => a.email === who);
+        const old = mine ? null : await env.CPR_KV.get('profile:' + who, 'json');   // profiles saved before the shared list
+        const profile = mine ? { name: mine.name, initials: mine.initials, number: mine.id, exp: mine.exp } : old;
         return json(200, { email: who, profile });
+      }
+      if (m === 'PUT') {
+        const e = cleanEntry({ ...body, id: body.number, email: who });
+        if (!e.name || !e.initials || !e.id) return json(400, { error: 'Name, initials and instructor number are all needed.' });
+        let i = list.findIndex((a) => a.email === who);
+        if (i < 0) i = list.findIndex((a) => !a.email && a.name.toLowerCase() === e.name.toLowerCase());   // claim a pre-made entry
+        if (i >= 0) list[i] = e; else list.push(e);
+        await env.CPR_KV.put('instructors', JSON.stringify(uniqueNames(list)));
+        await env.CPR_KV.delete('profile:' + who);
+        return json(200, { email: who, profile: { name: e.name, initials: e.initials, number: e.id, exp: e.exp } });
       }
     }
 
     if (path === 'instructors') {
-      if (m === 'GET') return json(200, (await env.CPR_KV.get('instructors', 'json')) || []);
-      if (m === 'PUT') {
-        const list = (Array.isArray(body) ? body : []).slice(0, 50)
-          .map((a) => ({ name: clean(a.name, 80), id: clean(a.id, 40), exp: clean(a.exp, 20), initials: clean(a.initials, 8) }))
-          .filter((a, i, all) => a.name && all.findIndex((b) => b.name.toLowerCase() === a.name.toLowerCase()) === i);   // each name once
+      if (m === 'GET') return json(200, await loadList());
+      if (m === 'PUT') {   // replace the whole list (Instructors panel)
+        const list = uniqueNames((Array.isArray(body) ? body : []).slice(0, 100).map(cleanEntry));
+        const emails = list.map((a) => a.email).filter(Boolean);
+        if (new Set(emails).size !== emails.length) return json(400, { error: 'Two instructors have the same login email.' });
         await env.CPR_KV.put('instructors', JSON.stringify(list));
         return json(200, list);
       }
+    }
+
+    if (m === 'PUT' && path === 'instructors/merge') {   // add/update people typed in a class's assistant list
+      const list = await loadList();
+      (Array.isArray(body) ? body : []).slice(0, 20).map(cleanEntry).filter((a) => a.name).forEach((a) => {
+        const i = list.findIndex((b) => b.name.toLowerCase() === a.name.toLowerCase());
+        if (i < 0) list.push(a);
+        else list[i] = { ...list[i], id: a.id || list[i].id, exp: a.exp || list[i].exp };
+      });
+      await env.CPR_KV.put('instructors', JSON.stringify(list));
+      return json(200, list);
     }
 
     if (m === 'GET' && path.startsWith('template/')) {

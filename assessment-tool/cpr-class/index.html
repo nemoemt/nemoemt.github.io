@@ -120,6 +120,22 @@
     <p class="hint">Students take the <a href="https://nemonu.org/cpr/" target="_blank" rel="noopener">CPR NEMO Exam</a> (nemonu.org/cpr, password AHA2026) and appear here when they submit it with this class date. Add anyone else by hand below.</p>
   </section>
 
+  <!-- Instructors: the shared list (also each person's profile) -->
+  <section class="card" id="instructorsCard">
+    <details id="instructorsDetails">
+      <summary style="cursor:pointer"><h2 style="display:inline">Instructors</h2> <span class="hint" id="instructorsCount"></span></summary>
+      <p class="hint">Everyone who teaches NEMO CPR classes. Add people and fill in their details here; when someone signs in with the <strong>login email</strong> you entered, this becomes their profile automatically. These names autocomplete in a class's assisting instructors, and initials and ID go on the sheets they check off.</p>
+      <div style="overflow-x:auto"><table class="assist" style="min-width:640px">
+        <thead><tr style="font-size:12px;color:var(--muted);text-align:left"><th>Name</th><th style="width:80px">Initials</th><th>Instructor ID#</th><th style="width:120px">Card exp.</th><th>Login email</th><th style="width:44px"></th></tr></thead>
+        <tbody id="instRows"></tbody>
+      </table></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" type="button" id="addInst">+ Add instructor</button>
+        <button class="btn btn-primary" type="button" id="saveInst">Save instructors</button>
+      </div>
+    </details>
+  </section>
+
   <div id="classArea" hidden>
     <section class="card">
       <h2 id="classTitle">Students</h2>
@@ -142,8 +158,9 @@
       </div>
       <h3 style="font-size:14px;margin:16px 0 6px">Assisting instructors</h3>
       <table class="assist"><tbody id="assistRows"></tbody></table>
+      <datalist id="knownInstructors"></datalist>
       <div class="row" style="margin-top:8px"><button class="btn" type="button" id="addAssist">+ Add another instructor</button></div>
-      <p class="hint">Tick everyone who helped teach this class (up to 8 go on the roster). Instructors you add are saved for future classes; ✕ removes one from the saved list. Remember to click Save course info.</p>
+      <p class="hint">Tick everyone who helped teach this class (up to 8 go on the roster). Instructors are remembered: type part of a name (like "adam") and their ID and card expiration fill in. ✕ takes someone off this class only; manage the saved list under <a href="#instructorsCard">Instructors</a>. Remember to click Save course info.</p>
       <div class="row" style="margin-top:10px"><button class="btn btn-primary" type="button" id="ciSave">Save course info</button></div>
     </section>
 
@@ -168,7 +185,7 @@
   const LEAD_INSTRUCTOR = 'Dylan Stone';      // already printed on the roster template as lead instructor
   let me = {};
   let cls = null;            // { date, info, students }
-  let directory = [];        // saved assisting instructors
+  let directory = [];        // the shared instructor list (name, initials, id, exp, email)
   let openKey = null;        // student panel currently open
 
   // ── helpers ────────────────────────────────────────────────────
@@ -177,7 +194,8 @@
     if (props) for (const [k, v] of Object.entries(props)) {
       if (k === 'class') n.className = v;
       else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
-      else if (k in n) n[k] = v; else n.setAttribute(k, v);
+      else if (k === 'list' || !(k in n)) n.setAttribute(k, v);   // e.g. an input's datalist can only be set as an attribute
+      else n[k] = v;
     }
     kids.flat().forEach((c) => { if (c != null && c !== false) n.append(c); });
     return n;
@@ -224,7 +242,7 @@
       me = r.profile;
       $('meTitle').textContent = 'My instructor profile';
       $('meCard').hidden = true; renderMe(); show('Profile saved to your login.', true);
-      directory = await api('instructors'); if (cls) renderInfo();
+      directory = await api('instructors'); renderInstructors(); if (cls) renderInfo();
     } catch (e) { show(e.message); }
   };
 
@@ -418,6 +436,7 @@
     const chosen = new Set((cls.info ? i.assistants || [] : fromSheet).map((a) => a.name.toLowerCase()));
     // Show saved instructors plus any on this class that aren't saved yet (each name once).
     const all = uniqueByName(directory.concat(i.assistants || [], fromSheet));
+    refreshInstructorList();
     const tb = $('assistRows'); tb.replaceChildren();
     all.forEach((a) => tb.append(assistRow(a, chosen.has(a.name.toLowerCase()))));
     tb.append(assistRow({}, false, true));
@@ -433,16 +452,47 @@
     });
     return [...out.values()];
   }
+  // Saved instructors (assisting list + everyone's profile) for autocomplete.
+  function knownInstructors() { return uniqueByName(directory); }
+  function findInstructor(text, exactOnly) {
+    const t = String(text || '').trim().toLowerCase();
+    if (!t) return null;
+    const all = knownInstructors();
+    const exact = all.find((a) => a.name.toLowerCase() === t);
+    if (exact || exactOnly) return exact || null;
+    const hits = partialMatches(t);
+    return hits.length === 1 ? hits[0] : null;
+  }
+  // Saved instructors whose full name, or any word in it, starts with the text ("adam", "dip").
+  function partialMatches(text) {
+    const t = String(text || '').trim().toLowerCase();
+    if (!t) return [];
+    return knownInstructors().filter((a) => a.name.toLowerCase().split(/\s+/).concat(a.name.toLowerCase()).some((w) => w.startsWith(t)));
+  }
+  function refreshInstructorList() {
+    $('knownInstructors').replaceChildren(...knownInstructors().map((a) => el('option', { value: a.name }, [a.id, a.exp].filter(Boolean).join(' · '))));
+  }
   function assistRow(a, on, blank) {
     const cb = el('input', { type: 'checkbox', checked: on, style: 'width:20px;height:20px' });
-    const name = el('input', { value: a.name || '', placeholder: blank ? 'Add instructor name' : '' });
+    const name = el('input', { value: a.name || '', placeholder: blank ? 'Type a name (e.g. adam)' : '', list: 'knownInstructors', autocomplete: 'off' });
     const id = el('input', { value: a.id || '', placeholder: 'Instructor ID#' });
     const exp = el('input', { value: a.exp || '', placeholder: 'Card exp. (e.g. 5/2027)' });
     if (blank) name.addEventListener('input', () => { if (name.value.trim()) cb.checked = true; });
+    // Remembered instructors: picking a suggestion, or typing enough of a name to
+    // match just one (e.g. "adam"), fills in the full name, ID and card expiration.
+    const fill = (exactOnly) => {
+      const hit = findInstructor(name.value, exactOnly);
+      if (!hit) return;
+      name.value = hit.name;
+      if (!id.value.trim()) id.value = hit.id || '';
+      if (!exp.value.trim()) exp.value = hit.exp || '';
+      cb.checked = true;
+    };
+    name.addEventListener('input', () => fill(true));
+    name.addEventListener('change', () => fill(false));
     const row = el('tr', { class: 'assist-row' }, el('td', { style: 'width:32px' }, cb), el('td', null, name), el('td', null, id), el('td', null, exp));
-    const rm = el('button', { class: 'btn btn-danger', type: 'button', title: 'Remove', style: 'padding:4px 10px',
+    const rm = el('button', { class: 'btn btn-danger', type: 'button', title: 'Take off this class', style: 'padding:4px 10px',
       onclick: () => {
-        if (name.value.trim() && !confirm('Remove ' + name.value.trim() + ' from the saved instructors? (Takes effect when you click Save course info.)')) return;
         row.remove();
         if (!document.querySelector('#assistRows tr')) $('assistRows').append(assistRow({}, false, true));
       } }, '✕');
@@ -459,14 +509,52 @@
       const [cb, name, id, exp] = tr.querySelectorAll('input');
       return { on: cb.checked, name: name.value.trim(), id: id.value.trim(), exp: exp.value.trim() };
     });
+    // A short name that matches more than one saved instructor ("sa") is probably unfinished.
+    const unclear = rowsRaw.filter((r) => r.on && r.name && !findInstructor(r.name, true) && partialMatches(r.name).length > 1);
+    if (unclear.length) {
+      show('"' + unclear[0].name + '" matches ' + partialMatches(unclear[0].name).map((a) => a.name).join(' and ') + '. Type more of the name (or pick from the suggestions), then save.');
+      return;
+    }
     const rows = uniqueByName(rowsRaw);
     const info = { startTime: $('ciStart').value.trim(), endTime: $('ciEnd').value.trim(), hours: $('ciHours').value.trim(),
       ratio: $('ciRatio').value.trim(), issueDate: $('ciIssue').value, assistants: rows.filter((r) => r.on) };
     if (info.assistants.length > 8) { show('The roster has room for 8 assisting instructors.'); return; }
     try {
-      directory = await api('instructors', { method: 'PUT', body: JSON.stringify(rows.map(({ name, id, exp }) => ({ name, id, exp }))) });
+      directory = await api('instructors/merge', { method: 'PUT', body: JSON.stringify(rows.map(({ name, id, exp }) => ({ name, id, exp }))) });
+      renderInstructors();
       const res = await api('classinfo', { method: 'PUT', body: JSON.stringify({ date: cls.date, info }) });
       cls.info = res.info; renderInfo(); show('Course info saved.', true);
+    } catch (e) { show(e.message); }
+  };
+
+  // ── instructors panel ──────────────────────────────────────────
+  function instRow(a) {
+    const f = (k, ph, attrs) => el('input', { value: a[k] || '', placeholder: ph, 'data-k': k, ...(attrs || {}) });
+    const row = el('tr', null,
+      el('td', null, f('name', 'Full name')), el('td', null, f('initials', 'AB', { maxlength: 6 })),
+      el('td', null, f('id', 'Instructor ID#', { inputmode: 'numeric' })), el('td', null, f('exp', '5/2027')),
+      el('td', null, f('email', 'name@u.northwestern.edu', { type: 'email' })));
+    row.append(el('td', null, el('button', { class: 'btn btn-danger', type: 'button', title: 'Remove', style: 'padding:4px 10px',
+      onclick: () => { if (!a.name || confirm('Remove ' + a.name + ' from the instructor list? (Saved when you click Save instructors.)')) row.remove(); } }, '✕')));
+    return row;
+  }
+  function renderInstructors() {
+    const list = knownInstructors().slice().sort((x, y) => x.name.localeCompare(y.name));
+    $('instRows').replaceChildren(...list.map(instRow));
+    if (!list.length) $('instRows').append(instRow({}));
+    $('instructorsCount').textContent = '· ' + list.length + (list.length === 1 ? ' person' : ' people');
+  }
+  $('addInst').onclick = () => { const r = instRow({}); $('instRows').append(r); r.querySelector('input').focus(); };
+  $('saveInst').onclick = async () => {
+    const list = [...document.querySelectorAll('#instRows tr')].map((tr) => {
+      const o = {}; tr.querySelectorAll('input').forEach((i) => { o[i.dataset.k] = i.value.trim(); }); return o;
+    }).filter((o) => o.name);
+    try {
+      directory = await api('instructors', { method: 'PUT', body: JSON.stringify(list) });
+      renderInstructors(); if (cls) renderInfo();
+      const mine = directory.find((x) => x.email && x.email === ($('meEmail').textContent || '').toLowerCase());
+      if (mine) { me = { name: mine.name, initials: mine.initials, number: mine.id, exp: mine.exp }; renderMe(); }
+      show('Instructor list saved (' + directory.length + ').', true);
     } catch (e) { show(e.message); }
   };
 
@@ -515,7 +603,7 @@
 
   // ── start ──────────────────────────────────────────────────────
   loadMe();
-  api('instructors').then((d) => { directory = d || []; if (cls) renderInfo(); }).catch(() => {});
+  api('instructors').then((d) => { directory = d || []; renderInstructors(); if (cls) renderInfo(); }).catch(() => {});
   let last = null; try { last = localStorage.getItem('nemo-cpr-last-class'); } catch (e) {}
   loadClassList().then(() => {
     // Open today's scheduled class if there is one, else the last class viewed, else today.

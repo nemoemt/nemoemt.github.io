@@ -507,9 +507,15 @@ emailed to NEMO as before.)
    in with the emailed code.
 2. The first time you sign in, set up your **profile**: name, initials, AHA
    instructor number and instructor card expiration. It's saved to your login
-   (so it fills in on any device), printed on every skills sheet you check off,
-   and adds you to the assisting-instructor list. Change it any time with
-   **My profile**.
+   (so it fills in on any device) and printed on every skills sheet you check
+   off. Change it any time with **My profile**.
+
+   **Instructors** (near the top of the page) is the shared list of everyone
+   who teaches: add people and fill in their name, initials, instructor ID,
+   card expiration and **login email**, then **Save instructors**. When someone
+   signs in with that email, their entry is already their profile. Anyone
+   on the list autocompletes in a class's assisting instructors (type "adam"
+   and Adam's ID and card expiration fill in).
 3. Today's class opens automatically (or pick one from **Or pick a class**:
    scheduled classes from the sign-up sheet, plus any other date students
    submitted for). Tap a student, tick each skill on the Adult and
