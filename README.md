@@ -484,12 +484,20 @@ CPR & AED** and an **Infant CPR** skills checklist for each student, and the
 **eCard upload sheet** (Excel). The site fills all four for you.
 
 **Before class:** make sure every instructor is on the **CPR instructors** list
-in the [Access Manager](https://nemo-tool.pages.dev/admin/).
+in the [Access Manager](https://nemo-tool.pages.dev/admin/), and that the class
+is on the **Sessions** tab of the *NEMO CPR Training Sign-Ups* sheet (date,
+trainers, time & location). The schedule syncs from there automatically
+(within about 5 minutes) to the exam's class dropdown and the management page.
+For that to work, the Sessions tab (only that tab) must stay published to the
+web: in the sheet, **File → Share → Publish to web → Sessions → CSV**. Its link
+is `SESSIONS_CSV_URL` at the top of `cpr-intake/worker.js`.
 
 **Students (during class):** they take the
 [CPR NEMO Exam](https://nemonu.org/cpr/) (password `AHA2026`) and, before
 they can submit, fill in first/last name, name for their card, email, phone,
-mailing address and the class date. That goes straight to the CPR class page
+mailing address, and pick their class from the dropdown (today's class is
+preselected; "Another date…" covers anything not on the schedule). Everyone
+who submits is added to that class automatically, pass or not. That goes straight to the CPR class page
 with their score. (They still get their answer sheet PDF, which is also
 emailed to NEMO as before.)
 
@@ -497,16 +505,25 @@ emailed to NEMO as before.)
 1. Open **CPR Testing & Management** at **https://nemonu.org/cpr-class**
    (phone or laptop; also linked at the bottom of the training page) and sign
    in with the emailed code.
-2. The first time, enter your name, initials and AHA instructor number (saved
-   on that device; they're printed on every sheet you sign off).
-3. Pick the class date. Tap a student, tick each skill on the Adult and
+2. The first time you sign in, set up your **profile**: name, initials, AHA
+   instructor number and instructor card expiration. It's saved to your login
+   (so it fills in on any device), printed on every skills sheet you check off,
+   and adds you to the assisting-instructor list. Change it any time with
+   **My profile**.
+3. Today's class opens automatically (or pick one from **Or pick a class**:
+   scheduled classes from the sign-up sheet, plus any other date students
+   submitted for). Tap a student, tick each skill on the Adult and
    Infant checklists (or **Check all**), and **Save**. All boxes ticked = PASS;
    anything missed = NR (needs remediation). Add a remediation note/date in
    the student's roster info if needed.
 4. Walk-ins who didn't take the online exam: **+ Add a student by hand**
    (enter their written exam score out of 25).
 5. Fill in **Course info for the roster** (times, hours, student-manikin
-   ratio, card issue date, assisting instructors) and save.
+   ratio, card issue date) and tick the **assisting instructors**: the class's
+   trainers from the sign-up sheet are ticked for you (the lead instructor is
+   already on the roster form). **+ Add another instructor** adds as many as
+   you need (up to 8 fit on the roster); ✕ removes one. Click **Save course
+   info**.
 
 **After class (lead instructor):** on the same page click **Download class
 paperwork (ZIP)**. The ZIP has two files:

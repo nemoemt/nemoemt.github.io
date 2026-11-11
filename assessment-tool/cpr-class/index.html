@@ -91,20 +91,21 @@
   <span class="spacer"></span>
   <a href="https://nemonu.org/cpr/" target="_blank" rel="noopener" style="color:white;font-size:13px;font-weight:600">Student exam ↗</a>
   <a href="../admin/" target="_blank" rel="noopener" style="color:white;font-size:13px;font-weight:600">Who has access ↗</a>
-  <button type="button" id="meBtn">My instructor info</button>
+  <button type="button" id="meBtn">My profile</button>
 </div>
 
 <main>
   <div id="msg" class="msg" hidden></div>
 
-  <!-- My instructor info: stamped on each skills sheet I check off -->
+  <!-- My profile: saved to my login, printed on each skills sheet I check off -->
   <section class="card" id="meCard" hidden>
-    <h2>My instructor info</h2>
-    <p class="hint" style="margin:0 0 10px">Saved on this device and printed on every skills sheet you check off.</p>
+    <h2 id="meTitle">My instructor profile</h2>
+    <p class="hint" style="margin:0 0 10px" id="meHint">Saved to your login (<span id="meEmail"></span>), so it fills in on any device. Your initials and instructor number are printed on every skills sheet you check off, and you're added to the assisting-instructor list for the roster.</p>
     <div class="row">
       <label class="f">Your name<input id="meName" autocomplete="name"></label>
-      <label class="f" style="max-width:120px">Initials<input id="meInitials" maxlength="6"></label>
+      <label class="f" style="max-width:110px">Initials<input id="meInitials" maxlength="6"></label>
       <label class="f">AHA instructor number<input id="meNumber" inputmode="numeric"></label>
+      <label class="f" style="max-width:170px">Instructor card expires<input id="meExp" placeholder="e.g. 5/2027"></label>
       <button class="btn btn-primary" type="button" id="meSave">Save</button>
     </div>
   </section>
@@ -114,7 +115,7 @@
     <h2>Class</h2>
     <div class="row">
       <label class="f">Class date<input type="date" id="classDate"></label>
-      <label class="f">Or pick a recent class<select id="classList"><option value="">Recent classes…</option></select></label>
+      <label class="f">Or pick a class<select id="classList"><option value="">Choose a class…</option></select></label>
     </div>
     <p class="hint">Students take the <a href="https://nemonu.org/cpr/" target="_blank" rel="noopener">CPR NEMO Exam</a> (nemonu.org/cpr, password AHA2026) and appear here when they submit it with this class date. Add anyone else by hand below.</p>
   </section>
@@ -141,7 +142,8 @@
       </div>
       <h3 style="font-size:14px;margin:16px 0 6px">Assisting instructors</h3>
       <table class="assist"><tbody id="assistRows"></tbody></table>
-      <p class="hint">Tick who helped teach this class. Instructors you add are saved for future classes.</p>
+      <div class="row" style="margin-top:8px"><button class="btn" type="button" id="addAssist">+ Add another instructor</button></div>
+      <p class="hint">Tick everyone who helped teach this class (up to 8 go on the roster). Instructors you add are saved for future classes; ✕ removes one from the saved list. Remember to click Save course info.</p>
       <div class="row" style="margin-top:10px"><button class="btn btn-primary" type="button" id="ciSave">Save course info</button></div>
     </section>
 
@@ -161,7 +163,9 @@
   'use strict';
   const P = window.NemoPacket;
   const $ = (id) => document.getElementById(id);
-  const ME_KEY = 'nemo-cpr-instructor-v1';
+  const ME_KEY = 'nemo-cpr-instructor-v1';   // older, per-device copy (used once to pre-fill the profile)
+  const SESSIONS_URL = 'https://nemo-cpr-intake.nemo-9bb.workers.dev/sessions';
+  const LEAD_INSTRUCTOR = 'Dylan Stone';      // already printed on the roster template as lead instructor
   let me = {};
   let cls = null;            // { date, info, students }
   let directory = [];        // saved assisting instructors
@@ -190,28 +194,67 @@
   const todayIso = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
   const fullName = (s) => s.cardName || ((s.firstName || '') + ' ' + (s.lastName || '')).trim();
 
-  // ── my instructor info ─────────────────────────────────────────
-  function loadMe() { try { me = JSON.parse(localStorage.getItem(ME_KEY) || '{}'); } catch (e) { me = {}; } renderMe(); }
+  // ── my profile (saved to my login on the server) ───────────────
+  async function loadMe() {
+    try {
+      const r = await api('me');
+      $('meEmail').textContent = r.email;
+      if (r.profile) me = r.profile;
+      else {
+        // First login: start from anything saved on this device by the older version.
+        try { me = JSON.parse(localStorage.getItem(ME_KEY) || '{}'); } catch (e) { me = {}; }
+        $('meTitle').textContent = 'Welcome! Set up your instructor profile';
+      }
+    } catch (e) { show(e.message); }
+    renderMe();
+  }
   function renderMe() {
-    $('meName').value = me.name || ''; $('meInitials').value = me.initials || ''; $('meNumber').value = me.number || '';
-    $('meLabel').textContent = me.initials ? 'Checking off as ' + (me.name || me.initials) : '';
+    $('meName').value = me.name || ''; $('meInitials').value = me.initials || '';
+    $('meNumber').value = me.number || ''; $('meExp').value = me.exp || '';
+    $('meLabel').textContent = me.initials && me.number ? 'Checking off as ' + (me.name || me.initials) : '';
     if (!me.initials || !me.number) $('meCard').hidden = false;
   }
   $('meBtn').onclick = () => { $('meCard').hidden = !$('meCard').hidden; };
-  $('meSave').onclick = () => {
-    me = { name: $('meName').value.trim(), initials: $('meInitials').value.trim().toUpperCase(), number: $('meNumber').value.trim() };
-    if (!me.initials || !me.number) { show('Add your initials and AHA instructor number; they go on every skills sheet you sign off.'); return; }
-    try { localStorage.setItem(ME_KEY, JSON.stringify(me)); } catch (e) {}
-    $('meCard').hidden = true; renderMe(); show('Saved your instructor info on this device.', true);
+  $('meSave').onclick = async () => {
+    const p = { name: $('meName').value.trim(), initials: $('meInitials').value.trim().toUpperCase(),
+      number: $('meNumber').value.trim(), exp: $('meExp').value.trim() };
+    if (!p.name || !p.initials || !p.number) { show('Add your name, initials and AHA instructor number; they go on every skills sheet you sign off.'); return; }
+    try {
+      const r = await api('me', { method: 'PUT', body: JSON.stringify(p) });
+      me = r.profile;
+      $('meTitle').textContent = 'My instructor profile';
+      $('meCard').hidden = true; renderMe(); show('Profile saved to your login.', true);
+      directory = await api('instructors'); if (cls) renderInfo();
+    } catch (e) { show(e.message); }
   };
 
   // ── classes ────────────────────────────────────────────────────
+  // Scheduled classes come from the sign-up sheet's Sessions tab (via the
+  // nemo-cpr-intake Worker); other dates appear once a student submits for them.
+  let schedule = [];
   async function loadClassList() {
     try {
-      const list = await api('classes');
+      const [list, sched] = await Promise.all([
+        api('classes'),
+        fetch(SESSIONS_URL).then((r) => r.json()).then((d) => d.sessions || []).catch(() => []),
+      ]);
+      schedule = sched;
+      const counts = Object.fromEntries(list.map((c) => [c.date, c.students]));
+      const n = (d) => (counts[d] || 0) + ((counts[d] || 0) === 1 ? ' student' : ' students');
       const sel = $('classList');
-      sel.replaceChildren(el('option', { value: '' }, list.length ? 'Recent classes…' : 'No classes yet'));
-      list.forEach((c) => sel.append(el('option', { value: c.date }, P.usDate(c.date) + ' · ' + c.students + (c.students === 1 ? ' student' : ' students'))));
+      sel.replaceChildren(el('option', { value: '' }, sched.length || list.length ? 'Choose a class…' : 'No classes yet'));
+      if (sched.length) {
+        const g = el('optgroup', { label: 'Scheduled classes (from the sign-up sheet)' });
+        sched.forEach((s) => g.append(el('option', { value: s.date }, P.usDate(s.date) + ' · ' + (s.trainers || []).join(', ') + ' · ' + n(s.date))));
+        sel.append(g);
+      }
+      const others = list.filter((c) => !sched.some((s) => s.date === c.date));
+      if (others.length) {
+        const g = el('optgroup', { label: sched.length ? 'Other dates with students' : 'Classes with students' });
+        others.forEach((c) => g.append(el('option', { value: c.date }, P.usDate(c.date) + ' · ' + n(c.date))));
+        sel.append(g);
+      }
+      if (cls) { sel.value = cls.date; if (!cls.info) renderInfo(); }
     } catch (e) { show(e.message); }
   }
   $('classList').onchange = () => { if ($('classList').value) { $('classDate').value = $('classList').value; openClass(); } };
@@ -225,6 +268,7 @@
       cls = await api('class?date=' + date);
       try { localStorage.setItem('nemo-cpr-last-class', date); } catch (e) {}
       $('classArea').hidden = false;
+      if ($('classList').querySelector('option[value="' + date + '"]')) $('classList').value = date;
       renderStudents(); renderInfo(); renderAddForm();
     } catch (e) { show(e.message); }
   }
@@ -289,7 +333,7 @@
     };
     status();
     const save = async (btn) => {
-      if (!me.initials || !me.number) { $('meCard').hidden = false; show('Add your initials and instructor number first (top of the page).'); return; }
+      if (!me.initials || !me.number) { $('meCard').hidden = false; show('Set up your profile first (initials and instructor number, top of the page).'); return; }
       btn.disabled = true;
       try {
         const all = checks.every(Boolean);
@@ -367,13 +411,27 @@
     $('ciHours').value = i.hours || '4';
     $('ciRatio').value = i.ratio || '';
     $('ciIssue').value = i.issueDate || cls.date;
-    const chosen = new Set((i.assistants || []).map((a) => a.name));
-    // Show saved instructors plus any on this class that aren't saved yet.
-    const all = directory.slice();
-    (i.assistants || []).forEach((a) => { if (!all.some((d) => d.name === a.name)) all.push(a); });
+    // Before course info is saved, tick the class's trainers from the sign-up sheet.
+    const session = schedule.find((x) => x.date === cls.date);
+    const fromSheet = !cls.info && session
+      ? session.trainers.filter((t) => t.toLowerCase() !== LEAD_INSTRUCTOR.toLowerCase()).map((name) => ({ name })) : [];
+    const chosen = new Set((cls.info ? i.assistants || [] : fromSheet).map((a) => a.name.toLowerCase()));
+    // Show saved instructors plus any on this class that aren't saved yet (each name once).
+    const all = uniqueByName(directory.concat(i.assistants || [], fromSheet));
     const tb = $('assistRows'); tb.replaceChildren();
-    all.forEach((a) => tb.append(assistRow(a, chosen.has(a.name))));
+    all.forEach((a) => tb.append(assistRow(a, chosen.has(a.name.toLowerCase()))));
     tb.append(assistRow({}, false, true));
+  }
+  // One entry per instructor name (case-insensitive); later entries fill in a missing ID/expiration.
+  function uniqueByName(list) {
+    const out = new Map();
+    list.forEach((a) => {
+      if (!a || !a.name) return;
+      const k = a.name.trim().toLowerCase();
+      const prev = out.get(k);
+      out.set(k, prev ? { ...prev, id: a.id || prev.id, exp: a.exp || prev.exp, on: prev.on || a.on } : { ...a, name: a.name.trim() });
+    });
+    return [...out.values()];
   }
   function assistRow(a, on, blank) {
     const cb = el('input', { type: 'checkbox', checked: on, style: 'width:20px;height:20px' });
@@ -381,13 +439,27 @@
     const id = el('input', { value: a.id || '', placeholder: 'Instructor ID#' });
     const exp = el('input', { value: a.exp || '', placeholder: 'Card exp. (e.g. 5/2027)' });
     if (blank) name.addEventListener('input', () => { if (name.value.trim()) cb.checked = true; });
-    return el('tr', { class: 'assist-row' }, el('td', { style: 'width:32px' }, cb), el('td', null, name), el('td', null, id), el('td', null, exp));
+    const row = el('tr', { class: 'assist-row' }, el('td', { style: 'width:32px' }, cb), el('td', null, name), el('td', null, id), el('td', null, exp));
+    const rm = el('button', { class: 'btn btn-danger', type: 'button', title: 'Remove', style: 'padding:4px 10px',
+      onclick: () => {
+        if (name.value.trim() && !confirm('Remove ' + name.value.trim() + ' from the saved instructors? (Takes effect when you click Save course info.)')) return;
+        row.remove();
+        if (!document.querySelector('#assistRows tr')) $('assistRows').append(assistRow({}, false, true));
+      } }, '✕');
+    row.append(el('td', { style: 'width:44px' }, rm));
+    return row;
   }
+  $('addAssist').onclick = () => {
+    const r = assistRow({}, false, true);
+    $('assistRows').append(r);
+    r.querySelectorAll('input')[1].focus();
+  };
   $('ciSave').onclick = async () => {
-    const rows = [...document.querySelectorAll('#assistRows tr')].map((tr) => {
+    const rowsRaw = [...document.querySelectorAll('#assistRows tr')].map((tr) => {
       const [cb, name, id, exp] = tr.querySelectorAll('input');
       return { on: cb.checked, name: name.value.trim(), id: id.value.trim(), exp: exp.value.trim() };
-    }).filter((r) => r.name);
+    });
+    const rows = uniqueByName(rowsRaw);
     const info = { startTime: $('ciStart').value.trim(), endTime: $('ciEnd').value.trim(), hours: $('ciHours').value.trim(),
       ratio: $('ciRatio').value.trim(), issueDate: $('ciIssue').value, assistants: rows.filter((r) => r.on) };
     if (info.assistants.length > 8) { show('The roster has room for 8 assisting instructors.'); return; }
@@ -444,10 +516,13 @@
   // ── start ──────────────────────────────────────────────────────
   loadMe();
   api('instructors').then((d) => { directory = d || []; if (cls) renderInfo(); }).catch(() => {});
-  loadClassList();
   let last = null; try { last = localStorage.getItem('nemo-cpr-last-class'); } catch (e) {}
-  $('classDate').value = last || todayIso();
-  openClass();
+  loadClassList().then(() => {
+    // Open today's scheduled class if there is one, else the last class viewed, else today.
+    const today = todayIso();
+    $('classDate').value = schedule.some((x) => x.date === today) ? today : (last || today);
+    openClass();
+  });
 })();
 </script>
 </body>

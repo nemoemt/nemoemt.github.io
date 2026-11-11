@@ -8,6 +8,7 @@
 //                              through the nemo-cpr-intake Worker, or added here)
 //   cls:<YYYY-MM-DD>           course info for the roster (times, ratio, assistants)
 //   instructors                saved assisting-instructor list (name, ID, card exp)
+//   profile:<email>            each instructor's own name, initials, ID, card exp
 //   template:<adult|infant|roster>   the blank AHA PDF forms
 //
 // Routes:
@@ -18,6 +19,7 @@
 //   PUT    skills                  -> save a checkoff     {key, kind, checks, result, ...}
 //   PUT    classinfo               -> save course info    {date, info}
 //   GET/PUT instructors            -> saved assisting instructors
+//   GET/PUT me                     -> the signed-in instructor's profile
 //   GET    template/<name>         -> blank PDF form
 const KEEP_DAYS = 400;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -129,17 +131,38 @@ export async function onRequest({ env, request, params }) {
         startTime: clean(i.startTime, 20), endTime: clean(i.endTime, 20), hours: clean(i.hours, 10),
         ratio: clean(i.ratio, 20), issueDate: DATE.test(i.issueDate) ? i.issueDate : '',
         assistants: (Array.isArray(i.assistants) ? i.assistants : []).slice(0, 8)
-          .map((a) => ({ name: clean(a.name, 80), id: clean(a.id, 40), exp: clean(a.exp, 20) })).filter((a) => a.name),
+          .map((a) => ({ name: clean(a.name, 80), id: clean(a.id, 40), exp: clean(a.exp, 20) }))
+          .filter((a, i, all) => a.name && all.findIndex((b) => b.name.toLowerCase() === a.name.toLowerCase()) === i),
       };
       await put(env, 'cls:' + body.date, info);
       return json(200, { info });
+    }
+
+    if (path === 'me') {
+      if (m === 'GET') return json(200, { email: who, profile: await env.CPR_KV.get('profile:' + who, 'json') });
+      if (m === 'PUT') {
+        const profile = {
+          name: clean(body.name, 80), initials: clean(body.initials, 8).toUpperCase(),
+          number: clean(body.number, 40), exp: clean(body.exp, 20),
+        };
+        if (!profile.name || !profile.initials || !profile.number) return json(400, { error: 'Name, initials and instructor number are all needed.' });
+        await env.CPR_KV.put('profile:' + who, JSON.stringify(profile));
+        // Also keep them in the assisting-instructor list for the roster.
+        const list = (await env.CPR_KV.get('instructors', 'json')) || [];
+        const i = list.findIndex((a) => a.name.toLowerCase() === profile.name.toLowerCase());
+        const entry = { name: profile.name, id: profile.number, exp: profile.exp, initials: profile.initials };
+        if (i >= 0) list[i] = { ...list[i], ...entry }; else list.push(entry);
+        await env.CPR_KV.put('instructors', JSON.stringify(list));
+        return json(200, { email: who, profile });
+      }
     }
 
     if (path === 'instructors') {
       if (m === 'GET') return json(200, (await env.CPR_KV.get('instructors', 'json')) || []);
       if (m === 'PUT') {
         const list = (Array.isArray(body) ? body : []).slice(0, 50)
-          .map((a) => ({ name: clean(a.name, 80), id: clean(a.id, 40), exp: clean(a.exp, 20), initials: clean(a.initials, 8) })).filter((a) => a.name);
+          .map((a) => ({ name: clean(a.name, 80), id: clean(a.id, 40), exp: clean(a.exp, 20), initials: clean(a.initials, 8) }))
+          .filter((a, i, all) => a.name && all.findIndex((b) => b.name.toLowerCase() === a.name.toLowerCase()) === i);   // each name once
         await env.CPR_KV.put('instructors', JSON.stringify(list));
         return json(200, list);
       }

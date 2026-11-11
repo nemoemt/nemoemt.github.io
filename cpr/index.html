@@ -166,6 +166,15 @@
     color: var(--accent);
     margin-left: 2px;
   }
+  .info-field select {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    padding: 10px 8px;
+    border: 1px solid rgba(0,0,0,0.2);
+    background: var(--paper);
+    color: var(--ink);
+    width: 100%;
+  }
   .info-field input {
     font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     font-size: 16px;
@@ -803,7 +812,8 @@
         </div>
         <input type="hidden" id="studentName" />
         <div class="info-field">
-          <label for="examDate">Class date <span class="req">*</span></label>
+          <label for="classPick">Your class <span class="req">*</span></label>
+          <select id="classPick" hidden></select>
           <input type="date" id="examDate" required />
         </div>
         <div class="info-field info-field--small">
@@ -1367,11 +1377,54 @@ let submitted = false;
   document.getElementById('examDate').value = iso;
   document.getElementById('todayLabel').textContent =
     d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  loadClassSessions(iso);
 })();
+
+// Class dropdown: the CPR class schedule from the sign-up sheet's Sessions tab
+// (served by the nemo-cpr-intake Worker). Shows classes from the past week and
+// the next two months, preselects today's class, and keeps "Another date" for
+// anything else. If the schedule can't load, the plain date box stays.
+function loadClassSessions(todayIso) {
+  const pick = document.getElementById('classPick');
+  const dateEl = document.getElementById('examDate');
+  const dayMs = 86400000, today = Date.parse(todayIso);
+  fetch('https://nemo-cpr-intake.nemo-9bb.workers.dev/sessions')
+    .then((r) => r.json())
+    .then((d) => {
+      const list = (d.sessions || []).filter((s) => {
+        const t = Date.parse(s.date);
+        return t >= today - 7 * dayMs && t <= today + 60 * dayMs;
+      });
+      if (!list.length) return;
+      const fmt = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      list.forEach((s) => {
+        const o = document.createElement('option');
+        o.value = s.date;
+        o.textContent = fmt(s.date) + (s.timeLocation ? ' · ' + s.timeLocation : '');
+        pick.appendChild(o);
+      });
+      const other = document.createElement('option');
+      other.value = '';
+      other.textContent = 'Another date…';
+      pick.appendChild(other);
+      const todays = list.find((s) => s.date === todayIso);
+      pick.value = todays ? todays.date : '';
+      const sync = () => {
+        dateEl.hidden = !!pick.value;
+        if (pick.value) dateEl.value = pick.value;
+        dateEl.classList.remove('invalid');
+        updateProgress();
+      };
+      pick.addEventListener('change', sync);
+      pick.hidden = false;
+      sync();
+    })
+    .catch(() => {});
+}
 
 // Validate required info fields, return list of empty field IDs
 const INFO_FIELDS = ['firstName', 'lastName', 'examDate', 'examVersion', 'studentEmail', 'studentPhone', 'studentAddress'];
-const INFO_LABELS = { firstName: 'First name', lastName: 'Last name', examDate: 'Class date', examVersion: 'Version',
+const INFO_LABELS = { firstName: 'First name', lastName: 'Last name', examDate: 'Class', examVersion: 'Version',
   studentEmail: 'Email', studentPhone: 'Phone', studentAddress: 'Mailing address' };
 
 function getMissingInfoFields() {

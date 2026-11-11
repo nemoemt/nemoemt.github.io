@@ -17,6 +17,14 @@
 // nemo-cpr-intake -> Edit code, paste this file, Deploy.
 
 const ALLOWED_ORIGINS = ['https://nemonu.org', 'https://www.nemonu.org', 'https://nemoemt.github.io'];
+
+// The CPR class schedule: the "Sessions" tab of the NEMO CPR Training Sign-Ups
+// Google Sheet, published to the web as CSV (File -> Share -> Publish to web ->
+// Sessions -> CSV). Only that tab is public; the sign-up responses are not.
+// GET /sessions turns it into a list the exam's class dropdown and the CPR
+// Testing & Management page use. Leave empty to turn the dropdown off.
+const SESSIONS_CSV_URL = '';
+let sessionsCache = null;   // { at, body }
 const KEEP_DAYS = 400;   // records expire after ~13 months; the class packet is the permanent copy
 const PASS_SCORE = 21;   // 84% of 25
 
@@ -37,6 +45,74 @@ function reply(status, body, origin) {
   });
 }
 
+// Minimal CSV parser (handles quoted fields with commas and quotes).
+function parseCsv(text) {
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+      else if (c === '"') q = false;
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(cell); cell = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(cell); rows.push(row); row = []; cell = '';
+    } else cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows;
+}
+
+const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+// "November 10th" (no year) -> "2026-11-10": the year that puts it nearest to
+// today, between 4 months ago and 8 months ahead.
+function toIsoDate(text, now) {
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text.trim());
+  if (iso) return text.trim();
+  const m = /([a-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?/i.exec(text);
+  if (!m) return null;
+  const mon = MONTHS.findIndex((n) => n.startsWith(m[1].toLowerCase().slice(0, 3)));
+  if (mon < 0) return null;
+  const day = +m[2];
+  let year = m[3] ? +m[3] : now.getUTCFullYear();
+  if (!m[3]) {
+    const d = (y) => Date.UTC(y, mon, day);
+    const lo = now.getTime() - 120 * 86400000, hi = now.getTime() + 240 * 86400000;
+    year = [year - 1, year, year + 1].find((y) => d(y) >= lo && d(y) <= hi) || year;
+  }
+  return year + '-' + String(mon + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+}
+
+async function sessions() {
+  const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=120', 'Access-Control-Allow-Origin': '*' };
+  if (!SESSIONS_CSV_URL) return new Response(JSON.stringify({ sessions: [] }), { headers });
+  if (sessionsCache && Date.now() - sessionsCache.at < 5 * 60000) return new Response(sessionsCache.body, { headers });
+  try {
+    const res = await fetch(SESSIONS_CSV_URL, { cf: { cacheTtl: 300 } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = parseCsv(await res.text());
+    const head = rows.shift().map((h) => h.trim().toLowerCase());
+    const col = (name) => head.findIndex((h) => h.startsWith(name));
+    const cDate = col('date'), cTrainers = col('trainers'), cCap = col('capacity'), cLeft = col('spots left'), cWhere = col('time');
+    const now = new Date();
+    const list = rows.map((r) => ({
+      date: toIsoDate(r[cDate] || '', now),
+      label: (r[cDate] || '').trim(),
+      trainers: cTrainers >= 0 ? (r[cTrainers] || '').split(',').map((t) => t.trim()).filter(Boolean) : [],
+      capacity: cCap >= 0 ? +r[cCap] || null : null,
+      spotsLeft: cLeft >= 0 && r[cLeft] !== '' ? +r[cLeft] : null,
+      timeLocation: cWhere >= 0 ? (r[cWhere] || '').trim() : '',
+    })).filter((s) => s.date).sort((a, b) => (a.date < b.date ? -1 : 1));
+    const body = JSON.stringify({ sessions: list });
+    sessionsCache = { at: Date.now(), body };
+    return new Response(body, { headers });
+  } catch (e) {
+    return new Response(JSON.stringify({ sessions: [], error: 'Could not read the class schedule.' }), { status: 502, headers });
+  }
+}
+
 const clean = (v, max) => String(v == null ? '' : v).replace(/[\u0000-\u001f]+/g, ' ').trim().slice(0, max);
 
 export default {
@@ -44,6 +120,7 @@ export default {
     const origin = request.headers.get('Origin') || '';
     const url = new URL(request.url);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) });
+    if (url.pathname === '/sessions' && request.method === 'GET') return sessions();
     if (url.pathname !== '/grade' || request.method !== 'POST') return reply(404, { error: 'Not found' }, origin);
     if (!ALLOWED_ORIGINS.includes(origin)) return reply(403, { error: 'Not allowed' }, origin);
 
