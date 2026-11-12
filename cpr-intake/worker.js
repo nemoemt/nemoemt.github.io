@@ -163,6 +163,7 @@ export default {
       email: clean(b.email, 120).toLowerCase(),
       phone: clean(b.phone, 40),
       address: clean(b.address, 200),
+      street: clean(b.street, 120), city: clean(b.city, 60), state: clean(b.state, 20), zip: clean(b.zip, 10),
       examVersion: b.examVersion === 'B' ? 'B' : 'A',
       submittedAt: new Date().toISOString(),
       source: 'exam',

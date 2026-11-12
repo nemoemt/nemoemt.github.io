@@ -495,7 +495,7 @@ is `SESSIONS_CSV_URL` at the top of `cpr-intake/worker.js`.
 **Students (during class):** they take the
 [CPR NEMO Exam](https://nemonu.org/cpr/) (password `AHA2026`) and, before
 they can submit, fill in first/last name, name for their card, email, phone,
-mailing address, and pick their class from the dropdown (today's class is
+mailing address (street, city, state and ZIP as separate boxes), and pick their class from the dropdown (today's class is
 preselected; "Another date…" covers anything not on the schedule). Everyone
 who submits is added to that class automatically, pass or not, with their
 score. Their answer sheet PDF is also emailed to NEMO: the exam sends it to

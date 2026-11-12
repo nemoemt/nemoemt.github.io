@@ -146,6 +146,10 @@
     margin-top: 12px;
   }
   .info-field--wide { grid-column: 1 / -1; }
+  .info-grid--address {
+    grid-template-columns: 2fr 1.2fr 0.6fr 0.8fr;
+    margin-top: 12px;
+  }
   .info-subhead {
     margin: 18px 0 2px;
     font-size: 13px;
@@ -229,8 +233,11 @@
     background: var(--accent-deep);
   }
   @media (max-width: 600px) {
-    .info-grid, .info-grid--card {
+    .info-grid, .info-grid--card, .info-grid--address {
       grid-template-columns: 1fr 1fr;
+    }
+    .info-grid--address .info-field:first-child {
+      grid-column: 1 / -1;
     }
     .info-grid--card .info-field:first-child {
       grid-column: 1 / -1;
@@ -840,9 +847,23 @@
           <label for="studentPhone">Phone <span class="req">*</span></label>
           <input type="tel" id="studentPhone" autocomplete="tel" required />
         </div>
-        <div class="info-field info-field--wide">
-          <label for="studentAddress">Mailing address <span class="req">*</span></label>
-          <input type="text" id="studentAddress" placeholder="Street, city, state, ZIP" autocomplete="street-address" required />
+      </div>
+      <div class="info-grid info-grid--address">
+        <div class="info-field">
+          <label for="studentStreet">Street address <span class="req">*</span></label>
+          <input type="text" id="studentStreet" placeholder="2251 Sheridan Rd, Apt 2" autocomplete="address-line1" required />
+        </div>
+        <div class="info-field">
+          <label for="studentCity">City <span class="req">*</span></label>
+          <input type="text" id="studentCity" autocomplete="address-level2" required />
+        </div>
+        <div class="info-field">
+          <label for="studentState">State <span class="req">*</span></label>
+          <input type="text" id="studentState" placeholder="IL" maxlength="20" autocomplete="address-level1" required />
+        </div>
+        <div class="info-field">
+          <label for="studentZip">ZIP <span class="req">*</span></label>
+          <input type="text" id="studentZip" inputmode="numeric" maxlength="10" autocomplete="postal-code" required />
         </div>
       </div>
     </div>
@@ -1424,9 +1445,11 @@ function loadClassSessions(todayIso) {
 }
 
 // Validate required info fields, return list of empty field IDs
-const INFO_FIELDS = ['firstName', 'lastName', 'examDate', 'examVersion', 'studentEmail', 'studentPhone', 'studentAddress'];
+const INFO_FIELDS = ['firstName', 'lastName', 'examDate', 'examVersion', 'studentEmail', 'studentPhone',
+  'studentStreet', 'studentCity', 'studentState', 'studentZip'];
 const INFO_LABELS = { firstName: 'First name', lastName: 'Last name', examDate: 'Class', examVersion: 'Version',
-  studentEmail: 'Email', studentPhone: 'Phone', studentAddress: 'Mailing address' };
+  studentEmail: 'Email', studentPhone: 'Phone', studentStreet: 'Street address', studentCity: 'City',
+  studentState: 'State', studentZip: 'ZIP' };
 
 function getMissingInfoFields() {
   return INFO_FIELDS.filter(id => {
@@ -1828,7 +1851,10 @@ function gradeOnServer() {
   const payload = {
     classDate: v('examDate'), firstName: v('firstName'), lastName: v('lastName'),
     cardName: v('cardName') || (v('firstName') + ' ' + v('lastName')),
-    email: v('studentEmail'), phone: v('studentPhone'), address: v('studentAddress'),
+    email: v('studentEmail'), phone: v('studentPhone'),
+    // One line for the roster ("2251 Sheridan Rd, Evanston, IL 60208"), plus the parts.
+    address: v('studentStreet') + ', ' + v('studentCity') + ', ' + v('studentState').toUpperCase() + ' ' + v('studentZip'),
+    street: v('studentStreet'), city: v('studentCity'), state: v('studentState').toUpperCase(), zip: v('studentZip'),
     examVersion: v('examVersion'), answers: userAnswers,
   };
   const send = (tries) => fetch(CPR_GRADE_URL, {
