@@ -2,7 +2,8 @@
    CPR class packet builder (used by cpr-class/index.html).
    Fills the AHA BLS forms with pdf-lib and returns one PDF:
      1. Course Roster (course info page + participant pages, 10 per page)
-     2. For each student: Adult CPR & AED sheet, then Infant CPR sheet
+     2. For each student: written exam answer sheet (if they took the online
+        exam), Adult CPR & AED sheet, then Infant CPR sheet
    plus the rows for the AHA eCard upload template (Excel).
    The blank forms come from /cpr-class/api/template/<adult|infant|roster>.
    Everything is flattened except nothing is signed: the lead instructor
@@ -133,7 +134,9 @@
   }
 
   // templates: { adult, infant, roster } as ArrayBuffer/Uint8Array
-  async function buildPacket(PDFLib, templates, info, students) {
+  // answerSheet(student): optional; returns the student's exam answer sheet PDF
+  // bytes (or null), drawn by the page with cpr/answer-sheet.js.
+  async function buildPacket(PDFLib, templates, info, students, answerSheet) {
     const out = await PDFLib.PDFDocument.create();
     const add = async (doc, pageIdx) => {
       const pages = await out.copyPages(doc, pageIdx || doc.getPageIndices());
@@ -145,6 +148,8 @@
       await add(await fillRosterRows(PDFLib, templates.roster, info, students.slice(i, i + 10)), [1]);
     }
     for (const st of students) {
+      const sheet = answerSheet ? await answerSheet(st) : null;
+      if (sheet) await add(await PDFLib.PDFDocument.load(sheet));
       await add(await fillSkills(PDFLib, templates.adult, 'adult', st, info.date));
       await add(await fillSkills(PDFLib, templates.infant, 'infant', st, info.date));
     }

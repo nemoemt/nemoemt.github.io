@@ -22,6 +22,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Same answer sheet drawing the exam uses (cpr/answer-sheet.js on nemonu.org). -->
+<script src="https://nemonu.org/cpr/answer-sheet.js"></script>
 <script src="packet.js"></script>
 <style>
   :root {
@@ -166,7 +169,7 @@
 
     <section class="card">
       <h2>Paperwork</h2>
-      <p class="hint" style="margin:0 0 10px">One ZIP file with both: the <strong>class packet PDF</strong> (filled course roster plus every student's Adult and Infant skills sheets; e-sign the roster's "Signature of Lead Instructor" line and save it) and the <strong>eCard upload sheet</strong> (Excel, students marked Complete only).</p>
+      <p class="hint" style="margin:0 0 10px">One ZIP file with both: the <strong>class packet PDF</strong> (filled course roster, then for each student their written exam answer sheet and Adult and Infant skills sheets; e-sign the roster's "Signature of Lead Instructor" line and save it) and the <strong>eCard upload sheet</strong> (Excel, students marked Complete only).</p>
       <div class="row">
         <button class="btn btn-gold" type="button" id="packetBtn">Download class paperwork (ZIP)</button>
       </div>
@@ -586,7 +589,14 @@
     try {
       const info = infoForPacket();
       const [adult, infant, roster] = await Promise.all(['adult', 'infant', 'roster'].map((n) => api('template/' + n)));
-      const pdf = await P.buildPacket(window.PDFLib, { adult, infant, roster }, info, cls.students);
+      // Each student's written exam answer sheet, rebuilt from their submitted answers.
+      const answerSheet = (st) => {
+        if (!Array.isArray(st.answers) || !Array.isArray(st.results) || !window.NemoAnswerSheet || !window.jspdf) return null;
+        const doc = NemoAnswerSheet.draw(window.jspdf.jsPDF, { name: st.cardName || (st.firstName + ' ' + st.lastName),
+          dateIso: st.classDate || cls.date, version: st.examVersion || 'A', answers: st.answers, results: st.results, score: st.score });
+        return doc.output('arraybuffer');
+      };
+      const pdf = await P.buildPacket(window.PDFLib, { adult, infant, roster }, info, cls.students, answerSheet);
       const rows = P.templateRows(info, cls.students);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), 'Sheet1');
@@ -595,7 +605,8 @@
       zip.file('BLS packet ' + cls.date + '.pdf', pdf);
       zip.file('BLS eCards ' + cls.date + '.xlsx', xlsx);
       download(await zip.generateAsync({ type: 'uint8array' }), 'BLS class ' + cls.date + '.zip', 'application/zip');
-      $('packetNote').textContent = 'Downloaded: the packet (' + (1 + Math.ceil(cls.students.length / 10) + cls.students.length * 3) + ' pages, '
+      const sheets = cls.students.filter((st) => Array.isArray(st.answers) && Array.isArray(st.results)).length;
+      $('packetNote').textContent = 'Downloaded: the packet (' + (1 + Math.ceil(cls.students.length / 10) + cls.students.length * 3 + sheets) + ' pages, '
         + cls.students.length + ' students) and the eCard sheet (' + (rows.length - 1) + ' complete).';
     } catch (e) { show('Could not build the paperwork: ' + e.message); }
     btn.disabled = false; btn.textContent = 'Download class paperwork (ZIP)';

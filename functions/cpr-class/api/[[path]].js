@@ -81,6 +81,14 @@ export async function onRequest({ env, request, params }) {
       const keys = await listKeys(env, 'stu:' + date + ':');
       const students = (await Promise.all(keys.map(async (key) => ({ key, ...(await env.CPR_KV.get(key, 'json')) }))))
         .sort((a, b) => (a.lastName || '').localeCompare(b.lastName || '') || (a.firstName || '').localeCompare(b.firstName || ''));
+      // Right/wrong per question for each graded exam, for the answer sheets in the class packet.
+      const answerKeys = {};
+      for (const st of students) {
+        if (!Array.isArray(st.answers)) continue;
+        const v = st.examVersion === 'B' ? 'B' : 'A';
+        if (!(v in answerKeys)) answerKeys[v] = await env.CPR_KV.get('answerkey:' + v, 'json');
+        if (answerKeys[v]) st.results = answerKeys[v].map((k, i) => st.answers[i] === k.correct);
+      }
       const info = (await env.CPR_KV.get('cls:' + date, 'json')) || null;
       return json(200, { date, info, students });
     }

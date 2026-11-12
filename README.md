@@ -537,8 +537,10 @@ used to cancel the email).
 
 **After class (lead instructor):** on the same page click **Download class
 paperwork (ZIP)**. The ZIP has two files:
-- **BLS packet <date>.pdf**: the filled roster (10 students per page) and
-  every student's Adult and Infant sheets. E-sign the roster's "Signature of
+- **BLS packet <date>.pdf**: the filled roster (10 students per page), then
+  for each student their written exam answer sheet (rebuilt from the answers
+  they submitted, same look as their own copy; students added by hand have
+  none) and their Adult and Infant sheets. E-sign the roster's "Signature of
   Lead Instructor" line (e.g. in Adobe Acrobat → Fill & Sign) and save it
   with your AHA records.
 - **BLS eCards <date>.xlsx**: the eCard upload sheet; upload it to the AHA
